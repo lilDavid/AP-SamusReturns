@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from collections import Counter
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -36,24 +37,53 @@ class SamusReturnsPatch(APAutoPatchInterface):
 
     def patch(self, target: str):
         from . import SamusReturnsWorld
+        from .settings import TargetSystem
 
         self.read()
 
         rom_path = self.get_path(SamusReturnsWorld.settings.rom_file)
-        output_path = Path(target) / GAME_ID_US
-        output_path.mkdir(parents=True, exist_ok=True)
-        if not MOD_FILES.issuperset({file.name for file in output_path.iterdir()}):
-            raise ValueError(
-                "Unexpected files were found in the output path. "
-                f'Verify you have the correct path and delete "{output_path}" if it is correct.'
-            )
+        if SamusReturnsWorld.settings.target_system == TargetSystem.CONSOLE:
+            path = SamusReturnsWorld.settings.console_settings.sd_path
+            if path is None:
+                output_path = Path(target)
+            else:
+                output_path = self.get_path(path) / "luma"
+                output_path.mkdir(exist_ok=True)
+                output_path /= "titles"
+        else:
+            path = SamusReturnsWorld.settings.emulator_settings.user_path
+            if path is None:
+                output_path = Path(target)
+            else:
+                output_path = self.get_path(path) / "load"
+                output_path.mkdir(exist_ok=True)
+                output_path /= "mods"
+        output_path.mkdir(exist_ok=True)
+
+        output_path /= GAME_ID_US
+        try:
+            if not MOD_FILES.issuperset({file.name for file in output_path.iterdir()}):
+                raise ValueError(
+                    "Unexpected files were found in the output path. "
+                    f'Verify you have the correct path and delete "{output_path}" if it is correct.'
+                )
+            shutil.rmtree(output_path)
+        except FileNotFoundError:
+            pass
+        output_path.mkdir(exist_ok=True)
 
         samus_returns_patcher.patch_extracted(rom_path, output_path, self.config)
+        if path is not None:
+            import logging
+
+            logger = logging.getLogger(type(self).__name__)
+            logger.setLevel(logging.INFO)
+            logger.info(f"Wrote randomizer files to {output_path}")
 
     @staticmethod
     def get_path(path: str):
         _path = Path(path)
-        if path != "" and _path.exists():
+        if _path.exists():
             return _path
         return Path(Utils.user_path(path))
 

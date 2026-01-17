@@ -1,4 +1,5 @@
 from collections import Counter
+from pathlib import Path
 from typing import ClassVar
 
 from BaseClasses import Item, Location, Region
@@ -8,6 +9,7 @@ from .data.constants import GAME_NAME
 from .data.room_names import SurfaceWest
 from .items import ItemName, item_data_table, launchers, major_items
 from .locations import location_table, make_name
+from .patch import SamusReturnsPatch
 
 LOCATION_COUNT = 211
 VICTORY = "Mission Accomplished!"
@@ -30,6 +32,7 @@ class SamusReturnsWorld(World):
     location_name_to_id: ClassVar[dict[str, int]] = {str(name): data.ap_id for name, data in location_table.items()}
 
     starting_items: Counter[ItemName]
+    ammo_amounts: dict[str, int]
 
     def generate_early(self):
         self.starting_items = Counter(
@@ -37,6 +40,16 @@ class SamusReturnsWorld(World):
                 ItemName.MissileLauncher: 1,
             }
         )
+        self.ammo_amounts = {
+            ItemName.EnergyTank: 100,
+            ItemName.MissileLauncher: 24,
+            ItemName.MissileTank: 3,
+            ItemName.SuperMissile: 5,
+            ItemName.SuperMissileTank: 1,
+            ItemName.PowerBomb: 5,
+            ItemName.PowerBombTank: 1,
+            ItemName.AeionTank: 50,
+        }
 
         for item in self.starting_items.elements():
             self.push_precollected(self.create_item(item))
@@ -72,6 +85,14 @@ class SamusReturnsWorld(World):
         item_pool += [self.create_filler() for _ in range(LOCATION_COUNT - len(item_pool))]
 
         self.multiworld.itempool += item_pool
+
+    def generate_output(self, output_directory: str):
+        patch = SamusReturnsPatch(player=self.player, player_name=self.player_name)
+        patch.create_config(self)
+
+        output_filename = f"{self.multiworld.get_out_file_name_base(self.player)}{patch.patch_file_ending}"
+        output_path = Path(output_directory) / output_filename
+        patch.write(str(output_path))
 
     def get_filler_item_name(self):
         return ItemName.Nothing

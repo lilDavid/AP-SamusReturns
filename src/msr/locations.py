@@ -34,11 +34,29 @@ class ActorLocationData(NamedTuple):
     scenario: AreaId
     actor: str
 
+    def to_pickup(self):
+        return {
+            "pickup_type": "actor",
+            "pickup_actor": {
+                "scenario": self.scenario,
+                "actor": self.actor,
+            },
+        }
+
 
 class MetroidLocationData(NamedTuple):
     ap_id: int
     scenario: AreaId
     spawngroup: str
+
+    def to_pickup(self):
+        return {
+            "pickup_type": "metroid",
+            "metroid_callback": {
+                "scenario": self.scenario,
+                "spawngroup": self.spawngroup,
+            },
+        }
 
 
 LocationData = ActorLocationData | MetroidLocationData

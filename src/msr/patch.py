@@ -100,8 +100,8 @@ class SamusReturnsPatch(APAutoPatchInterface):
             "$schema": PATCH_SCHEMA,
             "configuration_identifier": world.multiworld.seed_name,
             "starting_location": {
-                "scenario": AreaId.AREA_1,
-                "actor": "ST_SaveStation001",
+                "scenario": AreaId.SURFACE_EAST,
+                "actor": "StartPoint0",
             },
             "starting_items": self.create_starting_items(world),
             "pickups": self.create_pickups(world),

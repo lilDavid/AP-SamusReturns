@@ -9,6 +9,7 @@ from .data.constants import GAME_NAME
 from .data.room_names import SurfaceWest
 from .items import ItemName, item_data_table, launchers, major_items
 from .locations import location_table, make_name
+from .options import SamusReturnsOptions
 from .patch import SamusReturnsPatch
 from .settings import SamusReturnsSettings
 
@@ -30,6 +31,8 @@ class SamusReturnsWorld(World):
 
     game = GAME_NAME
     settings: ClassVar[SamusReturnsSettings]  # pyright: ignore[reportIncompatibleVariableOverride]
+    options_dataclass = SamusReturnsOptions
+    options: SamusReturnsOptions  # pyright: ignore[reportIncompatibleVariableOverride]
 
     item_name_to_id: ClassVar[dict[str, int]] = {str(name): data.ap_id for name, data in item_data_table.items()}
     location_name_to_id: ClassVar[dict[str, int]] = {str(name): data.ap_id for name, data in location_table.items()}
@@ -43,6 +46,9 @@ class SamusReturnsWorld(World):
                 ItemName.MissileLauncher: 1,
             }
         )
+
+        if self.options.dna_available.value < self.options.dna_required.value:
+            self.options.dna_available.value = self.options.dna_required.value
         self.ammo_amounts = {
             ItemName.EnergyTank: 100,
             ItemName.MissileLauncher: 24,
@@ -62,7 +68,11 @@ class SamusReturnsWorld(World):
         menu.add_locations(
             {name: data.ap_id for name, data in location_table.items()}, location_type=SamusReturnsLocation
         )
-        menu.add_event(make_name(SurfaceWest.LandingSite, "Proteus Ridley"), VICTORY)
+        menu.add_event(
+            make_name(SurfaceWest.LandingSite, "Proteus Ridley"),
+            VICTORY,
+            lambda state: state.has(ItemName.MetroidDna, self.player, self.options.dna_required.value),
+        )
         self.multiworld.regions.append(menu)
 
         self.multiworld.completion_condition[self.player] = lambda state: state.has(VICTORY, self.player)
@@ -75,7 +85,7 @@ class SamusReturnsWorld(World):
         item_pool += [self.create_item(name) for name in major_items if self.starting_items[name] <= 0]
 
         # DNA
-        item_pool += [self.create_item(ItemName.MetroidDna) for _ in range(39)]
+        item_pool += [self.create_item(ItemName.MetroidDna) for _ in range(self.options.dna_available.value)]
 
         # Tanks
         item_pool += [self.create_item(ItemName.EnergyTank) for _ in range(10)]
@@ -96,6 +106,9 @@ class SamusReturnsWorld(World):
         output_filename = f"{self.multiworld.get_out_file_name_base(self.player)}{patch.patch_file_ending}"
         output_path = Path(output_directory) / output_filename
         patch.write(str(output_path))
+
+    def fill_slot_data(self):
+        return self.options.as_dict(toggles_as_bools=True)
 
     def get_filler_item_name(self):
         return ItemName.Nothing

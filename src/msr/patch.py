@@ -103,6 +103,10 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 "scenario": AreaId.SURFACE_EAST,
                 "actor": "StartPoint0",
             },
+            "objective": {
+                "required_dna": world.options.dna_required.value,
+                "placed_dna": world.options.dna_available.value,
+            },
             "starting_items": self.create_starting_items(world),
             "pickups": self.create_pickups(world),
             "hints": [],

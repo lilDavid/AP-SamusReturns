@@ -1,6 +1,26 @@
 from enum import StrEnum
 
 
+class AreaId(StrEnum):
+    SURFACE_EAST = "s000_surface"
+    AREA_1 = "s010_area1"
+    AREA_2_EXTERIOR = "s020_area2"
+    AREA_2_INTERIOR = "s025_area2b"
+    AREA_2_ENTRYWAY = "s028_area2c"
+    AREA_3_EXTERIOR = "s030_area3"
+    AREA_3_CAVERNS = "s033_area3b"
+    AREA_3_INTERIOR = "s036_area3c"
+    AREA_4_CAVES = "s040_area4"
+    AREA_4_MINES = "s050_area5"
+    AREA_5_LOBBY = "s060_area6"
+    AREA_5_EXTERIOR = "s065_area6b"
+    AREA_5_INTERIOR = "s067_area6c"
+    AREA_6 = "s070_area7"
+    AREA_7 = "s090_area9"
+    AREA_8 = "s100_area10"
+    SURFACE_WEST = "s110_surfaceb"
+
+
 class ItemId(StrEnum):
     NOTHING = "ITEM_NONE"
     MAX_ENERGY = "ITEM_MAX_LIFE"

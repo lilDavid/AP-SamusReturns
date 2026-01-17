@@ -10,9 +10,7 @@ from .data.room_names import SurfaceWest
 from .items import ItemName, item_data_table, launchers, major_items
 from .locations import location_table, make_name
 from .patch import SamusReturnsPatch
-
-LOCATION_COUNT = 211
-VICTORY = "Mission Accomplished!"
+from .settings import SamusReturnsSettings
 
 
 class SamusReturnsItem(Item):
@@ -23,10 +21,15 @@ class SamusReturnsLocation(Location):
     game = GAME_NAME
 
 
+LOCATION_COUNT = 211
+VICTORY = "Mission Accomplished!"
+
+
 class SamusReturnsWorld(World):
     """TODO"""
 
     game = GAME_NAME
+    settings: ClassVar[SamusReturnsSettings]  # pyright: ignore[reportIncompatibleVariableOverride]
 
     item_name_to_id: ClassVar[dict[str, int]] = {str(name): data.ap_id for name, data in item_data_table.items()}
     location_name_to_id: ClassVar[dict[str, int]] = {str(name): data.ap_id for name, data in location_table.items()}

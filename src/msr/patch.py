@@ -2,11 +2,15 @@ from __future__ import annotations
 
 import json
 from collections import Counter
+from pathlib import Path
 from typing import TYPE_CHECKING
 from zipfile import ZipFile
 
+import Utils
+from open_samus_returns_rando import samus_returns_patcher
 from worlds.Files import APAutoPatchInterface
 
+from .data.constants import GAME_NAME
 from .data.internal_names import AreaId, ItemId, ItemModel
 from .items import ItemName, LauncherData, OtherItemData, TankData, UniqueItemData, item_data_table
 from .locations import location_table
@@ -15,17 +19,43 @@ if TYPE_CHECKING:
     from . import SamusReturnsWorld
 
 
+GAME_ID_US = "00040000001BB200"
+MD5_US_DECRYPTED = "d5c4ea950c46a5344e07c9108828142a"
+
+MOD_FILES = {"romfs", "code.bin", "exheader.bin"}
+
 PATCH_SCHEMA = "https://raw.githubusercontent.com/randovania/open-samus-returns-rando/refs/heads/main/src/open_samus_returns_rando/files/schema.json"
 
 
 class SamusReturnsPatch(APAutoPatchInterface):
+    game = GAME_NAME
     patch_file_ending = ".apmsr"
     result_file_ending = ""
 
     config: dict
 
     def patch(self, target: str):
-        raise NotImplementedError
+        from . import SamusReturnsWorld
+
+        self.read()
+
+        rom_path = self.get_path(SamusReturnsWorld.settings.rom_file)
+        output_path = Path(target) / GAME_ID_US
+        output_path.mkdir(parents=True, exist_ok=True)
+        if not MOD_FILES.issuperset({file.name for file in output_path.iterdir()}):
+            raise ValueError(
+                "Unexpected files were found in the output path. "
+                f'Verify you have the correct path and delete "{output_path}" if it is correct.'
+            )
+
+        samus_returns_patcher.patch_extracted(rom_path, output_path, self.config)
+
+    @staticmethod
+    def get_path(path: str):
+        _path = Path(path)
+        if path != "" and _path.exists():
+            return _path
+        return Path(Utils.user_path(path))
 
     def read_contents(self, opened_zipfile: ZipFile):
         self.config = json.loads(opened_zipfile.read("config.json"))

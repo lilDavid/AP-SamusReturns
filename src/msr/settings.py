@@ -1,4 +1,5 @@
-from typing import ClassVar
+from collections.abc import Sequence
+from typing import ClassVar, Self
 
 import settings
 
@@ -11,6 +12,11 @@ class RomFile(settings.UserFilePath):
     description = "Metroid: Samus Returns ROM file (decrypted format)"
     copy_to = "Metroid Samus Returns.cci"
     md5s: ClassVar[list[str | bytes]] = [MD5_US_DECRYPTED]
+
+    def browse(self, filetypes: Sequence[tuple[str, Sequence[str]]] | None = None, **kwargs) -> Self | None:
+        if filetypes is None:
+            filetypes = (("3DS ROM image", (".3ds", ".cci")),)
+        return super().browse(filetypes, **kwargs)
 
 
 class RomStart(str):

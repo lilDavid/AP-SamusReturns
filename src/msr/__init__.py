@@ -26,13 +26,17 @@ class SamusReturnsWorld(World):
 
     game = GAME_NAME
 
-    item_name_to_id: ClassVar[dict[str, int]] = {name: data.ap_id for name, data in item_data_table.items()}
-    location_name_to_id: ClassVar[dict[str, int]] = {name: data.ap_id for name, data in location_table.items()}
+    item_name_to_id: ClassVar[dict[str, int]] = {str(name): data.ap_id for name, data in item_data_table.items()}
+    location_name_to_id: ClassVar[dict[str, int]] = {str(name): data.ap_id for name, data in location_table.items()}
 
     starting_items: Counter[ItemName]
 
     def generate_early(self):
-        self.starting_items = Counter()
+        self.starting_items = Counter(
+            {
+                ItemName.MissileLauncher: 1,
+            }
+        )
 
         for item in self.starting_items.elements():
             self.push_precollected(self.create_item(item))
@@ -59,9 +63,9 @@ class SamusReturnsWorld(World):
 
         # Tanks
         item_pool += [self.create_item(ItemName.EnergyTank) for _ in range(10)]
-        item_pool += [self.create_item(ItemName.MissileTank) for _ in range((264 - 24) // 3)]
-        item_pool += [self.create_item(ItemName.SuperMissileTank) for _ in range((35 - 5) // 1)]
-        item_pool += [self.create_item(ItemName.PowerBombTank) for _ in range((20 - 5) // 1)]
+        item_pool += [self.create_item(ItemName.MissileTank) for _ in range(80)]
+        item_pool += [self.create_item(ItemName.SuperMissileTank) for _ in range(30)]
+        item_pool += [self.create_item(ItemName.PowerBombTank) for _ in range(15)]
         item_pool += [self.create_item(ItemName.AeionTank) for _ in range(15)]
 
         # Filler

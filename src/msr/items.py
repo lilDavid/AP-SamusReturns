@@ -46,6 +46,7 @@ class ItemName(StrEnum):
     MissileReserve = "Missile Reserve Tank"
 
     MetroidDna = "Metroid DNA"
+    Hatchling = "Metroid Hatchling"
 
     Nothing = "Nothing"
 
@@ -130,6 +131,7 @@ major_items = {
     ItemName.LightningArmor: UniqueItemData(62, ItemId.LIGHTNING_ARMOR, ItemModel.LightningArmor),
     ItemName.BeamBurst: UniqueItemData(63, ItemId.BEAM_BURST, ItemModel.BeamBurst),
     ItemName.PhaseDrift: UniqueItemData(64, ItemId.PHASE_DRIFT, ItemModel.PhaseDrift),
+    ItemName.Hatchling: UniqueItemData(65, ItemId.METROID_HATCHLING, ItemModel.Hatchling),
 }
 
 reserve_tanks = {
@@ -143,7 +145,7 @@ other_items: dict[ItemName, OtherItemData] = {
     ItemName.Nothing: OtherItemData(100, ItemId.NOTHING, ItemModel.ItemSphere, ItemClassification.filler),
 }
 
-item_data_table: dict[ItemName, ItemData] = {
+item_data_table: dict[str, ItemData] = {
     **tanks,
     **launchers,
     **major_items,

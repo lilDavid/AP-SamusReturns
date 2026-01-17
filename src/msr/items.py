@@ -1,6 +1,8 @@
 from enum import StrEnum
 from typing import NamedTuple
 
+from BaseClasses import ItemClassification
+
 from .data.internal_names import ItemId, ItemModel
 
 
@@ -53,6 +55,9 @@ class TankData(NamedTuple):
     item_id: ItemId
     model: ItemModel
 
+    def classification(self):
+        return ItemClassification.progression_deprioritized_skip_balancing
+
 
 class LauncherData(NamedTuple):
     ap_id: int
@@ -60,14 +65,33 @@ class LauncherData(NamedTuple):
     ammo_id: ItemId
     model: ItemModel
 
+    def classification(self):
+        return ItemClassification.progression | ItemClassification.useful
+
 
 class UniqueItemData(NamedTuple):
     ap_id: int
     item_id: ItemId
     model: ItemModel
+    is_progression: bool = True
+
+    def classification(self):
+        if self.is_progression:
+            return ItemClassification.progression | ItemClassification.useful
+        return ItemClassification.useful
 
 
-ItemData = TankData | LauncherData | UniqueItemData
+class OtherItemData(NamedTuple):
+    ap_id: int
+    item_id: ItemId
+    model: ItemModel
+    item_type: ItemClassification
+
+    def classification(self):
+        return self.item_type
+
+
+ItemData = TankData | LauncherData | UniqueItemData | OtherItemData
 
 
 tanks = {
@@ -102,7 +126,7 @@ major_items = {
     ItemName.HighJumpBoots: UniqueItemData(52, ItemId.HIGH_JUMP_BOOTS, ItemModel.HighJumpBoots),
     ItemName.SpaceJump: UniqueItemData(53, ItemId.SPACE_JUMP, ItemModel.SpaceJump),
     ItemName.ScrewAttack: UniqueItemData(54, ItemId.SCREW_ATTACK, ItemModel.ScrewAttack),
-    ItemName.ScanPulse: UniqueItemData(61, ItemId.SCAN_PULSE, ItemModel.ScanPulse),
+    ItemName.ScanPulse: UniqueItemData(61, ItemId.SCAN_PULSE, ItemModel.ScanPulse, is_progression=False),
     ItemName.LightningArmor: UniqueItemData(62, ItemId.LIGHTNING_ARMOR, ItemModel.LightningArmor),
     ItemName.BeamBurst: UniqueItemData(63, ItemId.BEAM_BURST, ItemModel.BeamBurst),
     ItemName.PhaseDrift: UniqueItemData(64, ItemId.PHASE_DRIFT, ItemModel.PhaseDrift),
@@ -114,9 +138,9 @@ reserve_tanks = {
     ItemName.AeionReserve: UniqueItemData(73, ItemId.ENERGY_RESERVE_TANK, ItemModel.AeionReserve),
 }
 
-other_items: dict[ItemName, ItemData] = {
-    ItemName.MetroidDna: UniqueItemData(91, ItemId.DNA, ItemModel.Dna),
-    ItemName.Nothing: UniqueItemData(100, ItemId.NOTHING, ItemModel.ItemSphere),
+other_items: dict[ItemName, OtherItemData] = {
+    ItemName.MetroidDna: OtherItemData(91, ItemId.DNA, ItemModel.Dna, ItemClassification.progression_skip_balancing),
+    ItemName.Nothing: OtherItemData(100, ItemId.NOTHING, ItemModel.ItemSphere, ItemClassification.filler),
 }
 
 item_data_table: dict[ItemName, ItemData] = {

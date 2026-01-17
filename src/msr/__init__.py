@@ -1,9 +1,78 @@
+from collections import Counter
+from typing import ClassVar
+
+from BaseClasses import Item, Location, Region
 from worlds.AutoWorld import World
 
 from .data.constants import GAME_NAME
+from .data.room_names import SurfaceWest
+from .items import ItemName, item_data_table, launchers, major_items
+from .locations import location_table, make_name
+
+LOCATION_COUNT = 211
+VICTORY = "Mission Accomplished!"
+
+
+class SamusReturnsItem(Item):
+    game = GAME_NAME
+
+
+class SamusReturnsLocation(Location):
+    game = GAME_NAME
 
 
 class SamusReturnsWorld(World):
     """TODO"""
 
     game = GAME_NAME
+
+    item_name_to_id: ClassVar[dict[str, int]] = {name: data.ap_id for name, data in item_data_table.items()}
+    location_name_to_id: ClassVar[dict[str, int]] = {name: data.ap_id for name, data in location_table.items()}
+
+    starting_items: Counter[ItemName]
+
+    def generate_early(self):
+        self.starting_items = Counter()
+
+        for item in self.starting_items.elements():
+            self.push_precollected(self.create_item(item))
+
+    def create_regions(self):
+        menu = Region(self.origin_region_name, self.player, self.multiworld)
+        menu.add_locations(
+            {name: data.ap_id for name, data in location_table.items()}, location_type=SamusReturnsLocation
+        )
+        menu.add_event(make_name(SurfaceWest.LandingSite, "Proteus Ridley"), VICTORY)
+        self.multiworld.regions.append(menu)
+
+        self.multiworld.completion_condition[self.player] = lambda state: state.has(VICTORY, self.player)
+
+    def create_items(self):
+        item_pool: list[Item] = []
+
+        # Major items
+        item_pool += [self.create_item(name) for name in launchers if self.starting_items[name] <= 0]
+        item_pool += [self.create_item(name) for name in major_items if self.starting_items[name] <= 0]
+
+        # DNA
+        item_pool += [self.create_item(ItemName.MetroidDna) for _ in range(39)]
+
+        # Tanks
+        item_pool += [self.create_item(ItemName.EnergyTank) for _ in range(10)]
+        item_pool += [self.create_item(ItemName.MissileTank) for _ in range((264 - 24) // 3)]
+        item_pool += [self.create_item(ItemName.SuperMissileTank) for _ in range((35 - 5) // 1)]
+        item_pool += [self.create_item(ItemName.PowerBombTank) for _ in range((20 - 5) // 1)]
+        item_pool += [self.create_item(ItemName.AeionTank) for _ in range(15)]
+
+        # Filler
+        item_pool += [self.create_filler() for _ in range(LOCATION_COUNT - len(item_pool))]
+
+        self.multiworld.itempool += item_pool
+
+    def get_filler_item_name(self):
+        return ItemName.Nothing
+
+    def create_item(self, name: str):
+        item_name = ItemName(name)
+        data = item_data_table[item_name]
+        return SamusReturnsItem(item_name, data.classification(), data.ap_id, self.player)

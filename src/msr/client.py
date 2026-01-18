@@ -84,7 +84,6 @@ class SamusReturnsContext(CommonContext):
                     if await self.game_interface.connect("localhost"):
                         logger.debug("Connected")
                     else:
-                        logger.debug("Connection attempt failed")
                         await asyncio.sleep(BACKOFF_LONG)
                         continue
 

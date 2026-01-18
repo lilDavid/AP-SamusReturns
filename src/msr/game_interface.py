@@ -2,6 +2,8 @@ import asyncio
 import struct
 from enum import IntEnum
 
+from CommonClient import logger
+
 from .data.internal_names import AreaId
 
 SR_PORT = 42069
@@ -52,10 +54,8 @@ class SamusReturnsConnector:
         try:
             self.streams = await asyncio.open_connection(self.address, SR_PORT)
             await self._request(PacketType.HANDSHAKE, struct.pack("<B", 0))
-        except OSError:
-            import traceback
-
-            traceback.print_exc()
+        except OSError as e:
+            logger.debug(str(e))
             self.disconnect()
             return False
 

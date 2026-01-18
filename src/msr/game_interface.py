@@ -45,11 +45,15 @@ class SamusReturnsConnector:
         if self.is_connected() and address == self.address:
             return True
         self.disconnect()
+        self.address = address
 
         try:
             self.streams = await asyncio.open_connection(self.address, SR_PORT)
             await self._request(PacketType.HANDSHAKE, struct.pack("<B", 0))
         except OSError:
+            import traceback
+
+            traceback.print_exc()
             self.disconnect()
             return False
 
@@ -119,3 +123,6 @@ class SamusReturnsInterface:
 
     async def is_in_game(self):
         return False
+
+    async def display_hud_message(self, text: str):
+        await self.connector.run_lua(f"Scenario.QueueAsyncPopup({text!r})")

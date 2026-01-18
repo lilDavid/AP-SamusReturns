@@ -26,10 +26,14 @@ class SamusReturnsManager(GameManager):
 class SamusReturnsCommandProcessor(ClientCommandProcessor):
     ctx: SamusReturnsContext
 
-    def _cmd_test_lua(self, *args: str):
-        """Run some Lua code in the game."""
-        code = " ".join(args)
-        Utils.async_start(self.ctx.test_lua(code))
+    # def _cmd_test_lua(self, *code: str):
+    #     """Run some Lua code in the game."""
+    #     joined_code = " ".join(code)
+    #     Utils.async_start(self.ctx.test_lua(joined_code))
+
+    def _cmd_test_hud(self, *text: str):
+        """Write a message to the HUD."""
+        Utils.async_start(self.ctx.game_interface.display_hud_message(" ".join(text)))
 
 
 class SamusReturnsContext(CommonContext):
@@ -52,7 +56,7 @@ class SamusReturnsContext(CommonContext):
         while not self.exit_event.is_set():
             try:
                 if not self.game_interface.is_connected():
-                    if await self.game_interface.connect("127.0.0.1"):
+                    if await self.game_interface.connect("localhost"):
                         logger.debug("Connected")
                     else:
                         logger.debug("Connection attempt failed")

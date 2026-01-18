@@ -109,7 +109,10 @@ class SamusReturnsWorld(World):
         patch.write(str(output_path))
 
     def fill_slot_data(self):
-        return self.options.as_dict(toggles_as_bools=True)
+        return self.options.as_dict(
+            "dna_required",
+            toggles_as_bools=True,
+        )
 
     def get_filler_item_name(self):
         return ItemName.Nothing

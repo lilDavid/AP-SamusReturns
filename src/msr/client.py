@@ -48,6 +48,14 @@ class SamusReturnsCommandProcessor(ClientCommandProcessor):
         """Write a message to the HUD."""
         Utils.async_start(self.ctx.game_interface.display_hud_message(" ".join(text)))
 
+    def _cmd_console_ip(self, ip_address: str | None = None):
+        """Get or set the IP address to connect to the game. Use "localhost" to connect to emulator."""
+        if ip_address is None:
+            logger.info(self.ctx.ip_address or "<unset>")
+        else:
+            self.ctx.ip_address = ip_address
+            self.ctx.force_client_dc = True
+
 
 class SamusReturnsDebugCommandProcessor(SamusReturnsCommandProcessor):
     def _cmd_test_lua(self, *code: str):
@@ -65,6 +73,8 @@ class SamusReturnsContext(CommonContext):
 
     game_sync_task: asyncio.Task
     game_interface: SamusReturnsInterface
+    ip_address: str
+    force_client_dc: bool
 
     local_locations: set[int]
 
@@ -74,8 +84,20 @@ class SamusReturnsContext(CommonContext):
         self.log_filter = SamusReturnsFilter()
         logger.addFilter(self.log_filter)
         self.game_interface = SamusReturnsInterface()
+        self.ip_address = self.get_default_ip_address()
+        self.force_client_dc = False
 
         self.local_locations = set()
+
+    @staticmethod
+    def get_default_ip_address():
+        from . import SamusReturnsWorld
+        from .settings import SamusReturnsSettings, TargetSystem
+
+        settings: SamusReturnsSettings = SamusReturnsWorld.settings
+        if settings.target_system == TargetSystem.EMULATOR:
+            return "localhost"
+        return settings.console_settings.ip_address or ""
 
     def run_gui(self):
         ui = SamusReturnsManager(self)
@@ -92,8 +114,17 @@ class SamusReturnsContext(CommonContext):
         logger.debug("Starting Samus Returns connector, attempting to connect to game")
         while not self.exit_event.is_set():
             try:
+                if self.force_client_dc:
+                    self.game_interface.disconnect()
+                    self.force_client_dc = False
+
                 if not self.game_interface.is_connected():
-                    if await self.game_interface.connect("localhost"):
+                    if not self.ip_address:
+                        logger.error("Client IP address is unset. Use /console_ip to connect to the game.")
+                        await asyncio.sleep(BACKOFF_LONG)
+                        continue
+
+                    if await self.game_interface.connect(self.ip_address):
                         logger.debug("Connected")
                     else:
                         await asyncio.sleep(BACKOFF_LONG)

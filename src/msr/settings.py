@@ -29,6 +29,12 @@ class ConsoleSdPath(settings.UserFolderPath):
     description = "3DS SD card path"
 
 
+class ConsoleIp(str):
+    """
+    Your 3DS's local IP address. You can find this ***.
+    """
+
+
 class EmulatorUserPath(settings.UserFolderPath):
     """
     Azahar user path. If set, the patcher can automatically place randomizer
@@ -49,7 +55,8 @@ class EmulatorRomStart(str):
 class TargetSystem(StrEnum):
     """
     Set this to "console" or "emulator" to automatically place randomizer files
-    in the matching path and start the emulator if appropriate.
+    in the matching path and start the emulator if appropriate. This setting
+    also determines what IP address the client will try to look for by default.
     """
 
     CONSOLE = "console"
@@ -58,6 +65,7 @@ class TargetSystem(StrEnum):
 
 class ConsoleSettings(settings.Group):
     sd_path: ConsoleSdPath | None = None
+    ip_address: ConsoleIp | None = None
 
 
 class EmulatorSettings(settings.Group):

@@ -61,7 +61,7 @@ class SamusReturnsConnector:
         self.address = address
 
         try:
-            self.streams = await asyncio.wait_for(asyncio.open_connection(self.address, SR_PORT), 30)
+            self.streams = await asyncio.wait_for(asyncio.open_connection(self.address, SR_PORT), 10)
             await self._request(PacketType.HANDSHAKE, struct.pack("<B", 0))
         except TimeoutError:
             logger.debug("Connection failed: Timeout")

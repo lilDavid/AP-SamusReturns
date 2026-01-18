@@ -1,13 +1,15 @@
+from __future__ import annotations
+
 import asyncio
 import traceback
 
 import Patch
 import Utils
-from CommonClient import CommonContext, get_base_parser, gui_enabled, logger, server_loop
+from CommonClient import ClientCommandProcessor, CommonContext, get_base_parser, gui_enabled, logger, server_loop
 from kvui import GameManager
 
 from .data.constants import GAME_NAME
-from .game_interface import SamusReturnsInterface
+from .game_interface import LuaError, SamusReturnsInterface
 
 OTHER_WORLD_ITEMS = 0b001
 
@@ -21,8 +23,18 @@ class SamusReturnsManager(GameManager):
     base_title = "Archipelago Metroid: Samus Returns Client"
 
 
+class SamusReturnsCommandProcessor(ClientCommandProcessor):
+    ctx: SamusReturnsContext
+
+    def _cmd_test_lua(self, *args: str):
+        """Run some Lua code in the game."""
+        code = " ".join(args)
+        Utils.async_start(self.ctx.test_lua(code))
+
+
 class SamusReturnsContext(CommonContext):
     game = GAME_NAME
+    command_processor = SamusReturnsCommandProcessor
     items_handling = OTHER_WORLD_ITEMS
 
     game_sync_task: asyncio.Task
@@ -64,6 +76,13 @@ class SamusReturnsContext(CommonContext):
     async def handle_game_ready(self):
         # TODO
         ...
+
+    async def test_lua(self, code: str):
+        try:
+            result = await self.game_interface.connector.run_lua(code)
+            logger.info(result)
+        except (OSError, LuaError) as e:
+            logger.exception(str(e))
 
 
 def launch_game(rom_file: str):

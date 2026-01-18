@@ -47,10 +47,7 @@ class SamusReturnsConnector:
         self.disconnect()
 
         try:
-            # Establish connection
             self.streams = await asyncio.open_connection(self.address, SR_PORT)
-
-            # Handshake
             await self._request(PacketType.HANDSHAKE, struct.pack("<B", 0))
         except OSError:
             self.disconnect()
@@ -71,7 +68,9 @@ class SamusReturnsConnector:
             reader, writer = self.streams
 
             try:
-                writer.write(struct.pack(">B", packet) + data)
+                request = struct.pack(">B", packet) + data
+                assert len(request) <= 4096
+                writer.write(request)
                 await asyncio.wait_for(writer.drain(), timeout=5)
                 response = await asyncio.wait_for(reader.read(4096), timeout=5)
 
@@ -88,6 +87,19 @@ class SamusReturnsConnector:
             except OSError:
                 self.disconnect()
                 raise
+
+    async def run_lua(self, code: str | bytes):
+        if isinstance(code, str):
+            code_bytes = code.encode()
+        else:
+            code_bytes = code
+        payload = struct.pack("<I", len(code_bytes)) + code_bytes
+        response = await self._request(PacketType.REMOTE_LUA_EXEC, payload)
+        success, _ = struct.unpack_from("<BI", response)
+        data = response[struct.calcsize("<BI") :].decode()
+        if not success:
+            raise LuaError(data)
+        return data
 
 
 class SamusReturnsInterface:

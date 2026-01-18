@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import ClassVar
 
 from BaseClasses import Item, Location, Region
+from worlds import LauncherComponents as Launcher
 from worlds.AutoWorld import World
 
 from .data.constants import GAME_NAME
@@ -117,3 +118,19 @@ class SamusReturnsWorld(World):
         item_name = ItemName(name)
         data = item_data_table[item_name]
         return SamusReturnsItem(item_name, data.classification(), data.ap_id, self.player)
+
+
+def launch_client():
+    from . import client
+
+    client.launch()
+
+
+Launcher.components.append(
+    Launcher.Component(
+        "Metroid: Samus Returns Client",
+        func=lambda: Launcher.launch_subprocess(launch_client, name="MetroidSamusReturnsClient"),
+        component_type=Launcher.Type.CLIENT,
+        file_identifier=Launcher.SuffixIdentifier(SamusReturnsPatch.patch_file_ending),
+    )
+)

@@ -3,7 +3,7 @@ from typing import NamedTuple
 
 from BaseClasses import ItemClassification
 
-from .data.internal_names import ItemId, ItemModel
+from .data.internal_names import ItemId, ItemModel, PickupSound
 
 
 class ItemName(StrEnum):
@@ -55,6 +55,7 @@ class TankData(NamedTuple):
     ap_id: int
     item_id: ItemId
     model: ItemModel
+    sound: PickupSound | None = None
 
     def classification(self):
         return ItemClassification.progression_deprioritized_skip_balancing
@@ -65,6 +66,7 @@ class LauncherData(NamedTuple):
     item_id: ItemId
     ammo_id: ItemId
     model: ItemModel
+    sound: PickupSound | None = None
 
     def classification(self):
         return ItemClassification.progression | ItemClassification.useful
@@ -75,6 +77,7 @@ class UniqueItemData(NamedTuple):
     item_id: ItemId
     model: ItemModel
     is_progression: bool = True
+    sound: PickupSound | None = None
 
     def classification(self):
         if self.is_progression:
@@ -87,6 +90,7 @@ class OtherItemData(NamedTuple):
     item_id: ItemId
     model: ItemModel
     item_type: ItemClassification
+    sound: PickupSound | None = None
 
     def classification(self):
         return self.item_type
@@ -142,7 +146,9 @@ reserve_tanks = {
 
 other_items: dict[ItemName, OtherItemData] = {
     ItemName.MetroidDna: OtherItemData(91, ItemId.DNA, ItemModel.Dna, ItemClassification.progression_skip_balancing),
-    ItemName.Nothing: OtherItemData(100, ItemId.NOTHING, ItemModel.ItemSphere, ItemClassification.filler),
+    ItemName.Nothing: OtherItemData(
+        100, ItemId.NOTHING, ItemModel.ItemSphere, ItemClassification.filler, sound=PickupSound.TANK
+    ),
 }
 
 item_data_table: dict[str, ItemData] = {

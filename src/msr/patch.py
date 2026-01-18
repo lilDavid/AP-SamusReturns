@@ -12,7 +12,7 @@ from open_samus_returns_rando import samus_returns_patcher
 from worlds.Files import APAutoPatchInterface
 
 from .data.constants import GAME_NAME
-from .data.internal_names import AreaId, ItemId, ItemModel
+from .data.internal_names import AreaId, ItemId, ItemModel, PickupSound
 from .items import ItemName, LauncherData, OtherItemData, TankData, UniqueItemData, item_data_table
 from .locations import location_table
 
@@ -145,13 +145,17 @@ class SamusReturnsPatch(APAutoPatchInterface):
 
             pickup = location_table[location.name].to_pickup()
             if location.item.player == world.player:
+                item_data = item_data_table[location.item.name]
                 pickup["resources"] = self.create_resources(world, ItemName(location.item.name))
                 pickup["caption"] = f"{location.item.name} acquired."
+                if item_data.sound:
+                    pickup["sound"] = item_data.sound
             else:
                 pickup["resources"] = [[self.create_resource(ItemId.NOTHING, 1)]]
                 pickup["caption"] = (
                     f"{world.multiworld.player_name[location.item.player]}'s {location.item.name} acquired."
                 )
+                pickup["sound"] = PickupSound.TANK
             if location.native_item:
                 pickup["model"] = [item_data_table[location.item.name].model]
             else:

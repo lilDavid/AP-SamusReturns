@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import traceback
 
 import Patch
@@ -23,6 +24,23 @@ class SamusReturnsManager(GameManager):
     base_title = "Archipelago Metroid: Samus Returns Client"
 
 
+class SamusReturnsFilter(logging.Filter):
+    last_message: str | None
+
+    def __init__(self):
+        self.last_message = None
+
+    def clear(self):
+        self.last_message = None
+
+    def filter(self, record: logging.LogRecord):
+        matches = record.getMessage() == self.last_message
+        if matches:
+            return False
+        self.last_message = record.getMessage()
+        return True
+
+
 class SamusReturnsCommandProcessor(ClientCommandProcessor):
     ctx: SamusReturnsContext
 
@@ -41,15 +59,22 @@ class SamusReturnsContext(CommonContext):
     command_processor = SamusReturnsCommandProcessor
     items_handling = OTHER_WORLD_ITEMS
 
+    log_filter: SamusReturnsFilter
+
     game_sync_task: asyncio.Task
     game_interface: SamusReturnsInterface
+
+    def __init__(self, server_address: str | None, password: str | None):
+        super().__init__(server_address, password)
+
+        self.log_filter = SamusReturnsFilter()
+        logger.addFilter(self.log_filter)
+        self.game_interface = SamusReturnsInterface()
 
     def run_gui(self):
         ui = SamusReturnsManager(self)
         self.ui = ui
         self.ui_task = asyncio.create_task(ui.async_run(), name="UI")
-
-        self.game_interface = SamusReturnsInterface()
 
     async def game_sync_loop(self):
         logger.debug("Starting Samus Returns connector, attempting to connect to game")
@@ -63,23 +88,29 @@ class SamusReturnsContext(CommonContext):
                         await asyncio.sleep(BACKOFF_LONG)
                         continue
 
-                if not (self.server and self.slot):
-                    logger.debug("Waiting for login/slot")
-                    await asyncio.sleep(BACKOFF_SHORT)
-                    continue
+                # if not self.server:
+                #     logger.info("Waiting for player to connect to server")
+                #     await asyncio.sleep(BACKOFF_SHORT)
+                #     continue
+                # if not self.slot:
+                #     logger.debug("Waiting for slot")
+                #     await asyncio.sleep(BACKOFF_SHORT)
+                #     continue
 
                 if await self.game_interface.is_in_game():
                     await self.handle_game_ready()
                     await asyncio.sleep(POLL_COOLDOWN)
                 else:
                     await asyncio.sleep(BACKOFF_SHORT)
+            except OSError as e:
+                logger.error(str(e))
+                await asyncio.sleep(BACKOFF_LONG)
             except Exception:
                 logger.error(traceback.format_exc())
                 await asyncio.sleep(BACKOFF_LONG)
 
     async def handle_game_ready(self):
-        # TODO
-        ...
+        logger.debug("In-game stub")
 
     async def test_lua(self, code: str):
         try:

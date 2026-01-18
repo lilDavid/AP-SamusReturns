@@ -2,6 +2,8 @@ import asyncio
 import struct
 from enum import IntEnum
 
+from .data.internal_names import AreaId
+
 SR_PORT = 42069
 
 
@@ -98,7 +100,10 @@ class SamusReturnsConnector:
         else:
             code_bytes = code
         payload = struct.pack("<I", len(code_bytes)) + code_bytes
-        response = await self._request(PacketType.REMOTE_LUA_EXEC, payload)
+        try:
+            response = await self._request(PacketType.REMOTE_LUA_EXEC, payload)
+        except TimeoutError:
+            return None
         success, _ = struct.unpack_from("<BI", response)
         data = response[struct.calcsize("<BI") :].decode()
         if not success:
@@ -122,7 +127,12 @@ class SamusReturnsInterface:
         self.connector.disconnect()
 
     async def is_in_game(self):
-        return False
+        scenario = await self.connector.run_lua("return Scenario.CurrentScenarioID")
+        try:
+            AreaId(scenario)
+            return True
+        except ValueError:
+            return False
 
     async def display_hud_message(self, text: str):
         await self.connector.run_lua(f"Scenario.QueueAsyncPopup({text!r})")

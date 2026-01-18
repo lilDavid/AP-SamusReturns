@@ -147,8 +147,12 @@ def launch_game(rom_file: str):
     import webbrowser
 
     from . import SamusReturnsWorld
+    from .settings import SamusReturnsSettings
 
-    auto_start: str | bool = SamusReturnsWorld.settings.emulator_settings.auto_start
+    # In 3DS modding, we supply a patch to the loader, so we actually need to launch the original rom
+    settings: SamusReturnsSettings = SamusReturnsWorld.settings
+    auto_start = settings.emulator_settings.rom_start
+    rom_file = settings.rom_file
 
     if isinstance(auto_start, str):
         subprocess.Popen([auto_start, rom_file], close_fds=True)

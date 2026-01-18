@@ -1,10 +1,19 @@
 import asyncio
+import pkgutil
 import struct
 from enum import IntEnum
 
 from CommonClient import logger
 
+from . import locations
 from .data.internal_names import AreaId
+
+
+def get_lua_file(file):
+    lua = pkgutil.get_data(__name__, f"data/lua/{file}")
+    assert lua is not None
+    return lua
+
 
 SR_PORT = 42069
 
@@ -52,10 +61,14 @@ class SamusReturnsConnector:
         self.address = address
 
         try:
-            self.streams = await asyncio.open_connection(self.address, SR_PORT)
+            self.streams = await asyncio.wait_for(asyncio.open_connection(self.address, SR_PORT), 30)
             await self._request(PacketType.HANDSHAKE, struct.pack("<B", 0))
+        except TimeoutError:
+            logger.debug("Connection failed: Timeout")
+            self.disconnect()
+            return False
         except OSError as e:
-            logger.debug(str(e))
+            logger.debug(f"Connection failed: {e}")
             self.disconnect()
             return False
 
@@ -111,6 +124,9 @@ class SamusReturnsConnector:
         return data
 
 
+LOCATION_BATCH_SIZE = 80
+
+
 class SamusReturnsInterface:
     connector: SamusReturnsConnector
 
@@ -121,7 +137,32 @@ class SamusReturnsInterface:
         return self.connector.is_connected()
 
     async def connect(self, address: str):
-        return await self.connector.connect(address)
+        if self.is_connected():
+            return True
+        result = await self.connector.connect(address)
+        if not result:
+            return False
+
+        # Bootstrap
+        await self.connector.run_lua(get_lua_file("bootstrap.lua"))
+
+        mapping_data = [
+            (location.ap_id, location.scenario, location.internal_name())
+            for location in locations.location_table.values()
+        ]
+        batches = [mapping_data[i : i + LOCATION_BATCH_SIZE] for i in range(0, len(mapping_data), LOCATION_BATCH_SIZE)]
+
+        template = "for k, v in pairs({}) do AP.LocationMapping[k] = v end"
+        for batch in batches:
+            table = "{"
+            for id, scenario, name in batch:
+                table += f'[{id}]={{"{scenario}","{name}"}},'
+            table += "}"
+            code = template.format(table)
+            logger.debug(f"Sending location batch size {len(code)}")
+            await self.connector.run_lua(code)
+
+        return True
 
     def disconnect(self):
         self.connector.disconnect()
@@ -133,6 +174,14 @@ class SamusReturnsInterface:
             return True
         except ValueError:
             return False
+
+    async def get_locations(self):
+        result = await self.connector.run_lua("return AP.CheckLocations()")
+        if result is None:
+            return None
+        locations: set[int] = {int(id) for id in result.split(",")} if result else set()
+        logger.debug(f"Got location list: {locations}")
+        return locations
 
     async def display_hud_message(self, text: str):
         await self.connector.run_lua(f"Scenario.QueueAsyncPopup({text!r})")

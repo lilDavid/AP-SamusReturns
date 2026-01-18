@@ -44,19 +44,21 @@ class SamusReturnsFilter(logging.Filter):
 class SamusReturnsCommandProcessor(ClientCommandProcessor):
     ctx: SamusReturnsContext
 
-    # def _cmd_test_lua(self, *code: str):
-    #     """Run some Lua code in the game."""
-    #     joined_code = " ".join(code)
-    #     Utils.async_start(self.ctx.test_lua(joined_code))
-
     def _cmd_test_hud(self, *text: str):
         """Write a message to the HUD."""
         Utils.async_start(self.ctx.game_interface.display_hud_message(" ".join(text)))
 
 
+class SamusReturnsDebugCommandProcessor(SamusReturnsCommandProcessor):
+    def _cmd_test_lua(self, *code: str):
+        """Run some Lua code in the game."""
+        joined_code = " ".join(code)
+        Utils.async_start(self.ctx.test_lua(joined_code))
+
+
 class SamusReturnsContext(CommonContext):
     game = GAME_NAME
-    command_processor = SamusReturnsCommandProcessor
+    command_processor = SamusReturnsCommandProcessor if Utils.is_frozen() else SamusReturnsDebugCommandProcessor
     items_handling = OTHER_WORLD_ITEMS
 
     log_filter: SamusReturnsFilter
@@ -64,12 +66,16 @@ class SamusReturnsContext(CommonContext):
     game_sync_task: asyncio.Task
     game_interface: SamusReturnsInterface
 
+    local_locations: set[int]
+
     def __init__(self, server_address: str | None, password: str | None):
         super().__init__(server_address, password)
 
         self.log_filter = SamusReturnsFilter()
         logger.addFilter(self.log_filter)
         self.game_interface = SamusReturnsInterface()
+
+        self.local_locations = set()
 
     def run_gui(self):
         ui = SamusReturnsManager(self)
@@ -115,7 +121,18 @@ class SamusReturnsContext(CommonContext):
                 await asyncio.sleep(BACKOFF_LONG)
 
     async def handle_game_ready(self):
-        logger.debug("In-game stub")
+        await self.handle_locations()
+
+    async def handle_locations(self):
+        locations = await self.game_interface.get_locations()
+        if locations is None:
+            return
+        locations.difference_update(self.local_locations)
+        if not Utils.is_frozen():
+            self.local_locations.update(locations)
+            for location in locations:
+                logger.info(f"New location: {self.location_names.lookup_in_slot(location)}")
+        await self.check_locations(locations)
 
     async def test_lua(self, code: str):
         try:

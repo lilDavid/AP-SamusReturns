@@ -76,6 +76,12 @@ class SamusReturnsContext(CommonContext):
         self.ui = ui
         self.ui_task = asyncio.create_task(ui.async_run(), name="UI")
 
+    async def server_auth(self, password_requested: bool = False):
+        if password_requested and not self.password:
+            await super().server_auth(password_requested)
+        await self.get_username()
+        await self.send_connect()
+
     async def game_sync_loop(self):
         logger.debug("Starting Samus Returns connector, attempting to connect to game")
         while not self.exit_event.is_set():
@@ -87,14 +93,14 @@ class SamusReturnsContext(CommonContext):
                         await asyncio.sleep(BACKOFF_LONG)
                         continue
 
-                # if not self.server:
-                #     logger.info("Waiting for player to connect to server")
-                #     await asyncio.sleep(BACKOFF_SHORT)
-                #     continue
-                # if not self.slot:
-                #     logger.debug("Waiting for slot")
-                #     await asyncio.sleep(BACKOFF_SHORT)
-                #     continue
+                if not self.server:
+                    logger.info("Waiting for player to connect to server")
+                    await asyncio.sleep(BACKOFF_SHORT)
+                    continue
+                if not self.slot:
+                    logger.debug("Waiting for slot")
+                    await asyncio.sleep(BACKOFF_SHORT)
+                    continue
 
                 if await self.game_interface.is_in_game():
                     await self.handle_game_ready()

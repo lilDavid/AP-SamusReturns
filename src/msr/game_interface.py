@@ -1,12 +1,15 @@
 import asyncio
 import pkgutil
 import struct
+from collections import Counter
+from collections.abc import Sequence
 from enum import IntEnum
 
 from CommonClient import logger
+from open_samus_returns_rando import lua_editor as osrr_lua
 
-from . import locations
-from .data.internal_names import AreaId
+from . import items, locations
+from .data.internal_names import AreaId, ItemId
 
 
 def get_lua_file(file):
@@ -88,10 +91,12 @@ class SamusReturnsConnector:
 
             try:
                 request = struct.pack(">B", packet) + data
+                logger.debug(f"> {len(request)} bytes")
                 assert len(request) <= 4096
                 writer.write(request)
                 await asyncio.wait_for(writer.drain(), timeout=5)
                 response = await asyncio.wait_for(reader.read(4096), timeout=5)
+                logger.debug(f"< {len(response)} bytes")
 
                 if response == b"":
                     raise OSError("Connection closed")
@@ -146,12 +151,13 @@ class SamusReturnsInterface:
         # Bootstrap
         await self.connector.run_lua(get_lua_file("bootstrap.lua"))
 
-        mapping_data = [
+        location_data = [
             (location.ap_id, location.scenario, location.internal_name())
             for location in locations.location_table.values()
         ]
-        batches = [mapping_data[i : i + LOCATION_BATCH_SIZE] for i in range(0, len(mapping_data), LOCATION_BATCH_SIZE)]
-
+        batches = [
+            location_data[i : i + LOCATION_BATCH_SIZE] for i in range(0, len(location_data), LOCATION_BATCH_SIZE)
+        ]
         template = "for k, v in pairs({}) do AP.LocationMapping[k] = v end"
         for batch in batches:
             table = "{"
@@ -159,8 +165,13 @@ class SamusReturnsInterface:
                 table += f'[{id}]={{"{scenario}","{name}"}},'
             table += "}"
             code = template.format(table)
-            logger.debug(f"Sending location batch size {len(code)}")
             await self.connector.run_lua(code)
+
+        code = "AP.ItemMapping = {"
+        for item in items.item_data_table.values():
+            code += f'[{item.ap_id}] = "{item.item_id}",'
+        code += "}"
+        await self.connector.run_lua(code)
 
         return True
 
@@ -182,6 +193,21 @@ class SamusReturnsInterface:
         locations: set[int] = {int(id) for id in result.split(",")} if result else set()
         logger.debug(f"Got location list: {locations}")
         return locations
+
+    async def get_inventory(self):
+        from . import SamusReturnsWorld
+
+        result = await self.connector.run_lua("return AP.GetInventory()")
+        if result is None:
+            return None
+        pairs = (map(int, kvp.split("=")) for kvp in result.split(","))
+        inventory = Counter({SamusReturnsWorld.item_id_to_name[id]: count for id, count in pairs})
+        logger.debug(f"Current inventory: {inventory}")
+        return inventory
+
+    async def set_items(self, items: Sequence[tuple[ItemId, int]]):
+        resources = ",".join([f'{{item_id="{item}",quantity={amount}}}' for item, amount in items])
+        await self.connector.run_lua(f"{osrr_lua.get_parent_for(items[0][0])}.OnPickedUp({{ {{ {resources} }} }})")
 
     async def display_hud_message(self, text: str):
         await self.connector.run_lua(f"Scenario.QueueAsyncPopup({text!r})")

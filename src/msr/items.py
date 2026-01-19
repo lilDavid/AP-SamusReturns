@@ -151,6 +151,12 @@ other_items: dict[ItemName, OtherItemData] = {
     ),
 }
 
+unique_items: dict[str, ItemData] = {
+    **launchers,
+    **major_items,
+    **reserve_tanks,
+}
+
 item_data_table: dict[str, ItemData] = {
     **tanks,
     **launchers,

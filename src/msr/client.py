@@ -66,6 +66,10 @@ class SamusReturnsDebugCommandProcessor(SamusReturnsCommandProcessor):
         joined_code = " ".join(code)
         Utils.async_start(self.ctx.test_lua(joined_code))
 
+    def _cmd_reload_ap_code(self):
+        """Reload the multiworld handling code"""
+        self.ctx.is_ap_code_loaded = False
+
 
 class SamusReturnsContext(CommonContext):
     game = GAME_NAME
@@ -80,6 +84,7 @@ class SamusReturnsContext(CommonContext):
     game_interface: SamusReturnsInterface
     ip_address: str
     force_client_dc: bool
+    is_ap_code_loaded: bool
 
     # Slot data
     ammo_amounts: dict[str, int]
@@ -94,6 +99,7 @@ class SamusReturnsContext(CommonContext):
         self.game_interface = SamusReturnsInterface()
         self.ip_address = self.get_default_ip_address()
         self.force_client_dc = False
+        self.is_ap_code_loaded = False
 
         self.local_locations = set()
         self.ammo_amounts = {}
@@ -139,6 +145,7 @@ class SamusReturnsContext(CommonContext):
                     self.force_client_dc = False
 
                 if not self.game_interface.is_connected():
+                    self.is_ap_code_loaded = False
                     if not self.ip_address:
                         logger.error("Client IP address is unset. Use /console_ip to connect to the game.")
                         await asyncio.sleep(BACKOFF_LONG)
@@ -172,6 +179,8 @@ class SamusReturnsContext(CommonContext):
                 await asyncio.sleep(BACKOFF_LONG)
 
     async def handle_game_ready(self):
+        if not self.is_ap_code_loaded:
+            await self.game_interface.load_rando_code()
         await self.handle_locations()
         await self.handle_received_items()
 

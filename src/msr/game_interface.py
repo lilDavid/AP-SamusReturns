@@ -22,6 +22,7 @@ SR_PORT = 42069
 
 
 TIMEOUT = 5.0
+BOOTSTRAP_BACKOFF = 1.0
 
 
 class PacketType(IntEnum):
@@ -144,11 +145,17 @@ class SamusReturnsInterface:
     async def connect(self, address: str):
         if self.is_connected():
             return True
-        result = await self.connector.connect(address)
-        if not result:
-            return False
+        return await self.connector.connect(address)
 
+    def disconnect(self):
+        self.connector.disconnect()
+
+    async def load_rando_code(self):
         # Bootstrap
+        if await self.connector.run_lua("return AP") != "nil":
+            # Already loaded (we don't expect the code to change between DC and reconnect)
+            return
+
         await self.connector.run_lua(get_lua_file("bootstrap.lua"))
 
         location_data = [
@@ -173,18 +180,21 @@ class SamusReturnsInterface:
         code += "}"
         await self.connector.run_lua(code)
 
-        return True
-
-    def disconnect(self):
-        self.connector.disconnect()
-
     async def is_in_game(self):
-        scenario = await self.connector.run_lua("return Scenario.CurrentScenarioID")
+        return await self.get_area() is not None
+
+    async def get_area(self):
+        result = await self.connector.run_lua("return Game.GetCurrentGameModeID() .. ';' .. Scenario.CurrentScenarioID")
+        if result is None:
+            return None
+        game_mode, scenario = result.split(";")
+        if game_mode != "INGAME":
+            return None
         try:
-            AreaId(scenario)
-            return True
+            return AreaId(scenario)
         except ValueError:
-            return False
+            logger.debug(f"Unrecognized scenario: {scenario}")
+            return None
 
     async def get_locations(self):
         result = await self.connector.run_lua("return AP.CheckLocations()")

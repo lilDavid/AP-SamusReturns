@@ -164,7 +164,7 @@ class Area3Exterior(StrEnum):
     TransportCavernsN = "Transport to Metroid Caverns North"
     BeamBurst = "Beam Burst Chamber & Tsumuri Station"
     HalzynHangout = "Halzyn Hangout"
-    Gamma = "Gamma Arena"
+    Gamma = "Exterior Gamma Arena"
     NooksCranny = "Nook's Cranny"
     FactoryExtAccess = "Factory Exterior Access"
 
@@ -176,7 +176,7 @@ class Area3Caverns(StrEnum):
     TransportFactoryExtN = "Transport to Factory Exterior North"
     Alpha2W = "Alpha+ Arena West"
     GammaC = "Gamma Arena Center"
-    GammaS = "Gamma Arena South"
+    GammaS = "Caverns Gamma Arena South"
     SaveStationN = "Save Station North"
     GravittGarden = "Gravitt Garden"
     AscendingAlleyway = "Ascending Alleyway"
@@ -201,7 +201,7 @@ class Area3Caverns(StrEnum):
 
 class Area3Interior(StrEnum):
     SecuritySite = "Security Site"
-    GammaSAccess = "Gamma Arena South Access"
+    GammaSAccess = "Factory Gamma Arena South Access"
     ParabyPeriphery = "Paraby Periphery"
     FanControl = "Fan Control"
     GrappleCircuit = "Grapple Circuit"
@@ -213,7 +213,7 @@ class Area3Interior(StrEnum):
     RamulkenResidence = "Ramulken Residence"
     WallfireWatch = "Wallfire Watch"
     Alpha = "Alpha Arena"
-    GammaS = "Gamma Arena South"
+    GammaS = "Factory Gamma Arena South"
     DedicatedCallisoRoost = "Dedicated Callisto Roost"
     FactoryTeleporterAccess = "Factory Teleporter Access"
     GammaCAccess = "Gamma Arena Center Access"
@@ -277,10 +277,10 @@ class Area5Lobby(StrEnum):
     TransportTowerIntW = "Transport to Tower Interior West"
     LobbyTeleporterE = "Lobby Teleporter East"
     Alpha2 = "Alpha+ Arena"
-    Gamma2Access = "Gamma+ Arena Access"
+    Gamma2Access = "Lobby Gamma+ Arena Access"
     PhaseDrift = "Phase Drift Chamber"
     MeboidMillpond = "Meboid Millpond"
-    Gamma2 = "Gamma+ Arena"
+    Gamma2 = "Lobby Gamma+ Arena"
     LobbyPassageway = "Lobby Passageway"
 
     def with_area(self):
@@ -321,10 +321,10 @@ class Area5Interior(StrEnum):
     TransportTowerExtW = "Transport to Tower Exterior West"
     GravitySuitAccess = "Gravity Suit Chamber Access"
     PhaseDriftTrialEntrance = "Phase Drift Trial Entrance"
-    Gamma2 = "Gamma+ Arena"
+    Gamma2 = "Tower Gamma+ Arena"
     InteriorTeleporter = "Interior Teleporter"
     Zeta2 = "Zeta+ Arena"
-    Gamma2Access = "Gamma+ Arena Access"
+    Gamma2Access = "Tower Gamma+ Arena Access"
 
     def with_area(self):
         return format_room_name(AreaName.Area5Interior, self)

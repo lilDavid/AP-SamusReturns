@@ -3,26 +3,26 @@ from enum import StrEnum
 
 class AreaName(StrEnum):
     SurfaceEast = "Surface"
-    Area1 = "A1"
-    Area2Exterior = "A2 Exterior"
-    Area2Interior = "A2 Interior"
-    Area2Entryway = "A2 Entryway"
-    Area3Exterior = "A3 Exterior"
-    Area3Caverns = "A3 Caverns"
-    Area3Interior = "A3 Interior"
-    Area4Caves = "A4 Caves"
-    Area4Mines = "A4 Mines"
-    Area5Lobby = "A5 Lobby"
-    Area5Exterior = "A5 Exterior"
-    Area5Interior = "A5 Interior"
-    Area6 = "A6"
-    Area7 = "A7"
-    Area8 = "A8"
+    Area1 = "Area 1"
+    Area2Exterior = "Area 2"
+    Area2Interior = "Area 2"
+    Area2Entryway = "Area 2"
+    Area3Exterior = "Area 3"
+    Area3Caverns = "Area 3"
+    Area3Interior = "Area 3"
+    Area4Caves = "Area 4"
+    Area4Mines = "Area 4"
+    Area5Lobby = "Area 4"
+    Area5Exterior = "Area 5"
+    Area5Interior = "Area 5"
+    Area6 = "Area 6"
+    Area7 = "Area 7"
+    Area8 = "Area 8"
     SurfaceWest = "Surface"
 
 
 def format_room_name(area: AreaName, room: str):
-    return f"{area} - {room}"
+    return f"{area}: {room}"
 
 
 class SurfaceEast(StrEnum):

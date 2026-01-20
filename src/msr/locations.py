@@ -216,7 +216,7 @@ location_table: dict[str, LocationData] = {
     make_name(Area4Mines.PinkCrystalPreserve): ActorLocationData(417, AreaId.AREA_4_MINES, "LE_Item_012"),
     make_name(Area4Mines.LavaReservoir): ActorLocationData(418, AreaId.AREA_4_MINES, "LE_Item_013"),
     make_name(Area4Mines.DualPondAlcove): ActorLocationData(419, AreaId.AREA_4_MINES, "LE_Item_005"),
-    make_name(Area4Mines.ZetaArena): MetroidLocationData(420, AreaId.AREA_4_MINES, "SG_Zeta_001"),
+    make_name(Area4Mines.Zeta): MetroidLocationData(420, AreaId.AREA_4_MINES, "SG_Zeta_001"),
     make_name(Area4Mines.GawronGroove): ActorLocationData(421, AreaId.AREA_4_MINES, "HiddenPowerup001"),
     make_name(Area4Mines.GemstoneGorge): ActorLocationData(422, AreaId.AREA_4_MINES, "LE_Item_006"),
     make_name(Area4Mines.Gamma2): MetroidLocationData(423, AreaId.AREA_4_MINES, "SG_Gamma_002_A"),

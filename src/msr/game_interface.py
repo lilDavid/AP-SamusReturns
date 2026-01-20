@@ -25,6 +25,7 @@ SR_PORT = 42069
 
 TIMEOUT = 5.0
 BOOTSTRAP_BACKOFF = 1.0
+DEBUG_PREVIEW_LENGTH = 32
 
 
 class PacketType(IntEnum):
@@ -94,12 +95,12 @@ class SamusReturnsConnector:
 
             try:
                 request = struct.pack(">B", packet) + data
-                logger.debug(f"> {len(request)} bytes")
+                logger.debug(f"> {packet.name} {data[:DEBUG_PREVIEW_LENGTH]} ({len(request)} bytes)")
                 assert len(request) <= 4096
                 writer.write(request)
                 await asyncio.wait_for(writer.drain(), timeout=5)
                 response = await asyncio.wait_for(reader.read(4096), timeout=5)
-                logger.debug(f"< {len(response)} bytes")
+                logger.debug(f"< {response[:DEBUG_PREVIEW_LENGTH]} ({len(response)} bytes)")
 
                 if response == b"":
                     raise OSError("Connection closed")

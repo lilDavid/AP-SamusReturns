@@ -224,7 +224,7 @@ class SamusReturnsInterface:
         logger.debug(f"Current inventory: {inventory}")
         return inventory
 
-    async def set_items(self, items: Sequence[tuple[ItemId, int]]):
+    async def give_items(self, items: Sequence[tuple[ItemId, int]]):
         resources = ",".join([f'{{item_id="{item}",quantity={amount}}}' for item, amount in items])
         await self.connector.run_lua(f"{osrr_lua.get_parent_for(items[0][0])}.OnPickedUp({{ {{ {resources} }} }})")
 

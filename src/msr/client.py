@@ -245,11 +245,11 @@ class SamusReturnsContext(CommonContext):
 
         item_data = item_data_table[item_name]
         if type(item_data) is LauncherData:
-            await self.game_interface.set_items(
+            await self.game_interface.give_items(
                 [(item_data.item_id, 1), (item_data.ammo_id, self.ammo_amounts[item_name])]
             )
         else:
-            await self.game_interface.set_items([(item_data.item_id, 1)])
+            await self.game_interface.give_items([(item_data.item_id, 1)])
         current_inventory[item_name] = 1
         message = f"{item_name} online"
         if network_item.player != self.slot:
@@ -262,15 +262,14 @@ class SamusReturnsContext(CommonContext):
         new_capacity = 0
         sender = None
         new_capacity, sender = self.get_count_and_sender(item, self.ammo_amounts[item])
-        if current_inventory[launcher]:
-            new_capacity += self.ammo_amounts[launcher]
+        new_capacity += self.ammo_amounts[launcher] * current_inventory[launcher]
 
         diff = new_capacity - current_capacity
         if diff > 0:
             message = f"{item[: -len(' Tank')]} capacity increased by {diff}"
             if diff == self.ammo_amounts[item] and sender is not None:
                 message += f" ({sender})"
-            await self.game_interface.set_items([(item_data.item_id, diff)])
+            await self.game_interface.give_items([(item_data.item_id, diff)])
             await self.game_interface.display_hud_message(message)
 
     async def handle_energy_capacity(self, current_inventory: Counter[str]):
@@ -282,7 +281,7 @@ class SamusReturnsContext(CommonContext):
             message = f"Energy capacity increased by {diff}"
             if diff == self.ammo_amounts[ItemName.EnergyTank] and sender is not None:
                 message += f" ({sender})"
-            await self.game_interface.set_items(
+            await self.game_interface.give_items(
                 [(tanks[ItemName.EnergyTank].item_id, (diff - 99) // self.ammo_amounts[ItemName.EnergyTank])]
             )
             await self.game_interface.display_hud_message(message)
@@ -290,12 +289,14 @@ class SamusReturnsContext(CommonContext):
     async def handle_aeion_capacity(self, current_inventory: Counter[str]):
         current_capacity = 1000 + current_inventory[ItemName.AeionTank]
         new_capacity, sender = self.get_count_and_sender(ItemName.AeionTank, self.ammo_amounts[ItemName.AeionTank])
+        for upgrade in (ItemName.ScanPulse, ItemName.LightningArmor, ItemName.BeamBurst, ItemName.PhaseDrift):
+            new_capacity += self.ammo_amounts[upgrade] * current_inventory[upgrade]
         diff = new_capacity - current_capacity
         if diff > 0:
             message = f"Aeion capacity increased by {diff}"
             if diff == self.ammo_amounts[ItemName.AeionTank] and sender is not None:
                 message += f" ({sender})"
-            await self.game_interface.set_items([(tanks[ItemName.AeionTank].item_id, diff)])
+            await self.game_interface.give_items([(tanks[ItemName.AeionTank].item_id, diff)])
             await self.game_interface.display_hud_message(message)
 
     async def handle_metroid_dna(self, current_inventory: Counter[str]):
@@ -308,7 +309,7 @@ class SamusReturnsContext(CommonContext):
                 message += f" x{diff}"
             elif sender is not None:
                 message += f" ({sender})"
-            await self.game_interface.set_items([(tanks[ItemName.MetroidDna].item_id, diff)])
+            await self.game_interface.give_items([(tanks[ItemName.MetroidDna].item_id, diff)])
             await self.game_interface.display_hud_message(message)
 
     def get_count_and_sender(self, item: ItemName, amount_per_item: int = 1):

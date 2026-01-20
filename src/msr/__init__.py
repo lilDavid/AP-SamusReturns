@@ -59,6 +59,10 @@ class SamusReturnsWorld(World):
             ItemName.PowerBomb: 5,
             ItemName.PowerBombTank: 1,
             ItemName.AeionTank: 50,
+            ItemName.ScanPulse: 0,
+            ItemName.LightningArmor: 150,
+            ItemName.BeamBurst: 150,
+            ItemName.PhaseDrift: 150,
         }
 
         for item in self.starting_items.elements():

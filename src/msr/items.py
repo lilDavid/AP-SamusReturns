@@ -66,10 +66,13 @@ class LauncherData(NamedTuple):
     item_id: ItemId
     ammo_id: ItemId
     model: ItemModel
+    is_progression: bool = True
     sound: PickupSound | None = None
 
     def classification(self):
-        return ItemClassification.progression | ItemClassification.useful
+        if self.is_progression:
+            return ItemClassification.progression | ItemClassification.useful
+        return ItemClassification.useful
 
 
 class UniqueItemData(NamedTuple):
@@ -113,6 +116,12 @@ launchers = {
     ),
     ItemName.SuperMissile: LauncherData(12, ItemId.SUPER_MISSILE, ItemId.SUPER_MISSILE_TANKS, ItemModel.SuperMissile),
     ItemName.PowerBomb: LauncherData(13, ItemId.POWER_BOMB, ItemId.POWER_BOMB_TANKS, ItemModel.PowerBomb),
+    ItemName.ScanPulse: LauncherData(
+        61, ItemId.SCAN_PULSE, ItemId.MAX_AEION, ItemModel.ScanPulse, is_progression=False
+    ),
+    ItemName.LightningArmor: LauncherData(62, ItemId.LIGHTNING_ARMOR, ItemId.MAX_AEION, ItemModel.LightningArmor),
+    ItemName.BeamBurst: LauncherData(63, ItemId.BEAM_BURST, ItemId.MAX_AEION, ItemModel.BeamBurst),
+    ItemName.PhaseDrift: LauncherData(64, ItemId.PHASE_DRIFT, ItemId.MAX_AEION, ItemModel.PhaseDrift),
 }
 
 major_items = {
@@ -131,11 +140,7 @@ major_items = {
     ItemName.HighJumpBoots: UniqueItemData(52, ItemId.HIGH_JUMP_BOOTS, ItemModel.HighJumpBoots),
     ItemName.SpaceJump: UniqueItemData(53, ItemId.SPACE_JUMP, ItemModel.SpaceJump),
     ItemName.ScrewAttack: UniqueItemData(54, ItemId.SCREW_ATTACK, ItemModel.ScrewAttack),
-    ItemName.ScanPulse: UniqueItemData(61, ItemId.SCAN_PULSE, ItemModel.ScanPulse, is_progression=False),
-    ItemName.LightningArmor: UniqueItemData(62, ItemId.LIGHTNING_ARMOR, ItemModel.LightningArmor),
-    ItemName.BeamBurst: UniqueItemData(63, ItemId.BEAM_BURST, ItemModel.BeamBurst),
-    ItemName.PhaseDrift: UniqueItemData(64, ItemId.PHASE_DRIFT, ItemModel.PhaseDrift),
-    ItemName.Hatchling: UniqueItemData(65, ItemId.METROID_HATCHLING, ItemModel.Hatchling),
+    ItemName.Hatchling: UniqueItemData(55, ItemId.METROID_HATCHLING, ItemModel.Hatchling),
 }
 
 reserve_tanks = {

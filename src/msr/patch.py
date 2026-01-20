@@ -139,6 +139,8 @@ class SamusReturnsPatch(APAutoPatchInterface):
         for item in world.multiworld.precollected_items[world.player]:
             item_data = item_data_table[item.name]
             match item_data:
+                case TankData(_, ItemId.ENERGY_TANKS):
+                    starting_items[ItemId.ENERGY_TANKS] += 1
                 case TankData(_, item_id):
                     starting_items[item_id] += world.ammo_amounts[item.name]
                 case LauncherData(_, item_id, ammo_id):

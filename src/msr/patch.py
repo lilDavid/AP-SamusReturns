@@ -98,7 +98,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
     def create_config(self, world: SamusReturnsWorld):
         self.config = {
             "$schema": PATCH_SCHEMA,
-            "configuration_identifier": world.multiworld.seed_name,
+            "configuration_identifier": self.get_config_identifier(world),
             "starting_location": {
                 "scenario": AreaId.SURFACE_EAST,
                 "actor": "StartPoint0",
@@ -116,6 +116,18 @@ class SamusReturnsPatch(APAutoPatchInterface):
             "game_patches": {},
             "cosmetic_patches": {"camera_names_dict": {area: {} for area in AreaId}},
         }
+
+    @staticmethod
+    def get_config_identifier(world: SamusReturnsWorld):
+        # AP player names can't contain leading or trailing whitespace, so we can parse the name out by padding it and
+        # taking the last 16 characters.
+        return f"{world.multiworld.seed_name}{world.player_name:<16}"
+
+    @staticmethod
+    def parse_config_identifier(config: str):
+        seed_name = config[:-16]
+        player_name = config[-16:].strip()
+        return seed_name, player_name
 
     def create_starting_items(self, world: SamusReturnsWorld):
         starting_items = Counter(

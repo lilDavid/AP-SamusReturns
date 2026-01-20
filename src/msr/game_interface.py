@@ -11,6 +11,8 @@ from open_samus_returns_rando import lua_editor as osrr_lua
 from . import items, locations
 from .data.internal_names import AreaId, ItemId
 
+UUID_LENGTH = 36  # 32 hex digits + 4 hyphens
+
 
 def get_lua_file(file):
     lua = pkgutil.get_data(__name__, f"data/lua/{file}")
@@ -149,6 +151,12 @@ class SamusReturnsInterface:
 
     def disconnect(self):
         self.connector.disconnect()
+
+    async def get_config_identifier(self):
+        rando_id = await self.connector.run_lua("return Init.sThisRandoIdentifier")
+        if rando_id is None:
+            return None
+        return rando_id[:-UUID_LENGTH]
 
     async def load_rando_code(self):
         # Bootstrap

@@ -10,10 +10,12 @@ import Utils
 from CommonClient import ClientCommandProcessor, CommonContext, get_base_parser, gui_enabled, logger, server_loop
 from kvui import GameManager
 from NetUtils import NetworkItem
+from worlds._bizhawk.context import AuthStatus
 
 from .data.constants import GAME_NAME
 from .game_interface import LuaError, SamusReturnsInterface
 from .items import ItemName, LauncherData, item_data_table, tanks, unique_items
+from .patch import SamusReturnsPatch
 
 ALL_ITEMS = 0b111
 
@@ -77,6 +79,10 @@ class SamusReturnsContext(CommonContext):
     items_handling = ALL_ITEMS
     want_slot_data = True
 
+    # AP server
+    auth_status: AuthStatus
+    password_requested: bool
+
     log_filter: SamusReturnsFilter
 
     # Game info
@@ -96,6 +102,10 @@ class SamusReturnsContext(CommonContext):
 
         self.log_filter = SamusReturnsFilter()
         logger.addFilter(self.log_filter)
+
+        self.auth_status = AuthStatus.NOT_AUTHENTICATED
+        self.password_requested = False
+
         self.game_interface = SamusReturnsInterface()
         self.ip_address = self.get_default_ip_address()
         self.force_client_dc = False
@@ -120,10 +130,13 @@ class SamusReturnsContext(CommonContext):
         self.ui_task = asyncio.create_task(ui.async_run(), name="UI")
 
     async def server_auth(self, password_requested: bool = False):
-        if password_requested and not self.password:
-            await super().server_auth(password_requested)
-        await self.get_username()
+        self.password_requested = password_requested
+        if not self.auth:
+            logger.info("Awaiting connection to game before authenticating")
+            return
+        await super().server_auth(password_requested)
         await self.send_connect()
+        self.auth_status = AuthStatus.PENDING
 
     def on_package(self, cmd: str, args: dict):
         if cmd == "Connected":
@@ -152,17 +165,26 @@ class SamusReturnsContext(CommonContext):
                         continue
 
                     if await self.game_interface.connect(self.ip_address):
-                        logger.debug("Connected")
+                        config_id = await self.game_interface.get_config_identifier()
+                        if config_id is None:
+                            logger.error("Config identifier returned None")
+                            self.game_interface.disconnect()
+                            await asyncio.sleep(BACKOFF_LONG)
+                            continue
+                        self.seed_name, self.auth = SamusReturnsPatch.parse_config_identifier(config_id)
+                        logger.debug(f"Connected to {self.seed_name} as {self.auth}")
                     else:
                         await asyncio.sleep(BACKOFF_LONG)
                         continue
 
-                if not self.server:
+                if self.server is None:
                     logger.info("Waiting for player to connect to server")
-                    await asyncio.sleep(BACKOFF_SHORT)
-                    continue
-                if not self.slot:
-                    logger.debug("Waiting for slot")
+
+                if self.server is not None and not self.server.socket.closed:
+                    if self.auth_status == AuthStatus.NOT_AUTHENTICATED:
+                        Utils.async_start(self.server_auth(self.password_requested))
+                else:
+                    self.auth_status = AuthStatus.NOT_AUTHENTICATED
                     await asyncio.sleep(BACKOFF_SHORT)
                     continue
 

@@ -1,6 +1,11 @@
 from dataclasses import dataclass
 
-from Options import DefaultOnToggle, OptionGroup, PerGameCommonOptions, Range
+from Options import Choice, DefaultOnToggle, OptionGroup, PerGameCommonOptions, Range
+
+
+class LogicTrick(Choice):
+    option_disable = 0
+    default = option_disable
 
 
 # Game options
@@ -18,12 +23,30 @@ class MetroidDnaRequired(Range):
     default = 10
 
 
+class WallJump(LogicTrick):
+    display_name = "Wall Jump"
+    option_enable = 1
+
+
+class IBJ(LogicTrick):
+    display_name = "Infinite Bomb Jump"
+    option_double = 1
+    option_vertical = 2
+
+
 # Cosmetics
 class RoomNames(DefaultOnToggle):
     display_name = "Display Room Names"
 
 
 msr_option_groups = [
+    OptionGroup(
+        "Logic",
+        [
+            WallJump,
+            IBJ,
+        ],
+    ),
     OptionGroup(
         "Cosmetic",
         [
@@ -38,6 +61,10 @@ class SamusReturnsOptions(PerGameCommonOptions):
     # Game options
     dna_available: MetroidDnaAvailable
     dna_required: MetroidDnaRequired
+
+    # Logic
+    wall_jump: WallJump
+    infinite_bomb_jump: IBJ
 
     # Cosmetic
     display_room_names: RoomNames

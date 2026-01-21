@@ -13,6 +13,7 @@ from NetUtils import NetworkItem
 from worlds._bizhawk.context import AuthStatus
 
 from .data.constants import GAME_NAME
+from .data.internal_names import ItemId
 from .game_interface import LuaError, SamusReturnsInterface
 from .items import ItemName, LauncherData, item_data_table, tanks, unique_items
 from .patch import SamusReturnsPatch
@@ -71,6 +72,22 @@ class SamusReturnsDebugCommandProcessor(SamusReturnsCommandProcessor):
     def _cmd_reload_ap_code(self):
         """Reload the multiworld handling code"""
         self.ctx.is_ap_code_loaded = False
+
+    # Logic testing
+    def _set_item(self, item: ItemId, enable: bool):
+        Utils.async_start(self.ctx.test_lua(f"RandomizerPowerup.SetItemAmount('{item}', {int(bool(enable))})"))
+
+    def _cmd_hi_jump(self, enable: bool):
+        """Turn High Jump Boots on or off (doesn't work if you have the item)"""
+        self._set_item(ItemId.HIGH_JUMP_BOOTS, enable)
+
+    def _cmd_space_jump(self, enable: bool):
+        """Turn Space Jump on or off (doesn't work if you have the item)"""
+        self._set_item(ItemId.SPACE_JUMP, enable)
+
+    def _cmd_gravity_suit(self, enable: bool):
+        """Turn Gravity Suit on or off (doesn't work if you have the item)"""
+        self._set_item(ItemId.GRAVITY_SUIT, enable)
 
 
 class SamusReturnsContext(CommonContext):

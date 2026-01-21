@@ -26,10 +26,6 @@ class Door(Enum):
     Elevator = "Elevator"
 
 
-def subregion(room: RoomName, subregion: str):
-    return f"{room.with_area()} - {subregion}"
-
-
 class AreaData(NamedTuple):
     name: str
     id: AreaId

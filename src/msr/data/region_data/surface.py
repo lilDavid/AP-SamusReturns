@@ -16,7 +16,7 @@ from ..internal_names import AreaId
 from ..room_names import Area1
 from ..room_names import SurfaceEast as East
 from ..room_names import SurfaceWest as West
-from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, subregion
+from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData
 
 surface_east_data = AreaData(
     name="Surface East",
@@ -29,12 +29,12 @@ surface_east_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            subregion(East.LandingSite, "West"),
+                            East.LandingSite.subregion("West"),
                             access_rule=can_climb_wall,
                         ),
                         ExitData(
                             Door.Open,
-                            subregion(East.HornoadHallway, "West"),
+                            East.HornoadHallway.subregion("West"),
                         ),
                     ]
                 ),
@@ -42,7 +42,7 @@ surface_east_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            subregion(East.LandingSite, "East"),
+                            East.LandingSite.subregion("East"),
                             access_rule=can_climb_wall,
                         ),
                         ExitData(
@@ -96,7 +96,7 @@ surface_east_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            subregion(East.MorphBall, "Lower"),
+                            East.MorphBall.subregion("Lower"),
                         ),
                     ],
                     pickups=[
@@ -107,12 +107,12 @@ surface_east_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            subregion(East.MorphBall, "Upper"),
+                            East.MorphBall.subregion("Upper"),
                             access_rule=can_high_ledge,
                         ),
                         ExitData(
                             Door.Normal,
-                            subregion(East.ChozoSeal, "Upper"),
+                            East.ChozoSeal.subregion("Upper"),
                         ),
                     ],
                 ),
@@ -125,15 +125,15 @@ surface_east_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Normal,
-                            subregion(East.MorphBall, "Lower"),
+                            East.MorphBall.subregion("Lower"),
                         ),
                         ExitData(
                             Door.Normal,
-                            subregion(East.ScanPulse, "Right"),
+                            East.ScanPulse.subregion("Right"),
                         ),
                         ExitData(
                             Door.Open,
-                            subregion(East.ChozoSeal, "Lower"),
+                            East.ChozoSeal.subregion("Lower"),
                         ),
                     ],
                 ),
@@ -141,7 +141,7 @@ surface_east_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            subregion(East.ChozoSeal, "Upper"),
+                            East.ChozoSeal.subregion("Upper"),
                             access_rule=can_high_ledge,
                         ),
                         ExitData(
@@ -169,11 +169,11 @@ surface_east_data = AreaData(
                 exits=[
                     ExitData(
                         Door.Normal,
-                        subregion(East.ChozoSeal, "Lower"),
+                        East.ChozoSeal.subregion("Lower"),
                     ),
                     ExitData(
                         Door.MorphTunnel,
-                        subregion(East.ChozoSeal, "Tunnel"),
+                        East.ChozoSeal.subregion("Tunnel"),
                         access_rule=can_bomb_block,
                     ),
                     ExitData(
@@ -235,11 +235,11 @@ surface_east_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            subregion(East.EnergyRechargeShaft, "Lower"),
+                            East.EnergyRechargeShaft.subregion("Lower"),
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            subregion(East.Alpha, "Arena"),
+                            East.Alpha.subregion("Arena"),
                             access_rule=can_any_missile,
                         ),
                         ExitData(
@@ -256,7 +256,7 @@ surface_east_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            subregion(East.Alpha, "Lobby"),
+                            East.Alpha.subregion("Lobby"),
                             access_rule=lambda state, player: can_damage_metroid(state, player)
                             and can_any_missile(state, player),
                         ),
@@ -293,11 +293,11 @@ surface_east_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Normal,
-                            subregion(East.ChozoSeal, "Upper"),
+                            East.ChozoSeal.subregion("Upper"),
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            subregion(East.ScanPulse, "Left"),
+                            East.ScanPulse.subregion("Left"),
                         ),
                     ],
                 ),
@@ -305,7 +305,7 @@ surface_east_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            subregion(East.ScanPulse, "Right"),
+                            East.ScanPulse.subregion("Right"),
                         ),
                         ExitData(
                             Door.Charge,
@@ -325,7 +325,7 @@ surface_east_data = AreaData(
                 exits=[
                     ExitData(
                         Door.Gryncore,
-                        subregion(East.Alpha, "Lobby"),
+                        East.Alpha.subregion("Lobby"),
                     )
                 ],
                 pickups=[
@@ -339,11 +339,11 @@ surface_east_data = AreaData(
                 exits=[
                     ExitData(
                         Door.MorphTunnel,
-                        subregion(East.Alpha, "Lobby"),
+                        East.Alpha.subregion("Lobby"),
                     ),
                     ExitData(
                         Door.MorphTunnel,
-                        subregion(East.Alpha, "Pickup"),
+                        East.Alpha.subregion("Pickup"),
                     ),
                 ],
             ),
@@ -354,12 +354,12 @@ surface_east_data = AreaData(
                 exits=[
                     ExitData(
                         Door.Open,
-                        subregion(East.ScanPulse, "Left"),
+                        East.ScanPulse.subregion("Left"),
                         access_rule=can_climb_shaft,
                     ),
                     ExitData(
                         Door.Normal,
-                        subregion(East.EnergyRechargeShaft, "Top"),
+                        East.EnergyRechargeShaft.subregion("Top"),
                     ),
                     ExitData(
                         Door.MorphTunnel,
@@ -374,7 +374,7 @@ surface_east_data = AreaData(
                 exits=[
                     ExitData(
                         Door.Charge,
-                        subregion(East.ScanPulse, "Left"),
+                        East.ScanPulse.subregion("Left"),
                     ),
                     ExitData(
                         Door.MorphTunnel,
@@ -411,7 +411,7 @@ surface_east_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            subregion(East.HornoadHallway, "East"),
+                            East.HornoadHallway.subregion("East"),
                             access_rule=lambda state, player:
                             # Break or morph under the block
                             can_any_missile(state, player)
@@ -429,7 +429,7 @@ surface_east_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            subregion(East.HornoadHallway, "West"),
+                            East.HornoadHallway.subregion("West"),
                             access_rule=None,  # Drop down the upper path
                         ),
                         ExitData(
@@ -448,7 +448,7 @@ surface_east_data = AreaData(
                 exits=[
                     ExitData(
                         Door.Gigadora,
-                        subregion(East.LandingSite, "West"),
+                        East.LandingSite.subregion("West"),
                     ),
                 ],
                 pickups=[
@@ -471,7 +471,7 @@ surface_east_data = AreaData(
                 exits=[
                     ExitData(
                         Door.Open,
-                        subregion(East.LandingSite, "West"),
+                        East.LandingSite.subregion("West"),
                     )
                 ],
                 pickups=[
@@ -521,7 +521,7 @@ surface_east_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            subregion(East.CavernCavity, "Lower"),
+                            East.CavernCavity.subregion("Lower"),
                         ),
                     ],
                     pickups=[
@@ -532,12 +532,12 @@ surface_east_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            subregion(East.CavernCavity, "Upper"),
+                            East.CavernCavity.subregion("Upper"),
                             access_rule=can_high_ledge,
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            subregion(East.Alpha, "Lobby"),
+                            East.Alpha.subregion("Lobby"),
                         ),
                     ],
                     pickups=[
@@ -552,7 +552,7 @@ surface_east_data = AreaData(
                 exits=[
                     ExitData(
                         Door.Normal,
-                        subregion(East.Alpha, "Arena"),
+                        East.Alpha.subregion("Arena"),
                     ),
                     ExitData(
                         Door.Normal,

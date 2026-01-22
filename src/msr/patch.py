@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import functools
 import json
 import shutil
 from collections import Counter
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 from zipfile import ZipFile
 
 import Utils
@@ -33,8 +34,6 @@ class SamusReturnsPatch(APAutoPatchInterface):
     game = GAME_NAME
     patch_file_ending = ".apmsr"
     result_file_ending = ""
-
-    room_names: ClassVar[dict[AreaId, dict[str, str]]]
 
     config: dict
 
@@ -201,12 +200,9 @@ class SamusReturnsPatch(APAutoPatchInterface):
         }
 
     @staticmethod
+    @functools.cache
     def get_room_names():
-        if hasattr(SamusReturnsPatch, "room_names"):
-            return SamusReturnsPatch.room_names
-
         mapping: dict[AreaId, dict[str, str]] = {}
         for area_data in all_areas_data:
             mapping[area_data.id] = {room.id: room.name for room in area_data.rooms}
-        SamusReturnsPatch.room_names = mapping
         return mapping

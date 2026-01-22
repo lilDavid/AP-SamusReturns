@@ -13,7 +13,6 @@ from ...logic import (
 )
 from ...options import WallJump
 from ..internal_names import AreaId
-from ..room_names import Area1
 from ..room_names import SurfaceEast as East
 from ..room_names import SurfaceWest as West
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData
@@ -59,11 +58,12 @@ surface_east_data = AreaData(
                             access_rule=lambda state, player: can_climb_wall(state, player)
                             and can_power_bomb(state, player),
                         ),
-                        ExitData(
-                            Door.Open,
-                            West.TransportArea8,
-                            access_rule=lambda state, player: state.has(ItemName.Hatchling, player),
-                        ),
+                        # TODO
+                        # ExitData(
+                        #     Door.Open,
+                        #     West.TransportArea8,
+                        #     access_rule=lambda state, player: state.has(ItemName.Hatchling, player),
+                        # ),
                     ],
                     events=[
                         EventData(
@@ -85,11 +85,11 @@ surface_east_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Normal,
-                            East.HornoadHallway,
+                            East.HornoadHallway.subregion("East"),
                         ),
                         ExitData(
                             Door.Missile,
-                            East.MorphBall,
+                            East.MorphBall.subregion("Upper"),
                         ),
                     ],
                     pickups=[
@@ -201,10 +201,11 @@ surface_east_data = AreaData(
                             East.ChozoSeal.subregion("Tunnel"),
                             access_rule=can_bomb_block,
                         ),
-                        ExitData(
-                            Door.Elevator,
-                            Area1.TransportSurfaceArea2,
-                        ),
+                        # TODO
+                        # ExitData(
+                        #     Door.Elevator,
+                        #     Area1.TransportSurfaceArea2,
+                        # ),
                         ExitData(
                             Door.Open,
                             East.TransportCache,
@@ -411,11 +412,11 @@ surface_east_data = AreaData(
                         ),
                         ExitData(
                             Door.Normal,
-                            East.EnergyRechargeShaft.subregion("Top"),
+                            East.EnergyRechargeShaft.subregion("Upper"),
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            East.CavernCavity,
+                            East.CavernAlcove,
                         ),
                     ],
                 ),
@@ -466,7 +467,7 @@ surface_east_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            East.LandingSite,
+                            East.LandingSite.subregion("East"),
                         ),
                         ExitData(
                             Door.Open,
@@ -478,7 +479,7 @@ surface_east_data = AreaData(
                             # Climb the shaft overhead
                             or can_fly_straight_up(state, player)
                             or (
-                                state.has(ItemName.HighJumpBoots)
+                                state.has(ItemName.HighJumpBoots, player)
                                 and can_wall_jump(state, player, WallJump.option_enable)
                             ),
                         ),
@@ -519,9 +520,9 @@ surface_east_data = AreaData(
                             access_rule=lambda state, player:
                             # Reach the top
                             can_any_missile(state, player)
-                            and state.has_all((ItemName.GrappleBeam, ItemName.MorphBall))
+                            and state.has_all((ItemName.GrappleBeam, ItemName.MorphBall), player)
                             # Cross the pitfall blocks
-                            and (can_spider(state, player) or state.has(ItemName.PhaseDrift))
+                            and (can_spider(state, player) or state.has(ItemName.PhaseDrift, player))
                             # Escape
                             and can_climb_shaft(state, player)
                         )
@@ -599,7 +600,7 @@ surface_east_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            East.CavernCavity.subregion("Lower"),
+                            East.EnergyRechargeShaft.subregion("Lower"),
                         ),
                     ],
                     pickups=[
@@ -611,16 +612,13 @@ surface_east_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            East.CavernCavity.subregion("Upper"),
+                            East.EnergyRechargeShaft.subregion("Upper"),
                             access_rule=can_high_ledge,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             East.Alpha.subregion("Lobby"),
                         ),
-                    ],
-                    pickups=[
-                        PickupData(access_rule=lambda state, player: state.has(ItemName.MorphBall, player)),
                     ],
                 ),
             ],

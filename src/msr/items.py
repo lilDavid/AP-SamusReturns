@@ -66,7 +66,8 @@ class TankData(NamedTuple):
     sound: PickupSound | None = None
 
     def classification(self):
-        return ItemClassification.progression_deprioritized_skip_balancing
+        # return ItemClassification.progression_deprioritized_skip_balancing
+        return ItemClassification.filler
 
 
 class LauncherData(NamedTuple):

@@ -2,29 +2,22 @@ from collections import Counter
 from pathlib import Path
 from typing import ClassVar
 
-from BaseClasses import Item, Location, Region
+import Utils
+from BaseClasses import Item
 from worlds import LauncherComponents as Launcher
 from worlds.AutoWorld import World
+from worlds.generic.Rules import add_rule
 
 from .data.constants import GAME_NAME
 from .data.room_names import SurfaceWest
-from .items import ItemName, item_data_table, launchers, major_items
+from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, launchers, major_items
 from .locations import location_table, make_name
 from .options import SamusReturnsOptions
 from .patch import SamusReturnsPatch
+from .regions import connect_entrances, create_regions, set_starting_room
 from .settings import SamusReturnsSettings
 
-
-class SamusReturnsItem(Item):
-    game = GAME_NAME
-
-
-class SamusReturnsLocation(Location):
-    game = GAME_NAME
-
-
 LOCATION_COUNT = 211
-VICTORY = "Mission Accomplished!"
 
 
 class SamusReturnsWorld(World):
@@ -37,6 +30,7 @@ class SamusReturnsWorld(World):
 
     item_name_to_id: ClassVar[dict[str, int]] = {str(name): data.ap_id for name, data in item_data_table.items()}
     location_name_to_id: ClassVar[dict[str, int]] = {str(name): data.ap_id for name, data in location_table.items()}
+    topology_present = not Utils.is_frozen()
 
     starting_items: Counter[ItemName]
     ammo_amounts: dict[str, int]
@@ -69,17 +63,15 @@ class SamusReturnsWorld(World):
             self.push_precollected(self.create_item(item))
 
     def create_regions(self):
-        menu = Region(self.origin_region_name, self.player, self.multiworld)
-        menu.add_locations(
-            {name: data.ap_id for name, data in location_table.items()}, location_type=SamusReturnsLocation
-        )
-        menu.add_event(
-            make_name(SurfaceWest.LandingSite, "Proteus Ridley"),
-            VICTORY,
+        set_starting_room(self)
+        create_regions(self)
+        connect_entrances(self)
+
+    def set_rules(self):
+        add_rule(
+            self.get_location(make_name(SurfaceWest.LandingSite, "Proteus Ridley")),
             lambda state: state.has(ItemName.MetroidDna, self.player, self.options.dna_required.value),
         )
-        self.multiworld.regions.append(menu)
-
         self.multiworld.completion_condition[self.player] = lambda state: state.has(VICTORY, self.player)
 
     def create_items(self):
@@ -117,6 +109,8 @@ class SamusReturnsWorld(World):
             "ammo_amounts": self.ammo_amounts,
             **self.options.as_dict(
                 "dna_required",
+                "wall_jump",
+                "infinite_bomb_jump",
                 toggles_as_bools=True,
             ),
         }

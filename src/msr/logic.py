@@ -1,7 +1,9 @@
 from enum import StrEnum
+from typing import assert_never
 
 from BaseClasses import CollectionState
 
+from .data.region_data import Door
 from .items import ItemName
 from .options import IBJ, WallJump
 
@@ -82,3 +84,30 @@ def can_damage_metroid(state: CollectionState, player: int):
     return state.has_any(
         (ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst, ItemName.IceBeam), player
     )
+
+
+def can_open_door(state: CollectionState, player: int, door: Door):
+    match door:
+        case Door.Open:
+            return True
+        case Door.Normal:
+            return True  # Player always has a weapon to open this with (power beam can't be randomized)
+        case Door.Charge:
+            return state.has(ItemName.ChargeBeam, player)
+        case Door.Missile:
+            return can_any_missile(state, player)
+        case Door.Super:
+            return state.has(ItemName.SuperMissile, player)
+        case Door.PowerBomb:
+            return can_power_bomb(state, player)
+        case Door.MorphTunnel:
+            return state.has(ItemName.MorphBall, player)
+        case Door.Gigadora:
+            return state.has(ItemName.SpazerBeam, player)
+        case Door.Gryncore:
+            return state.has(ItemName.PlasmaBeam, player)
+        case Door.Taramarga:
+            return state.has(ItemName.WaveBeam, player)
+        case Door.Elevator:
+            return True
+    assert_never(door)

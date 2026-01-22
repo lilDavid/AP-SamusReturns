@@ -1,9 +1,17 @@
 from enum import StrEnum
 from typing import NamedTuple
 
-from BaseClasses import ItemClassification
+from BaseClasses import Item, ItemClassification
 
+from .data.constants import GAME_NAME
 from .data.internal_names import ItemId, ItemModel, PickupSound
+
+
+class SamusReturnsItem(Item):
+    game = GAME_NAME
+
+
+VICTORY = "Mission Accomplished!"
 
 
 class ItemName(StrEnum):

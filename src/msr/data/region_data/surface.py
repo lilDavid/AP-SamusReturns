@@ -1,4 +1,4 @@
-from ...items import ItemName
+from ...items import VICTORY, ItemName
 from ...logic import (
     can_any_missile,
     can_bomb_block,
@@ -16,7 +16,7 @@ from ..internal_names import AreaId
 from ..room_names import Area1
 from ..room_names import SurfaceEast as East
 from ..room_names import SurfaceWest as West
-from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData
+from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData
 
 surface_east_data = AreaData(
     name="Surface East",
@@ -25,7 +25,7 @@ surface_east_data = AreaData(
         RoomData(
             East.LandingSite,
             id="collision_camera_000",
-            region_data=[
+            regions=[
                 RegionData(
                     "East",
                     exits=[
@@ -65,13 +65,21 @@ surface_east_data = AreaData(
                             access_rule=lambda state, player: state.has(ItemName.Hatchling, player),
                         ),
                     ],
+                    events=[
+                        EventData(
+                            "Proteus Ridley",
+                            VICTORY,
+                            access_rule=lambda state, player: state.has(ItemName.Hatchling, player),  # TODO
+                            show_in_spoiler=False,
+                        )
+                    ],
                 ),
             ],
         ),
         RoomData(
             East.TwistyTunnel,
             id="collision_camera_002",
-            region_data=[
+            regions=[
                 RegionData(
                     None,
                     exits=[
@@ -95,7 +103,7 @@ surface_east_data = AreaData(
         RoomData(
             East.MorphBall,
             id="collision_camera_003",
-            region_data=[
+            regions=[
                 RegionData(
                     "Upper",
                     exits=[
@@ -131,7 +139,7 @@ surface_east_data = AreaData(
         RoomData(
             East.ChozoSeal,
             id="collision_camera_004",
-            region_data=[
+            regions=[
                 RegionData(
                     "Upper",
                     exits=[
@@ -180,7 +188,7 @@ surface_east_data = AreaData(
         RoomData(
             East.TransportArea1,
             id="collision_camera_006",
-            region_data=[
+            regions=[
                 RegionData(
                     None,
                     exits=[
@@ -215,7 +223,7 @@ surface_east_data = AreaData(
         RoomData(
             East.ChozoCacheE,
             id="collision_camera_007",
-            region_data=[
+            regions=[
                 RegionData(
                     None,
                     exits=[
@@ -233,7 +241,7 @@ surface_east_data = AreaData(
         RoomData(
             East.ChargeBeam,
             id="collision_camera_008",
-            region_data=[
+            regions=[
                 RegionData(
                     None,
                     exits=[
@@ -250,14 +258,14 @@ surface_east_data = AreaData(
                     pickups=[
                         PickupData(),
                     ],
-                    pickups_require_exit=True,
+                    require_exit_access=True,
                 ),
             ],
         ),
         RoomData(
             East.Alpha,
             id="collision_camera_010",
-            region_data=[
+            regions=[
                 RegionData(
                     "Lobby",
                     exits=[
@@ -319,7 +327,7 @@ surface_east_data = AreaData(
         RoomData(
             East.ScanPulse,
             id="collision_camera_011",
-            region_data=[
+            regions=[
                 RegionData(
                     "Right",
                     exits=[
@@ -355,7 +363,7 @@ surface_east_data = AreaData(
         RoomData(
             East.ChozoCacheW,
             id="collision_camera_012",
-            region_data=[
+            regions=[
                 RegionData(
                     None,
                     exits=[
@@ -373,7 +381,7 @@ surface_east_data = AreaData(
         RoomData(
             East.MoheekMarket,
             id="collision_camera_013",
-            region_data=[
+            regions=[
                 RegionData(
                     None,
                     exits=[
@@ -392,7 +400,7 @@ surface_east_data = AreaData(
         RoomData(
             East.CavernCavity,
             id="collision_camera_014",
-            region_data=[
+            regions=[
                 RegionData(
                     None,
                     exits=[
@@ -416,7 +424,7 @@ surface_east_data = AreaData(
         RoomData(
             East.ChargeBeamAccess,
             id="collision_camera_015",
-            region_data=[
+            regions=[
                 RegionData(
                     None,
                     exits=[
@@ -452,7 +460,7 @@ surface_east_data = AreaData(
         RoomData(
             East.HornoadHallway,
             id="collision_camera_016",
-            region_data=[
+            regions=[
                 RegionData(
                     "West",
                     exits=[
@@ -497,7 +505,7 @@ surface_east_data = AreaData(
         RoomData(
             East.SurfaceStash,
             id="collision_camera_018",
-            region_data=[
+            regions=[
                 RegionData(
                     None,
                     exits=[
@@ -524,7 +532,7 @@ surface_east_data = AreaData(
         RoomData(
             East.SurfaceCrumbleChallenge,
             id="collision_camera_019",
-            region_data=[
+            regions=[
                 RegionData(
                     None,
                     exits=[
@@ -544,7 +552,7 @@ surface_east_data = AreaData(
         RoomData(
             East.TransportCache,
             id="collision_camera_020",
-            region_data=[
+            regions=[
                 RegionData(
                     None,
                     exits=[
@@ -560,7 +568,7 @@ surface_east_data = AreaData(
         RoomData(
             East.CavernAlcove,
             id="collision_camera_021",
-            region_data=[
+            regions=[
                 RegionData(
                     None,
                     exits=[
@@ -581,7 +589,7 @@ surface_east_data = AreaData(
         RoomData(
             East.EnergyRechargeShaft,
             id="collision_camera_023",
-            region_data=[
+            regions=[
                 RegionData(
                     "Upper",
                     exits=[
@@ -620,7 +628,7 @@ surface_east_data = AreaData(
         RoomData(
             East.AmmoRecharge,
             id="collision_camera_024",
-            region_data=[
+            regions=[
                 RegionData(
                     None,
                     exits=[
@@ -646,7 +654,7 @@ surface_west_data = AreaData(
         RoomData(
             West.TransportArea8,
             id="collision_camera_017",
-            region_data=[],  # TODO
+            regions=[],  # TODO
         ),
     ],
 )

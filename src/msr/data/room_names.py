@@ -35,7 +35,7 @@ class _WithArea(Protocol):
 
 class _SubregionMixin:
     def subregion(self: _WithArea, name: str):
-        return f"{self.with_area()} - {name}"
+        return f"{self.with_area()} ({name})"
 
 
 class SurfaceEast(_SubregionMixin, StrEnum):

@@ -1,5 +1,8 @@
 from typing import NamedTuple
 
+from BaseClasses import Location
+
+from .data.constants import GAME_NAME
 from .data.internal_names import AreaId
 from .data.room_names import (
     Area1,
@@ -21,6 +24,10 @@ from .data.room_names import (
     SurfaceEast,
     SurfaceWest,
 )
+
+
+class SamusReturnsLocation(Location):
+    game = GAME_NAME
 
 
 def make_name(room: RoomName, location: str | None = None):

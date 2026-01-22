@@ -9,7 +9,7 @@ from BaseClasses import CollectionState
 from ..internal_names import AreaId
 from ..room_names import RoomName
 
-AccessRule = Callable[[CollectionState, int], bool] | None
+AccessRule = Callable[[CollectionState, int], bool]
 
 
 class Door(Enum):
@@ -35,22 +35,30 @@ class AreaData(NamedTuple):
 class RoomData(NamedTuple):
     name: RoomName
     id: str
-    region_data: Sequence[RegionData]
+    regions: Sequence[RegionData]
 
 
 class RegionData(NamedTuple):
     name: str | None
     exits: Sequence[ExitData]
     pickups: Sequence[PickupData] = []
-    pickups_require_exit: bool = False  # Require access to one of this room's exits for pickups to be reachable
+    events: Sequence[EventData] = []
+    require_exit_access: bool = False  # Require access to one of this room's exits for pickups/events to be reachable
 
 
 class ExitData(NamedTuple):
     door: Door
     destination: str
-    access_rule: AccessRule = None
+    access_rule: AccessRule | None = None
 
 
 class PickupData(NamedTuple):
     name: str | None = None
-    access_rule: AccessRule = None
+    access_rule: AccessRule | None = None
+
+
+class EventData(NamedTuple):
+    name: str
+    item_name: str | None = None
+    access_rule: AccessRule | None = None
+    show_in_spoiler: bool = False

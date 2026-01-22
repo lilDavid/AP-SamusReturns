@@ -207,6 +207,6 @@ class SamusReturnsPatch(APAutoPatchInterface):
 
         mapping: dict[AreaId, dict[str, str]] = {}
         for area_data in all_areas_data:
-            mapping[area_data.id] = {room.id: name for name, room in area_data.rooms.items()}
+            mapping[area_data.id] = {room.id: room.name for room in area_data.rooms}
         SamusReturnsPatch.room_names = mapping
         return mapping

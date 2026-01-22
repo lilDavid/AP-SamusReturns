@@ -5,196 +5,240 @@ from . import AreaData, RoomData
 area_5_lobby_data = AreaData(
     name="Area 5 Tower Lobby",
     id=AreaId.AREA_5_LOBBY,
-    rooms={
-        Area5Lobby.LobbySaveStation: RoomData(
+    rooms=[
+        RoomData(
+            Area5Lobby.LobbySaveStation,
             id="collision_camera_001",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Lobby.TransportTowerIntE: RoomData(
+        RoomData(
+            Area5Lobby.TransportTowerIntE,
             id="collision_camera_002",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Lobby.TransportAreas4And6: RoomData(
+        RoomData(
+            Area5Lobby.TransportAreas4And6,
             id="collision_camera_004",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Lobby.LobbyTeleporterW: RoomData(
+        RoomData(
+            Area5Lobby.LobbyTeleporterW,
             id="collision_camera_006",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Lobby.JShapeTunnel: RoomData(
+        RoomData(
+            Area5Lobby.JShapeTunnel,
             id="collision_camera_007",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Lobby.TransportTowerIntW: RoomData(
+        RoomData(
+            Area5Lobby.TransportTowerIntW,
             id="collision_camera_010",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Lobby.LobbyTeleporterE: RoomData(
+        RoomData(
+            Area5Lobby.LobbyTeleporterE,
             id="collision_camera_011",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Lobby.Alpha2: RoomData(
+        RoomData(
+            Area5Lobby.Alpha2,
             id="collision_camera_012",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Lobby.Gamma2Access: RoomData(
+        RoomData(
+            Area5Lobby.Gamma2Access,
             id="collision_camera_013",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Lobby.PhaseDrift: RoomData(
+        RoomData(
+            Area5Lobby.PhaseDrift,
             id="collision_camera_014",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Lobby.MeboidMillpond: RoomData(
+        RoomData(
+            Area5Lobby.MeboidMillpond,
             id="collision_camera_015",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Lobby.Gamma2: RoomData(
+        RoomData(
+            Area5Lobby.Gamma2,
             id="collision_camera_016",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Lobby.LobbyPassageway: RoomData(
+        RoomData(
+            Area5Lobby.LobbyPassageway,
             id="collision_camera_017",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-    },
+    ],
 )
 
 area_5_exterior_data = AreaData(
     name="Area 5 Tower Exterior",
     id=AreaId.AREA_5_EXTERIOR,
-    rooms={
-        Area5Exterior.TowerExt: RoomData(
+    rooms=[
+        RoomData(
+            Area5Exterior.TowerExt,
             id="collision_camera_002",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Exterior.OvergrownMaze: RoomData(
+        RoomData(
+            Area5Exterior.OvergrownMaze,
             id="collision_camera_004",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Exterior.ScrewAttack: RoomData(
+        RoomData(
+            Area5Exterior.ScrewAttack,
             id="collision_camera_005",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Exterior.ZetaAccess: RoomData(
+        RoomData(
+            Area5Exterior.ZetaAccess,
             id="collision_camera_006",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Exterior.RedPlantMaze: RoomData(
+        RoomData(
+            Area5Exterior.RedPlantMaze,
             id="collision_camera_008",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Exterior.TransportTowerIntW: RoomData(
+        RoomData(
+            Area5Exterior.TransportTowerIntW,
             id="collision_camera_011",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Exterior.Zeta: RoomData(
+        RoomData(
+            Area5Exterior.Zeta,
             id="collision_camera_012",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Exterior.ParabyParlor: RoomData(
+        RoomData(
+            Area5Exterior.ParabyParlor,
             id="collision_camera_013",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Exterior.Gamma2: RoomData(
+        RoomData(
+            Area5Exterior.Gamma2,
             id="collision_camera_014",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Exterior.Gamma: RoomData(
+        RoomData(
+            Area5Exterior.Gamma,
             id="collision_camera_015",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Exterior.ScrewAttackAccess: RoomData(
+        RoomData(
+            Area5Exterior.ScrewAttackAccess,
             id="collision_camera_016",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-    },
+    ],
 )
 
 area_5_interior_data = AreaData(
     name="Area 5 Dam Interior",
     id=AreaId.AREA_5_INTERIOR,
-    rooms={
-        Area5Interior.TransportTowerLobbyE: RoomData(
+    rooms=[
+        RoomData(
+            Area5Interior.TransportTowerLobbyE,
             id="collision_camera_002",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.InteriorSaveStation: RoomData(
+        RoomData(
+            Area5Interior.InteriorSaveStation,
             id="collision_camera_003",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.TransportTowerExtE: RoomData(
+        RoomData(
+            Area5Interior.TransportTowerExtE,
             id="collision_camera_005",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.PlasmaBeam: RoomData(
+        RoomData(
+            Area5Interior.PlasmaBeam,
             id="collision_camera_006",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.GrappleShuffler: RoomData(
+        RoomData(
+            Area5Interior.GrappleShuffler,
             id="collision_camera_007",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.AutrackAcropolis: RoomData(
+        RoomData(
+            Area5Interior.AutrackAcropolis,
             id="collision_camera_008",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.GravitySuit: RoomData(
+        RoomData(
+            Area5Interior.GravitySuit,
             id="collision_camera_009",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.PhaseDriftTrialReward: RoomData(
+        RoomData(
+            Area5Interior.PhaseDriftTrialReward,
             id="collision_camera_010",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.PhaseDriftTrialW: RoomData(
+        RoomData(
+            Area5Interior.PhaseDriftTrialW,
             id="collision_camera_011",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.PhaseDriftTrialE: RoomData(
+        RoomData(
+            Area5Interior.PhaseDriftTrialE,
             id="collision_camera_012",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.TransportTowerLobbyW: RoomData(
+        RoomData(
+            Area5Interior.TransportTowerLobbyW,
             id="collision_camera_015",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.MetroidMarina: RoomData(
+        RoomData(
+            Area5Interior.MetroidMarina,
             id="collision_camera_016",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.Zeta2Access: RoomData(
+        RoomData(
+            Area5Interior.Zeta2Access,
             id="collision_camera_017",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.TransportTowerExtW: RoomData(
+        RoomData(
+            Area5Interior.TransportTowerExtW,
             id="collision_camera_018",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.GravitySuitAccess: RoomData(
+        RoomData(
+            Area5Interior.GravitySuitAccess,
             id="collision_camera_020",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.PhaseDriftTrialEntrance: RoomData(
+        RoomData(
+            Area5Interior.PhaseDriftTrialEntrance,
             id="collision_camera_021",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.Gamma2: RoomData(
+        RoomData(
+            Area5Interior.Gamma2,
             id="collision_camera_022",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.InteriorTeleporter: RoomData(
+        RoomData(
+            Area5Interior.InteriorTeleporter,
             id="collision_camera_023",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.Zeta2: RoomData(
+        RoomData(
+            Area5Interior.Zeta2,
             id="collision_camera_025",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area5Interior.Gamma2Access: RoomData(
+        RoomData(
+            Area5Interior.Gamma2Access,
             id="collision_camera_026",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-    },
+    ],
 )

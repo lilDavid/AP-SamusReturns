@@ -21,11 +21,13 @@ from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData
 surface_east_data = AreaData(
     name="Surface East",
     id=AreaId.SURFACE_EAST,
-    rooms={
-        East.LandingSite: RoomData(
+    rooms=[
+        RoomData(
+            East.LandingSite,
             id="collision_camera_000",
-            region_data={
-                "East": RegionData(
+            region_data=[
+                RegionData(
+                    "East",
                     exits=[
                         ExitData(
                             Door.Open,
@@ -36,9 +38,10 @@ surface_east_data = AreaData(
                             Door.Open,
                             East.HornoadHallway.subregion("West"),
                         ),
-                    ]
+                    ],
                 ),
-                "West": RegionData(
+                RegionData(
+                    "West",
                     exits=[
                         ExitData(
                             Door.Open,
@@ -61,34 +64,40 @@ surface_east_data = AreaData(
                             West.TransportArea8,
                             access_rule=lambda state, player: state.has(ItemName.Hatchling, player),
                         ),
-                    ]
+                    ],
                 ),
-            },
+            ],
         ),
-        East.TwistyTunnel: RoomData(
+        RoomData(
+            East.TwistyTunnel,
             id="collision_camera_002",
-            region_data=RegionData(
-                exits=[
-                    ExitData(
-                        Door.Normal,
-                        East.HornoadHallway,
-                    ),
-                    ExitData(
-                        Door.Missile,
-                        East.MorphBall,
-                    ),
-                ],
-                pickups=[
-                    PickupData(
-                        access_rule=lambda state, player: state.has("Morph Ball", player),
-                    ),
-                ],
-            ),
+            region_data=[
+                RegionData(
+                    None,
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            East.HornoadHallway,
+                        ),
+                        ExitData(
+                            Door.Missile,
+                            East.MorphBall,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=lambda state, player: state.has("Morph Ball", player),
+                        ),
+                    ],
+                ),
+            ],
         ),
-        East.MorphBall: RoomData(
+        RoomData(
+            East.MorphBall,
             id="collision_camera_003",
-            region_data={
-                "Upper": RegionData(
+            region_data=[
+                RegionData(
+                    "Upper",
                     exits=[
                         ExitData(
                             Door.Missile,
@@ -103,7 +112,8 @@ surface_east_data = AreaData(
                         PickupData(),
                     ],
                 ),
-                "Lower": RegionData(
+                RegionData(
+                    "Lower",
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
@@ -116,12 +126,14 @@ surface_east_data = AreaData(
                         ),
                     ],
                 ),
-            },
+            ],
         ),
-        East.ChozoSeal: RoomData(
+        RoomData(
+            East.ChozoSeal,
             id="collision_camera_004",
-            region_data={
-                "Upper": RegionData(
+            region_data=[
+                RegionData(
+                    "Upper",
                     exits=[
                         ExitData(
                             Door.Normal,
@@ -137,7 +149,8 @@ surface_east_data = AreaData(
                         ),
                     ],
                 ),
-                "Lower": RegionData(
+                RegionData(
+                    "Lower",
                     exits=[
                         ExitData(
                             Door.Open,
@@ -150,7 +163,8 @@ surface_east_data = AreaData(
                         ),
                     ],
                 ),
-                "Tunnel": RegionData(
+                RegionData(
+                    "Tunnel",
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
@@ -161,77 +175,91 @@ surface_east_data = AreaData(
                         PickupData(),
                     ],
                 ),
-            },
+            ],
         ),
-        East.TransportArea1: RoomData(
+        RoomData(
+            East.TransportArea1,
             id="collision_camera_006",
-            region_data=RegionData(
-                exits=[
-                    ExitData(
-                        Door.Normal,
-                        East.ChozoSeal.subregion("Lower"),
-                    ),
-                    ExitData(
-                        Door.MorphTunnel,
-                        East.ChozoSeal.subregion("Tunnel"),
-                        access_rule=can_bomb_block,
-                    ),
-                    ExitData(
-                        Door.Elevator,
-                        Area1.TransportSurfaceArea2,
-                    ),
-                    ExitData(
-                        Door.Open,
-                        East.TransportCache,
-                        access_rule=lambda state, player: state.has(ItemName.Hatchling, player),
-                    ),
-                ],
-                pickups=[
-                    PickupData(
-                        access_rule=lambda state, player: state.has(ItemName.MorphBall, player)
-                        and can_high_ledge(state, player),
-                    ),
-                ],
-            ),
+            region_data=[
+                RegionData(
+                    None,
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            East.ChozoSeal.subregion("Lower"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            East.ChozoSeal.subregion("Tunnel"),
+                            access_rule=can_bomb_block,
+                        ),
+                        ExitData(
+                            Door.Elevator,
+                            Area1.TransportSurfaceArea2,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            East.TransportCache,
+                            access_rule=lambda state, player: state.has(ItemName.Hatchling, player),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=lambda state, player: state.has(ItemName.MorphBall, player)
+                            and can_high_ledge(state, player),
+                        ),
+                    ],
+                ),
+            ],
         ),
-        East.ChozoCacheE: RoomData(
+        RoomData(
+            East.ChozoCacheE,
             id="collision_camera_007",
-            region_data=RegionData(
-                exits=[
-                    ExitData(
-                        Door.MorphTunnel,
-                        East.ChargeBeamAccess,
-                    )
-                ],
-                pickups=[
-                    PickupData(),
-                ],
-            ),
+            region_data=[
+                RegionData(
+                    None,
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            East.ChargeBeamAccess,
+                        )
+                    ],
+                    pickups=[
+                        PickupData(),
+                    ],
+                ),
+            ],
         ),
-        East.ChargeBeam: RoomData(
+        RoomData(
+            East.ChargeBeam,
             id="collision_camera_008",
-            region_data=RegionData(
-                exits=[
-                    ExitData(
-                        Door.Missile,
-                        East.ChargeBeamAccess,
-                        access_rule=can_high_ledge,
-                    ),
-                    ExitData(
-                        Door.Charge,
-                        East.ChargeBeamAccess,
-                    ),
-                ],
-                pickups=[
-                    PickupData(),
-                ],
-                pickups_require_exit=True,
-            ),
+            region_data=[
+                RegionData(
+                    None,
+                    exits=[
+                        ExitData(
+                            Door.Missile,
+                            East.ChargeBeamAccess,
+                            access_rule=can_high_ledge,
+                        ),
+                        ExitData(
+                            Door.Charge,
+                            East.ChargeBeamAccess,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(),
+                    ],
+                    pickups_require_exit=True,
+                ),
+            ],
         ),
-        East.Alpha: RoomData(
+        RoomData(
+            East.Alpha,
             id="collision_camera_010",
-            region_data={
-                "Lobby": RegionData(
+            region_data=[
+                RegionData(
+                    "Lobby",
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
@@ -252,7 +280,8 @@ surface_east_data = AreaData(
                         ),
                     ],
                 ),
-                "Arena": RegionData(
+                RegionData(
+                    "Arena",
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
@@ -273,7 +302,8 @@ surface_east_data = AreaData(
                         )
                     ],
                 ),
-                "Pickup": RegionData(
+                RegionData(
+                    "Pickup",
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
@@ -284,12 +314,14 @@ surface_east_data = AreaData(
                         PickupData("Missile"),
                     ],
                 ),
-            },
+            ],
         ),
-        East.ScanPulse: RoomData(
+        RoomData(
+            East.ScanPulse,
             id="collision_camera_011",
-            region_data={
-                "Right": RegionData(
+            region_data=[
+                RegionData(
+                    "Right",
                     exits=[
                         ExitData(
                             Door.Normal,
@@ -301,7 +333,8 @@ surface_east_data = AreaData(
                         ),
                     ],
                 ),
-                "Left": RegionData(
+                RegionData(
+                    "Left",
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
@@ -317,93 +350,111 @@ surface_east_data = AreaData(
                         ),
                     ],
                 ),
-            },
+            ],
         ),
-        East.ChozoCacheW: RoomData(
+        RoomData(
+            East.ChozoCacheW,
             id="collision_camera_012",
-            region_data=RegionData(
-                exits=[
-                    ExitData(
-                        Door.Gryncore,
-                        East.Alpha.subregion("Lobby"),
-                    )
-                ],
-                pickups=[
-                    PickupData(),
-                ],
-            ),
+            region_data=[
+                RegionData(
+                    None,
+                    exits=[
+                        ExitData(
+                            Door.Gryncore,
+                            East.Alpha.subregion("Lobby"),
+                        )
+                    ],
+                    pickups=[
+                        PickupData(),
+                    ],
+                ),
+            ],
         ),
-        East.MoheekMarket: RoomData(
+        RoomData(
+            East.MoheekMarket,
             id="collision_camera_013",
-            region_data=RegionData(
-                exits=[
-                    ExitData(
-                        Door.MorphTunnel,
-                        East.Alpha.subregion("Lobby"),
-                    ),
-                    ExitData(
-                        Door.MorphTunnel,
-                        East.Alpha.subregion("Pickup"),
-                    ),
-                ],
-            ),
+            region_data=[
+                RegionData(
+                    None,
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            East.Alpha.subregion("Lobby"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            East.Alpha.subregion("Pickup"),
+                        ),
+                    ],
+                ),
+            ],
         ),
-        East.CavernCavity: RoomData(
+        RoomData(
+            East.CavernCavity,
             id="collision_camera_014",
-            region_data=RegionData(
-                exits=[
-                    ExitData(
-                        Door.Open,
-                        East.ScanPulse.subregion("Left"),
-                        access_rule=can_climb_shaft,
-                    ),
-                    ExitData(
-                        Door.Normal,
-                        East.EnergyRechargeShaft.subregion("Top"),
-                    ),
-                    ExitData(
-                        Door.MorphTunnel,
-                        East.CavernCavity,
-                    ),
-                ],
-            ),
+            region_data=[
+                RegionData(
+                    None,
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            East.ScanPulse.subregion("Left"),
+                            access_rule=can_climb_shaft,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            East.EnergyRechargeShaft.subregion("Top"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            East.CavernCavity,
+                        ),
+                    ],
+                ),
+            ],
         ),
-        East.ChargeBeamAccess: RoomData(
+        RoomData(
+            East.ChargeBeamAccess,
             id="collision_camera_015",
-            region_data=RegionData(
-                exits=[
-                    ExitData(
-                        Door.Charge,
-                        East.ScanPulse.subregion("Left"),
-                    ),
-                    ExitData(
-                        Door.MorphTunnel,
-                        East.ChozoCacheE,
-                    ),
-                    ExitData(
-                        Door.Missile,
-                        East.ChargeBeam,
-                    ),
-                    ExitData(
-                        Door.Charge,
-                        East.ChargeBeam,
-                    ),
-                    ExitData(
-                        Door.Normal,
-                        East.AmmoRecharge,
-                    ),
-                ],
-                pickups=[
-                    PickupData(
-                        access_rule=lambda state, player: state.has(ItemName.MorphBall, player),
-                    ),
-                ],
-            ),
+            region_data=[
+                RegionData(
+                    None,
+                    exits=[
+                        ExitData(
+                            Door.Charge,
+                            East.ScanPulse.subregion("Left"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            East.ChozoCacheE,
+                        ),
+                        ExitData(
+                            Door.Missile,
+                            East.ChargeBeam,
+                        ),
+                        ExitData(
+                            Door.Charge,
+                            East.ChargeBeam,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            East.AmmoRecharge,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=lambda state, player: state.has(ItemName.MorphBall, player),
+                        ),
+                    ],
+                ),
+            ],
         ),
-        East.HornoadHallway: RoomData(
+        RoomData(
+            East.HornoadHallway,
             id="collision_camera_016",
-            region_data={
-                "West": RegionData(
+            region_data=[
+                RegionData(
+                    "West",
                     exits=[
                         ExitData(
                             Door.Open,
@@ -423,9 +474,10 @@ surface_east_data = AreaData(
                                 and can_wall_jump(state, player, WallJump.option_enable)
                             ),
                         ),
-                    ]
+                    ],
                 ),
-                "East": RegionData(
+                RegionData(
+                    "East",
                     exits=[
                         ExitData(
                             Door.Open,
@@ -438,82 +490,100 @@ surface_east_data = AreaData(
                             access_rule=lambda state, player: can_any_missile(state, player)
                             or can_climb_shaft(state, player),
                         ),
-                    ]
+                    ],
                 ),
-            },
+            ],
         ),
-        East.SurfaceStash: RoomData(
+        RoomData(
+            East.SurfaceStash,
             id="collision_camera_018",
-            region_data=RegionData(
-                exits=[
-                    ExitData(
-                        Door.Gigadora,
-                        East.LandingSite.subregion("West"),
-                    ),
-                ],
-                pickups=[
-                    PickupData(
-                        access_rule=lambda state, player:
-                        # Reach the top
-                        can_any_missile(state, player)
-                        and state.has_all((ItemName.GrappleBeam, ItemName.MorphBall))
-                        # Cross the pitfall blocks
-                        and (can_spider(state, player) or state.has(ItemName.PhaseDrift))
-                        # Escape
-                        and can_climb_shaft(state, player)
-                    )
-                ],
-            ),
+            region_data=[
+                RegionData(
+                    None,
+                    exits=[
+                        ExitData(
+                            Door.Gigadora,
+                            East.LandingSite.subregion("West"),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=lambda state, player:
+                            # Reach the top
+                            can_any_missile(state, player)
+                            and state.has_all((ItemName.GrappleBeam, ItemName.MorphBall))
+                            # Cross the pitfall blocks
+                            and (can_spider(state, player) or state.has(ItemName.PhaseDrift))
+                            # Escape
+                            and can_climb_shaft(state, player)
+                        )
+                    ],
+                ),
+            ],
         ),
-        East.SurfaceCrumbleChallenge: RoomData(
+        RoomData(
+            East.SurfaceCrumbleChallenge,
             id="collision_camera_019",
-            region_data=RegionData(
-                exits=[
-                    ExitData(
-                        Door.Open,
-                        East.LandingSite.subregion("West"),
-                    )
-                ],
-                pickups=[
-                    PickupData(
-                        access_rule=None  # Drop off and power grip for it (movement trick?)
-                    ),
-                ],
-            ),
+            region_data=[
+                RegionData(
+                    None,
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            East.LandingSite.subregion("West"),
+                        )
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=None  # Drop off and power grip for it (movement trick?)
+                        ),
+                    ],
+                ),
+            ],
         ),
-        East.TransportCache: RoomData(
+        RoomData(
+            East.TransportCache,
             id="collision_camera_020",
-            region_data=RegionData(
-                exits=[
-                    ExitData(
-                        Door.Open,
-                        East.TransportArea1,
-                        access_rule=lambda state, player: state.has(ItemName.Hatchling, player),
-                    ),
-                ]
-            ),
+            region_data=[
+                RegionData(
+                    None,
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            East.TransportArea1,
+                            access_rule=lambda state, player: state.has(ItemName.Hatchling, player),
+                        ),
+                    ],
+                ),
+            ],
         ),
-        East.CavernAlcove: RoomData(
+        RoomData(
+            East.CavernAlcove,
             id="collision_camera_021",
-            region_data=RegionData(
-                exits=[
-                    ExitData(
-                        Door.MorphTunnel,
-                        East.CavernCavity,
-                    )
-                ],
-                pickups=[
-                    PickupData(
-                        access_rule=lambda state, player: state.has(ItemName.MorphBall, player)
-                        and can_climb_shaft(state, player)
-                    )
-                ],
-            ),
+            region_data=[
+                RegionData(
+                    None,
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            East.CavernCavity,
+                        )
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=lambda state, player: state.has(ItemName.MorphBall, player)
+                            and can_climb_shaft(state, player)
+                        )
+                    ],
+                ),
+            ],
         ),
-        East.EnergyRechargeShaft: RoomData(
+        RoomData(
+            East.EnergyRechargeShaft,
             id="collision_camera_023",
-            region_data={
-                "Upper": RegionData(
+            region_data=[
+                RegionData(
+                    "Upper",
                     exits=[
                         ExitData(
                             Door.Normal,
@@ -528,7 +598,8 @@ surface_east_data = AreaData(
                         PickupData(access_rule=lambda state, player: state.has(ItemName.MorphBall, player)),
                     ],
                 ),
-                "Lower": RegionData(
+                RegionData(
+                    "Lower",
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
@@ -544,33 +615,38 @@ surface_east_data = AreaData(
                         PickupData(access_rule=lambda state, player: state.has(ItemName.MorphBall, player)),
                     ],
                 ),
-            },
+            ],
         ),
-        East.AmmoRecharge: RoomData(
+        RoomData(
+            East.AmmoRecharge,
             id="collision_camera_024",
-            region_data=RegionData(
-                exits=[
-                    ExitData(
-                        Door.Normal,
-                        East.Alpha.subregion("Arena"),
-                    ),
-                    ExitData(
-                        Door.Normal,
-                        East.ChargeBeamAccess,
-                    ),
-                ]
-            ),
+            region_data=[
+                RegionData(
+                    None,
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            East.Alpha.subregion("Arena"),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            East.ChargeBeamAccess,
+                        ),
+                    ],
+                ),
+            ],
         ),
-    },
+    ],
 )
 
 surface_west_data = AreaData(
     name="Surface West",
     id=AreaId.SURFACE_WEST,
-    rooms={
-        West.TransportArea8: RoomData(
+    rooms=[
+        RoomData(
+            West.TransportArea8,
             id="collision_camera_017",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-    },
+    ],
 )

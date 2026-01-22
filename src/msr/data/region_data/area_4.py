@@ -5,145 +5,178 @@ from . import AreaData, RoomData
 area_4_caves_data = AreaData(
     name="Area 4 Central Caves",
     id=AreaId.AREA_4_CAVES,
-    rooms={
-        Area4Caves.CavesIntersectionTerminal: RoomData(
+    rooms=[
+        RoomData(
+            Area4Caves.CavesIntersectionTerminal,
             id="collision_camera_001",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.SpazerBeam: RoomData(
+        RoomData(
+            Area4Caves.SpazerBeam,
             id="collision_camera_003",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.LavaPond: RoomData(
+        RoomData(
+            Area4Caves.LavaPond,
             id="collision_camera_005",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.TransportArea3Mines: RoomData(
+        RoomData(
+            Area4Caves.TransportArea3Mines,
             id="collision_camera_006",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.Alpha2: RoomData(
+        RoomData(
+            Area4Caves.Alpha2,
             id="collision_camera_007",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.TransitTunnel: RoomData(
+        RoomData(
+            Area4Caves.TransitTunnel,
             id="collision_camera_010",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.FleechSwarmCave: RoomData(
+        RoomData(
+            Area4Caves.FleechSwarmCave,
             id="collision_camera_011",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.HostileHangout: RoomData(
+        RoomData(
+            Area4Caves.HostileHangout,
             id="collision_camera_012",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.Gamma: RoomData(
+        RoomData(
+            Area4Caves.Gamma,
             id="collision_camera_013",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.GammaAccessS: RoomData(
+        RoomData(
+            Area4Caves.GammaAccessS,
             id="collision_camera_014",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.OutwardClimb: RoomData(
+        RoomData(
+            Area4Caves.OutwardClimb,
             id="collision_camera_015",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.AmethystAltars: RoomData(
+        RoomData(
+            Area4Caves.AmethystAltars,
             id="collision_camera_016",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.GammaAccessN: RoomData(
+        RoomData(
+            Area4Caves.GammaAccessN,
             id="collision_camera_018",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.Alpha2Access: RoomData(
+        RoomData(
+            Area4Caves.Alpha2Access,
             id="collision_camera_019",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.VenomousPond: RoomData(
+        RoomData(
+            Area4Caves.VenomousPond,
             id="collision_camera_022",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Caves.TransportArea5: RoomData(
+        RoomData(
+            Area4Caves.TransportArea5,
             id="collision_camera_023",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-    },
+    ],
 )
 
 area_4_mines_data = AreaData(
     name="Area 4 Crystal Mines",
     id=AreaId.AREA_4_MINES,
-    rooms={
-        Area4Mines.MinesIntersectionTunnel: RoomData(
+    rooms=[
+        RoomData(
+            Area4Mines.MinesIntersectionTunnel,
             id="collision_camera_001",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.SuperMissile: RoomData(
+        RoomData(
+            Area4Mines.SuperMissile,
             id="collision_camera_002",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.PinkCrystalPreserve: RoomData(
+        RoomData(
+            Area4Mines.PinkCrystalPreserve,
             id="collision_camera_003",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.TransportCentralCaves: RoomData(
+        RoomData(
+            Area4Mines.TransportCentralCaves,
             id="collision_camera_005",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.LavaReservoir: RoomData(
+        RoomData(
+            Area4Mines.LavaReservoir,
             id="collision_camera_006",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.DualPondAlcove: RoomData(
+        RoomData(
+            Area4Mines.DualPondAlcove,
             id="collision_camera_007",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.Zeta: RoomData(
+        RoomData(
+            Area4Mines.Zeta,
             id="collision_camera_008",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.GawronGroove: RoomData(
+        RoomData(
+            Area4Mines.GawronGroove,
             id="collision_camera_009",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.MinesEntrance: RoomData(
+        RoomData(
+            Area4Mines.MinesEntrance,
             id="collision_camera_010",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.TsumuriTunnel: RoomData(
+        RoomData(
+            Area4Mines.TsumuriTunnel,
             id="collision_camera_011",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.MinesTeleporter: RoomData(
+        RoomData(
+            Area4Mines.MinesTeleporter,
             id="collision_camera_012",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.GreenCrystalDugout: RoomData(
+        RoomData(
+            Area4Mines.GreenCrystalDugout,
             id="collision_camera_013",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.GemstoneGorge: RoomData(
+        RoomData(
+            Area4Mines.GemstoneGorge,
             id="collision_camera_014",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.Gamma2: RoomData(
+        RoomData(
+            Area4Mines.Gamma2,
             id="collision_camera_015",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.BasaltBasin: RoomData(
+        RoomData(
+            Area4Mines.BasaltBasin,
             id="collision_camera_017",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.SpaceJump: RoomData(
+        RoomData(
+            Area4Mines.SpaceJump,
             id="collision_camera_AfterChase",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-        Area4Mines.DiggernautExcavationTunnels: RoomData(
+        RoomData(
+            Area4Mines.DiggernautExcavationTunnels,
             id="collision_camera_AfterChase_001",
-            region_data={},  # TODO
+            region_data=[],  # TODO
         ),
-    },
+    ],
 )

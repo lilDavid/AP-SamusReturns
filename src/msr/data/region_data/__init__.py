@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Sequence
 from enum import Enum
 from typing import NamedTuple
 
@@ -29,15 +29,17 @@ class Door(Enum):
 class AreaData(NamedTuple):
     name: str
     id: AreaId
-    rooms: Mapping[RoomName, RoomData]
+    rooms: Sequence[RoomData]
 
 
 class RoomData(NamedTuple):
+    name: RoomName
     id: str
-    region_data: RegionData | Mapping[str, RegionData]
+    region_data: Sequence[RegionData]
 
 
 class RegionData(NamedTuple):
+    name: str | None
     exits: Sequence[ExitData]
     pickups: Sequence[PickupData] = []
     pickups_require_exit: bool = False  # Require access to one of this room's exits for pickups to be reachable

@@ -13,7 +13,7 @@ from open_samus_returns_rando import samus_returns_patcher
 from worlds.Files import APAutoPatchInterface
 
 from .data.constants import GAME_NAME
-from .data.internal_names import AreaId, ItemId, ItemModel, PickupSound
+from .data.internal_names import RANDO_DNA_TEMPLATE, AreaId, ItemId, ItemModel, PickupSound
 from .items import ItemName, LauncherData, OtherItemData, TankData, UniqueItemData, item_data_table
 from .locations import location_table
 from .regions import all_areas_data
@@ -36,6 +36,11 @@ class SamusReturnsPatch(APAutoPatchInterface):
     result_file_ending = ""
 
     config: dict
+    required_dna: int
+    placed_dna: int
+
+    def __init__(self, path: str | None = None, player: int | None = None, player_name: str = "", server: str = ""):
+        super().__init__(path, player, player_name, server)
 
     def patch(self, target: str):
         from . import SamusReturnsWorld
@@ -105,13 +110,15 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 "scenario": AreaId.SURFACE_EAST,
                 "actor": "StartPoint0",
             },
-            "objective": {
-                "required_dna": world.options.dna_required.value,
-                "placed_dna": world.options.dna_available.value,
-            },
             "starting_items": self.create_starting_items(world),
             "pickups": self.create_pickups(world),
             "hints": [],
+            "objective": {
+                "final_boss": "Ridley",
+                "total_dna": world.options.dna_available.value,
+                "required_dna": self.required_dna,
+                "placed_dna": world.options.dna_available.value,
+            },
             "cosmetic_patches": {
                 "enable_room_name_display": "ALWAYS" if world.options.display_room_names.value else "NEVER",
                 "camera_names_dict": self.get_room_names(),
@@ -124,8 +131,8 @@ class SamusReturnsPatch(APAutoPatchInterface):
 
     @staticmethod
     def get_config_identifier(world: SamusReturnsWorld):
-        # AP player names can't contain leading or trailing whitespace, so we can parse the name out by padding it and
-        # taking the last 16 characters.
+        # AP player names can't contain leading or trailing whitespace, so we
+        # can parse the name by padding it and taking the last 16 characters.
         return f"{world.multiworld.seed_name}{world.player_name:<16}"
 
     @staticmethod
@@ -141,7 +148,13 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 ItemId.MAX_AEION: 1000,
             }
         )
+        self.required_dna = world.options.dna_required.value
         for item in world.multiworld.precollected_items[world.player]:
+            # Because of how the patcher works, we need to adjust the
+            # requirement down instead of starting with some
+            if item.name == ItemName.MetroidDna:
+                self.required_dna -= 1
+                continue
             item_data = item_data_table[item.name]
             match item_data:
                 case TankData(_, ItemId.ENERGY_TANKS):
@@ -162,6 +175,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
             if location.address is None:
                 continue
 
+            self.placed_dna = 0
             pickup = location_table[location.name].to_pickup()
             if location.item.player == world.player:
                 item_data = item_data_table[location.item.name]
@@ -185,6 +199,10 @@ class SamusReturnsPatch(APAutoPatchInterface):
     def create_resources(self, world: SamusReturnsWorld, item: ItemName):
         data = item_data_table[item]
         match data:
+            case OtherItemData(_, ItemId.DNA):
+                self.placed_dna += 1
+                item_id = ItemId(RANDO_DNA_TEMPLATE + str(self.placed_dna))
+                return [[self.create_resource(item_id, 1)]]
             case TankData(_, item_id):
                 return [[self.create_resource(item_id, world.ammo_amounts[item])]]
             case LauncherData(_, item_id, ammo_id):

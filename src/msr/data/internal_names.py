@@ -21,6 +21,9 @@ class AreaId(StrEnum):
     SURFACE_WEST = "s110_surfaceb"
 
 
+RANDO_DNA_TEMPLATE = "ITEM_RANDO_DNA_"
+
+
 class ItemId(StrEnum):
     NOTHING = "ITEM_NONE"
     MAX_ENERGY = "ITEM_MAX_LIFE"

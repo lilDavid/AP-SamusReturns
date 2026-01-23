@@ -67,6 +67,15 @@ class SamusReturnsWorld(World):
         create_regions(self)
         connect_entrances(self)
 
+        # TODO: Temporary fix so the locations can all be present
+        from BaseClasses import Region
+
+        region = Region("Extra region", self.player, self.multiworld)
+        locations = {location.name for location in self.get_locations()}
+        region.add_locations({name: data.ap_id for name, data in location_table.items() if name not in locations})
+        self.multiworld.regions.append(region)
+        self.get_region("Surface: Transport Cache").connect(region)
+
     def set_rules(self):
         add_rule(
             self.get_location(make_name(SurfaceWest.LandingSite, "Proteus Ridley")),

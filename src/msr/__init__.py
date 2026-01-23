@@ -5,19 +5,24 @@ from typing import ClassVar
 import Utils
 from BaseClasses import Item
 from worlds import LauncherComponents as Launcher
-from worlds.AutoWorld import World
+from worlds.AutoWorld import WebWorld, World
 from worlds.generic.Rules import add_rule
 
 from .data.constants import GAME_NAME
 from .data.room_names import SurfaceWest
 from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, launchers, major_items
 from .locations import location_table, make_name
-from .options import SamusReturnsOptions
+from .options import SamusReturnsOptions, msr_option_groups
 from .patch import SamusReturnsPatch
 from .regions import connect_entrances, create_regions, set_starting_room
 from .settings import SamusReturnsSettings
 
 LOCATION_COUNT = 211
+
+
+class SamusReturnsWebWorld(WebWorld):
+    theme = "ice"
+    option_groups = msr_option_groups
 
 
 class SamusReturnsWorld(World):
@@ -27,6 +32,8 @@ class SamusReturnsWorld(World):
     settings: ClassVar[SamusReturnsSettings]  # pyright: ignore[reportIncompatibleVariableOverride]
     options_dataclass = SamusReturnsOptions
     options: SamusReturnsOptions  # pyright: ignore[reportIncompatibleVariableOverride]
+
+    web = SamusReturnsWebWorld()
 
     item_name_to_id: ClassVar[dict[str, int]] = {str(name): data.ap_id for name, data in item_data_table.items()}
     location_name_to_id: ClassVar[dict[str, int]] = {str(name): data.ap_id for name, data in location_table.items()}

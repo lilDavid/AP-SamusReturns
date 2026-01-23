@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Choice, DefaultOnToggle, OptionGroup, PerGameCommonOptions, Range
+from Options import Choice, DefaultOnToggle, OptionGroup, PerGameCommonOptions, Range, StartInventoryPool
 
 
 class LogicTrick(Choice):
@@ -68,3 +68,6 @@ class SamusReturnsOptions(PerGameCommonOptions):
 
     # Cosmetic
     display_room_names: RoomNames
+
+    # Item & location options
+    start_inventory_from_pool: StartInventoryPool

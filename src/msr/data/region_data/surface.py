@@ -339,6 +339,9 @@ surface_east_data = AreaData(
                             East.ScanPulse.subregion("Left"),
                         ),
                     ],
+                    pickups=[
+                        PickupData(),
+                    ],
                 ),
                 RegionData(
                     "Left",
@@ -560,6 +563,9 @@ surface_east_data = AreaData(
                             East.TransportArea1,
                             access_rule=lambda state, player: state.has(ItemName.Hatchling, player),
                         ),
+                    ],
+                    pickups=[
+                        PickupData(),
                     ],
                 ),
             ],

@@ -5,7 +5,7 @@ from BaseClasses import CollectionState
 
 from .data.region_data import Door
 from .items import ItemName
-from .options import IBJ, WallJump
+from .options import IBJ, Movement, WallJump
 
 # TODO: Ammo logic
 
@@ -13,6 +13,7 @@ from .options import IBJ, WallJump
 class Trick(StrEnum):
     WallJump = "wall_jump"
     IBJ = "infinite_bomb_jump"
+    Movement = "movement"
 
 
 def get_option(state: CollectionState, player: int, option: str):
@@ -22,6 +23,14 @@ def get_option(state: CollectionState, player: int, option: str):
 
 def can_trick(state: CollectionState, player: int, trick: Trick, difficulty: int) -> bool:
     return get_option(state, player, trick) >= difficulty
+
+
+def can_movement(state: CollectionState, player: int, movement: int):
+    return can_trick(state, player, Trick.Movement, movement)
+
+
+def can_beam_block_through_tunnel(state: CollectionState, player: int):
+    return state.has(ItemName.WaveBeam, player) or can_movement(state, player, Movement.option_enable)
 
 
 def can_bomb(state: CollectionState, player: int):
@@ -41,7 +50,7 @@ def can_spider(state: CollectionState, player: int):
 
 
 def can_wall_jump(state: CollectionState, player: int, wall_jump: int):
-    return can_trick(state, player, Trick.WallJump, WallJump.option_enable)
+    return can_trick(state, player, Trick.WallJump, wall_jump)
 
 
 def can_ibj(state: CollectionState, player: int, ibj: int):
@@ -64,12 +73,16 @@ def can_climb_wall(state: CollectionState, player: int):
     return can_spider(state, player) or can_fly_straight_up(state, player)
 
 
-def can_high_ledge(state: CollectionState, player: int):
+def can_high_jump(state: CollectionState, player: int):
     return (
         state.has(ItemName.HighJumpBoots, player)
         or can_ibj(state, player, IBJ.option_double)
-        or can_climb_wall(state, player)
+        or can_fly_straight_up(state, player)
     )
+
+
+def can_high_ledge(state: CollectionState, player: int):
+    return can_climb_wall(state, player) or can_high_jump(state, player)
 
 
 def can_climb_shaft(state: CollectionState, player: int):

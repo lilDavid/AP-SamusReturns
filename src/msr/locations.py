@@ -115,7 +115,7 @@ location_table: dict[str, LocationData] = {
     make_name(Area1.MagmaPool, "Alcove"): ActorLocationData(116, AreaId.AREA_1, "LE_Item_001"),
     make_name(Area1.MagmaPool, "Magma"): ActorLocationData(117, AreaId.AREA_1, "HiddenPowerup002"),
     make_name(Area1.CavernsSaveStation): ActorLocationData(118, AreaId.AREA_1, "LE_Item_006"),
-    make_name(Area1.VentShaft): ActorLocationData(119, AreaId.AREA_1, "LE_Item_016"),
+    make_name(Area1.InnerTempleVentShaft): ActorLocationData(119, AreaId.AREA_1, "LE_Item_016"),
     make_name(Area1.TransportCache): ActorLocationData(120, AreaId.AREA_1, "LE_Item_003"),
     make_name(Area1.CavernsAlphaSw): MetroidLocationData(121, AreaId.AREA_1, "SG_Alpha_001"),
     # Area 2 - dam exterior

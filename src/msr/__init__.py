@@ -81,7 +81,7 @@ class SamusReturnsWorld(World):
         locations = {location.name for location in self.get_locations()}
         region.add_locations({name: data.ap_id for name, data in location_table.items() if name not in locations})
         self.multiworld.regions.append(region)
-        self.get_region("Surface: Transport Cache").connect(region)
+        self.get_region("Area 1: Transport to Surface and Area 2 (Area 2)").connect(region)
 
     def set_rules(self):
         add_rule(

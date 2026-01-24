@@ -34,6 +34,11 @@ class IBJ(LogicTrick):
     option_vertical = 2
 
 
+class Movement(LogicTrick):
+    display_name = "Movement"
+    option_enable = 1
+
+
 # Cosmetics
 class RoomNames(DefaultOnToggle):
     display_name = "Display Room Names"
@@ -45,6 +50,7 @@ msr_option_groups = [
         [
             WallJump,
             IBJ,
+            Movement,
         ],
     ),
     OptionGroup(
@@ -65,6 +71,7 @@ class SamusReturnsOptions(PerGameCommonOptions):
     # Logic
     wall_jump: WallJump
     infinite_bomb_jump: IBJ
+    movement: Movement
 
     # Cosmetic
     display_room_names: RoomNames

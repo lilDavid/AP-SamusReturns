@@ -13,6 +13,7 @@ from ...logic import (
 )
 from ...options import WallJump
 from ..internal_names import AreaId
+from ..room_names import Area1
 from ..room_names import SurfaceEast as East
 from ..room_names import SurfaceWest as West
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData
@@ -201,11 +202,10 @@ surface_east_data = AreaData(
                             East.ChozoSeal.subregion("Tunnel"),
                             access_rule=can_bomb_block,
                         ),
-                        # TODO
-                        # ExitData(
-                        #     Door.Elevator,
-                        #     Area1.TransportSurfaceArea2,
-                        # ),
+                        ExitData(
+                            Door.Elevator,
+                            Area1.TransportSurfaceArea2.subregion("Surface"),
+                        ),
                         ExitData(
                             Door.Open,
                             East.TransportCache,
@@ -295,13 +295,11 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             East.Alpha.subregion("Lobby"),
-                            access_rule=lambda state, player: can_damage_metroid(state, player)
-                            and can_any_missile(state, player),
+                            access_rule=can_any_missile,
                         ),
                         ExitData(
                             Door.Normal,
                             East.AmmoRecharge,
-                            access_rule=can_damage_metroid,
                         ),
                     ],
                     pickups=[

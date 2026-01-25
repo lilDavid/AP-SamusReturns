@@ -1,5 +1,4 @@
 from ...items import ItemName
-from ...locations import make_name
 from ...logic import (
     can_any_missile,
     can_beam_block_through_tunnel,
@@ -601,7 +600,7 @@ area_1_data = AreaData(
                             Door.MorphTunnel,
                             Area1.CavernsSaveStation.subregion("Main"),
                             access_rule=lambda state, player: state.has(
-                                make_name(Area1.WaterMaze, "Grapple Block"), player
+                                Area1.WaterMaze.location("Grapple Block"), player
                             ),
                         ),
                     ],
@@ -788,7 +787,7 @@ area_1_data = AreaData(
                             Door.MorphTunnel,
                             Area1.WaterMaze.subregion("Pickup"),
                             access_rule=lambda state, player: state.has(
-                                make_name(Area1.WaterMaze, "Grapple Block"), player
+                                Area1.WaterMaze.location("Grapple Block"), player
                             )
                             and (
                                 can_spider(state, player)

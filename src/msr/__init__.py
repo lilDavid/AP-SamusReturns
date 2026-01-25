@@ -11,7 +11,7 @@ from worlds.generic.Rules import add_rule
 from .data.constants import GAME_NAME
 from .data.room_names import SurfaceWest
 from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, launchers, major_items
-from .locations import location_table, make_name
+from .locations import location_table
 from .options import SamusReturnsOptions, msr_option_groups
 from .patch import SamusReturnsPatch
 from .regions import connect_entrances, create_regions, set_starting_room
@@ -85,7 +85,7 @@ class SamusReturnsWorld(World):
 
     def set_rules(self):
         add_rule(
-            self.get_location(make_name(SurfaceWest.LandingSite, "Proteus Ridley")),
+            self.get_location(SurfaceWest.LandingSite.location("Proteus Ridley")),
             lambda state: state.has(ItemName.MetroidDna, self.player, self.options.dna_required.value),
         )
         self.multiworld.completion_condition[self.player] = lambda state: state.has(VICTORY, self.player)

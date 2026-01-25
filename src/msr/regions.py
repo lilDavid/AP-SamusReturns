@@ -17,7 +17,7 @@ from .data.region_data.area_8 import area_8_data
 from .data.region_data.surface import surface_east_data, surface_west_data
 from .data.room_names import RoomName, SurfaceWest
 from .items import SamusReturnsItem
-from .locations import SamusReturnsLocation, location_table, make_name
+from .locations import SamusReturnsLocation, location_table
 from .logic import can_open_door
 
 if TYPE_CHECKING:
@@ -84,11 +84,11 @@ def create_regions(world: SamusReturnsWorld):
     for area in all_areas_data:
         for room in area.rooms:
             for subregion in room.regions:
-                name = room.name.subregion(subregion.name) if subregion.name else room.name.with_area()
+                name = room.name.subregion(subregion.name)
                 region = Region(name, world.player, multiworld=world.multiworld)  # TODO: Hint text
 
                 for pickup in subregion.pickups:
-                    pickup_name = make_name(room.name, pickup.name)
+                    pickup_name = room.name.location(pickup.name)
                     location = SamusReturnsLocation(
                         world.player, pickup_name, location_table[pickup_name].ap_id, region
                     )
@@ -99,7 +99,7 @@ def create_regions(world: SamusReturnsWorld):
                     region.locations.append(location)
 
                 for event in subregion.events:
-                    event_name = make_name(room.name, event.name)
+                    event_name = room.name.location(event.name)
                     location = SamusReturnsLocation(world.player, event_name, None, region)
                     if event.access_rule:
                         add_rule(location, create_rule(event.access_rule, world.player))

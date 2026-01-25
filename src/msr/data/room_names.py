@@ -33,12 +33,19 @@ class _WithArea(Protocol):
     def with_area(self) -> str: ...
 
 
-class _SubregionMixin:
-    def subregion(self: _WithArea, name: str):
+class _RoomNameMixin:
+    def subregion(self: _WithArea, name: str | None = None):
+        if name is None:
+            return self.with_area()
         return f"{self.with_area()} ({name})"
 
+    def location(self: _WithArea, name: str | None = None):
+        if name is None:
+            return self.with_area()
+        return f"{self.with_area()} - {name}"
 
-class SurfaceEast(_SubregionMixin, StrEnum):
+
+class SurfaceEast(_RoomNameMixin, StrEnum):
     LandingSite = "Landing Site"
     TwistyTunnel = "Twisty Tunnel"
     MorphBall = "Morph Ball Chamber"
@@ -65,7 +72,7 @@ class SurfaceEast(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.SurfaceEast, self)
 
 
-class Area1(_SubregionMixin, StrEnum):
+class Area1(_RoomNameMixin, StrEnum):
     TransportSurfaceArea2 = "Transport to Surface and Area 2"
     MoheekMount = "Moheek Mount"
     GulluggGangway = "Gullugg Gangway"
@@ -103,7 +110,7 @@ class Area1(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area1, self)
 
 
-class Area2Exterior(_SubregionMixin, StrEnum):
+class Area2Exterior(_RoomNameMixin, StrEnum):
     DamExterior = "Dam Exterior"
     Arachnus = "Arachnus Arena"
     FanFunnel = "Fan Funnel"
@@ -131,7 +138,7 @@ class Area2Exterior(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area2Exterior, self)
 
 
-class Area2Interior(_SubregionMixin, StrEnum):
+class Area2Interior(_RoomNameMixin, StrEnum):
     WaveBeam = "Wave Beam & Transport to Dam Exterior West"
     VariaSuit = "Varia Suit Chamber"
     InteriorIntersection = "Interior Intersection Terminal"
@@ -153,7 +160,7 @@ class Area2Interior(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area2Interior, self)
 
 
-class Area2Entryway(_SubregionMixin, StrEnum):
+class Area2Entryway(_RoomNameMixin, StrEnum):
     TransportAreas1And3 = "Transport to Areas 1 and 3"
     EntrywayTeleporter = "Entryway Teleporter"
     LightningArmor = "Lightning Armor & Transport to Dam Exterior East"
@@ -165,7 +172,7 @@ class Area2Entryway(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area2Entryway, self)
 
 
-class Area3Exterior(_SubregionMixin, StrEnum):
+class Area3Exterior(_RoomNameMixin, StrEnum):
     TransportArea2 = "Transport to Area 2"
     ExteriorMaze = "Exterior Maze"
     GrappleBeam = "Grapple Beam Chamber"
@@ -185,7 +192,7 @@ class Area3Exterior(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area3Exterior, self)
 
 
-class Area3Caverns(_SubregionMixin, StrEnum):
+class Area3Caverns(_RoomNameMixin, StrEnum):
     TransportFactoryExtN = "Transport to Factory Exterior North"
     Alpha2W = "Alpha+ Arena West"
     GammaC = "Gamma Arena Center"
@@ -212,7 +219,7 @@ class Area3Caverns(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area3Caverns, self)
 
 
-class Area3Interior(_SubregionMixin, StrEnum):
+class Area3Interior(_RoomNameMixin, StrEnum):
     SecuritySite = "Security Site"
     GammaSAccess = "Factory Gamma Arena South Access"
     ParabyPeriphery = "Paraby Periphery"
@@ -235,7 +242,7 @@ class Area3Interior(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area3Interior, self)
 
 
-class Area4Caves(_SubregionMixin, StrEnum):
+class Area4Caves(_RoomNameMixin, StrEnum):
     CavesIntersectionTerminal = "Caves Intersection Terminal"
     SpazerBeam = "Spazer Beam Chamber"
     CrumbleCatwalk = "Crumble Catwalk"
@@ -258,7 +265,7 @@ class Area4Caves(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area4Caves, self)
 
 
-class Area4Mines(_SubregionMixin, StrEnum):
+class Area4Mines(_RoomNameMixin, StrEnum):
     MinesIntersectionTunnel = "Mines Intersection Terminal"
     SuperMissile = "Super Missile Chamber"
     PinkCrystalPreserve = "Pink Crystal Preserve"
@@ -281,7 +288,7 @@ class Area4Mines(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area4Mines, self)
 
 
-class Area5Lobby(_SubregionMixin, StrEnum):
+class Area5Lobby(_RoomNameMixin, StrEnum):
     LobbySaveStation = "Lobby Save Station"
     TransportTowerIntE = "Transport to Tower Interior East"
     TransportAreas4And6 = "Transport to Areas 4 and 6"
@@ -300,7 +307,7 @@ class Area5Lobby(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area5Lobby, self)
 
 
-class Area5Exterior(_SubregionMixin, StrEnum):
+class Area5Exterior(_RoomNameMixin, StrEnum):
     TowerExt = "Tower Exterior"
     OvergrownMaze = "Overgrown Maze"
     ScrewAttack = "Screw Attack Chamber"
@@ -317,7 +324,7 @@ class Area5Exterior(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area5Exterior, self)
 
 
-class Area5Interior(_SubregionMixin, StrEnum):
+class Area5Interior(_RoomNameMixin, StrEnum):
     TransportTowerLobbyE = "Transport to Tower Lobby East"
     InteriorSaveStation = "Interior Save Station"
     TransportTowerExtE = "Transport to Tower Exterior East"
@@ -343,7 +350,7 @@ class Area5Interior(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area5Interior, self)
 
 
-class Area6(_SubregionMixin, StrEnum):
+class Area6(_RoomNameMixin, StrEnum):
     TransportArea7 = "Transport to Area 7"
     TeleporterS = "Teleporter South"
     Omega = "Omega Arena"
@@ -368,7 +375,7 @@ class Area6(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area6, self)
 
 
-class Area7(_SubregionMixin, StrEnum):
+class Area7(_RoomNameMixin, StrEnum):
     LabTeleporterW = "Laboratory Teleporter West"
     GrapplePuzzleMadness = "Grapple Puzzle Madness"
     SpiderBoostTunnelS = "Spider Boost Tunnel South"
@@ -390,7 +397,7 @@ class Area7(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area7, self)
 
 
-class Area8(_SubregionMixin, StrEnum):
+class Area8(_RoomNameMixin, StrEnum):
     TransportSurface = "Transport to Surface"
     NestHallwayS = "Metroid Nest Hallway South"
     Amphitheater = "Amphitheater"
@@ -414,7 +421,7 @@ class Area8(_SubregionMixin, StrEnum):
         return format_room_name(AreaName.Area8, self)
 
 
-class SurfaceWest(_SubregionMixin, StrEnum):
+class SurfaceWest(_RoomNameMixin, StrEnum):
     LandingSite = "Landing Site"
     TransportArea8 = "Transport to Area 8"
     SurfaceStash = "Surface Stash"

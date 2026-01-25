@@ -31,7 +31,8 @@ class ConsoleSdPath(settings.UserFolderPath):
 
 class ConsoleIp(str):
     """
-    Your 3DS's local IP address. You can find this ***.
+    Your 3DS's local IP address. You can find this by opening the Homebrew
+    Launcher and pressing the Y button.
     """
 
 

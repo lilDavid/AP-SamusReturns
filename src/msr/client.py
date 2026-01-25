@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import shutil
 import traceback
 from collections import Counter
 
@@ -16,7 +17,8 @@ from .data.constants import GAME_NAME
 from .data.internal_names import ItemId
 from .game_interface import LuaError, SamusReturnsInterface
 from .items import ItemName, LauncherData, item_data_table, tanks, unique_items
-from .patch import SamusReturnsPatch
+from .patch import GAME_ID_US, SamusReturnsPatch
+from .settings import SamusReturnsSettings, TargetSystem
 
 ALL_ITEMS = 0b111
 
@@ -134,7 +136,6 @@ class SamusReturnsContext(CommonContext):
     @staticmethod
     def get_default_ip_address():
         from . import SamusReturnsWorld
-        from .settings import SamusReturnsSettings, TargetSystem
 
         settings: SamusReturnsSettings = SamusReturnsWorld.settings
         if settings.target_system == TargetSystem.EMULATOR:
@@ -356,7 +357,6 @@ def launch_game(rom_file: str):
     import webbrowser
 
     from . import SamusReturnsWorld
-    from .settings import SamusReturnsSettings
 
     # In 3DS modding, we supply a patch to the loader, so we actually need to launch the original rom
     settings: SamusReturnsSettings = SamusReturnsWorld.settings
@@ -369,6 +369,32 @@ def launch_game(rom_file: str):
         webbrowser.open(rom_file)
 
 
+def install_rando_patch(patch_dir: str):
+    from . import SamusReturnsWorld
+
+    settings: SamusReturnsSettings = SamusReturnsWorld.settings
+    if settings.target_system == TargetSystem.CONSOLE:
+        path = settings.console_settings.sd_path
+        if path is None:
+            return
+        output_path = SamusReturnsPatch.get_path(path) / "luma"
+        output_path.mkdir(exist_ok=True)
+        output_path /= "titles"
+    else:
+        path = settings.emulator_settings.user_path
+        if path is None:
+            return
+        output_path = SamusReturnsPatch.get_path(path) / "load"
+        output_path.mkdir(exist_ok=True)
+        output_path /= "mods"
+    output_path.mkdir(exist_ok=True)
+    output_path /= GAME_ID_US
+    SamusReturnsPatch.verify_file_structure(output_path)
+
+    shutil.copytree(patch_dir, output_path)
+    logger.info(f"Wrote randomizer patch to {output_path}")
+
+
 def launch(*launch_args: str):
     async def main():
         parser = get_base_parser()
@@ -377,7 +403,7 @@ def launch(*launch_args: str):
 
         if args.patch_file:
             metadata, result_file = Patch.create_rom_file(args.patch_file)
-            logger.info(f"Patch with meta-data {metadata} was written to {result_file}")
+            install_rando_patch(result_file)
             if "server" in metadata:
                 args.connect = metadata["server"]
             launch_game(result_file)

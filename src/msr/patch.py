@@ -44,48 +44,17 @@ class SamusReturnsPatch(APAutoPatchInterface):
 
     def patch(self, target: str):
         from . import SamusReturnsWorld
-        from .settings import TargetSystem
 
         self.read()
 
         rom_path = self.get_path(SamusReturnsWorld.settings.rom_file)
-        if SamusReturnsWorld.settings.target_system == TargetSystem.CONSOLE:
-            path = SamusReturnsWorld.settings.console_settings.sd_path
-            if path is None:
-                output_path = Path(target)
-            else:
-                output_path = self.get_path(path) / "luma"
-                output_path.mkdir(exist_ok=True)
-                output_path /= "titles"
-        else:
-            path = SamusReturnsWorld.settings.emulator_settings.user_path
-            if path is None:
-                output_path = Path(target)
-            else:
-                output_path = self.get_path(path) / "load"
-                output_path.mkdir(exist_ok=True)
-                output_path /= "mods"
+        output_path = Path(target)
         output_path.mkdir(exist_ok=True)
-
         output_path /= GAME_ID_US
-        try:
-            if not MOD_FILES.issuperset({file.name for file in output_path.iterdir()}):
-                raise ValueError(
-                    "Unexpected files were found in the output path. "
-                    f'Verify you have the correct path and delete "{output_path}" if it is correct.'
-                )
-            shutil.rmtree(output_path)
-        except FileNotFoundError:
-            pass
+        self.verify_file_structure(output_path)
         output_path.mkdir(exist_ok=True)
 
         samus_returns_patcher.patch_extracted(rom_path, output_path, self.config)
-        if path is not None:
-            import logging
-
-            logger = logging.getLogger(type(self).__name__)
-            logger.setLevel(logging.INFO)
-            logger.info(f"Wrote randomizer files to {output_path}")
 
     @staticmethod
     def get_path(path: str):
@@ -93,6 +62,18 @@ class SamusReturnsPatch(APAutoPatchInterface):
         if _path.exists():
             return _path
         return Path(Utils.user_path(path))
+
+    @staticmethod
+    def verify_file_structure(target: Path):
+        try:
+            if not MOD_FILES.issuperset({file.name for file in target.iterdir()}):
+                raise ValueError(
+                    "Unexpected files were found in the output path. "
+                    f'Verify you have the correct path and delete "{target}" if it is correct.'
+                )
+            shutil.rmtree(target)
+        except FileNotFoundError:
+            pass
 
     def read_contents(self, opened_zipfile: ZipFile):
         self.config = json.loads(opened_zipfile.read("config.json"))

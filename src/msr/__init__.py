@@ -77,11 +77,14 @@ class SamusReturnsWorld(World):
         # TODO: Temporary fix so the locations can all be present
         from BaseClasses import Region
 
-        region = Region("Extra region", self.player, self.multiworld)
+        region = Region("Placeholder", self.player, self.multiworld)
         locations = {location.name for location in self.get_locations()}
         region.add_locations({name: data.ap_id for name, data in location_table.items() if name not in locations})
         self.multiworld.regions.append(region)
-        self.get_region("Area 1: Transport to Surface and Area 2 (Area 2)").connect(region)
+        self.get_region(self.origin_region_name).connect(
+            region,
+            rule=lambda state: state.has(ItemName.MetroidDna, self.player, self.options.dna_required.value),
+        )
 
     def set_rules(self):
         add_rule(

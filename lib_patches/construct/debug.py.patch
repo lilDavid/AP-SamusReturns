@@ -1,0 +1,16 @@
+---
++++ src/msr/lib/construct/debug.py	2026-01-27 19:04:56.682966616 -0600
+@@ -1,6 +1,6 @@
+ from construct import *
+ from construct.lib import *
+-import sys, traceback, pdb, inspect
++import sys, traceback
+
+
+ class Probe(Construct):
+@@ -156,5 +156,4 @@
+         print("".join(traceback.format_exception(*sys.exc_info())[1:]))
+         if msg:
+             print(msg)
+-        pdb.post_mortem(sys.exc_info()[2])
+         print("--------------------------------------------------")

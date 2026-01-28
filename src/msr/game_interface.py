@@ -6,7 +6,6 @@ from collections.abc import Sequence
 from enum import IntEnum
 
 from CommonClient import logger
-from open_samus_returns_rando import lua_editor as osrr_lua
 
 from . import items, locations
 from .data.internal_names import AreaId, ItemId
@@ -225,6 +224,8 @@ class SamusReturnsInterface:
         return inventory
 
     async def give_items(self, items: Sequence[tuple[ItemId, int]]):
+        from open_samus_returns_rando import lua_editor as osrr_lua
+
         resources = ",".join([f'{{item_id="{item}",quantity={amount}}}' for item, amount in items])
         await self.connector.run_lua(f"{osrr_lua.get_parent_for(items[0][0])}.OnPickedUp({{ {{ {resources} }} }})")
 

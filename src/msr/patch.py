@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING
 from zipfile import ZipFile
 
 import Utils
-from open_samus_returns_rando import samus_returns_patcher
 from worlds.Files import APAutoPatchInterface
 
 from .data.constants import GAME_NAME
@@ -43,6 +42,8 @@ class SamusReturnsPatch(APAutoPatchInterface):
         super().__init__(path, player, player_name, server)
 
     def patch(self, target: str):
+        from open_samus_returns_rando import samus_returns_patcher
+
         from . import SamusReturnsWorld
 
         self.read()

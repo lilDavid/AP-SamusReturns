@@ -8,6 +8,7 @@ from worlds import LauncherComponents as Launcher
 from worlds.AutoWorld import WebWorld, World
 from worlds.generic.Rules import add_rule
 
+from . import lib as lib  # Set up module importer for open-samus-returns-rando
 from .data.constants import GAME_NAME
 from .data.room_names import SurfaceWest
 from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, launchers, major_items

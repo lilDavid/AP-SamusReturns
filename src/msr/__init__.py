@@ -67,6 +67,9 @@ class SamusReturnsWorld(World):
             ItemName.PhaseDrift: 150,
         }
 
+        if self.options.starting_scan_pulse.value:
+            self.starting_items[ItemName.ScanPulse] = 1
+
         for item in self.starting_items.elements():
             self.push_precollected(self.create_item(item))
 

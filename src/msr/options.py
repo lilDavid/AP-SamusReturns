@@ -27,6 +27,13 @@ class MetroidDnaRequired(Range):
     default = 10
 
 
+# Item pool
+class ScanPulseStart(DefaultOnToggle):
+    """Start with Scan Pulse."""
+
+    display_name = "Starting Scan Pulse"
+
+
 class WallJump(LogicTrick):
     """
     Jump off of walls in midair.
@@ -75,6 +82,12 @@ class RoomNames(DefaultOnToggle):
 
 msr_option_groups = [
     OptionGroup(
+        "ItemPool",
+        [
+            ScanPulseStart,
+        ],
+    ),
+    OptionGroup(
         "Logic",
         [
             WallJump,
@@ -96,6 +109,9 @@ class SamusReturnsOptions(PerGameCommonOptions):
     # Game options
     dna_available: MetroidDnaAvailable
     dna_required: MetroidDnaRequired
+
+    # Item pool
+    starting_scan_pulse: ScanPulseStart
 
     # Logic
     wall_jump: WallJump

@@ -201,7 +201,7 @@ area_1_data = AreaData(
                             Door.Normal,
                             Area1.InnerTempleUpperHallway,
                             access_rule=lambda state, player: can_climb_wall(state, player)
-                            or (state.has(ItemName.HighJumpBoots) and can_climb_shaft(state, player)),
+                            or (state.has(ItemName.HighJumpBoots, player) and can_climb_shaft(state, player)),
                         ),
                         ExitData(
                             Door.Normal,
@@ -697,7 +697,7 @@ area_1_data = AreaData(
                                         or (
                                             can_climb_shaft(state, player)
                                             and (
-                                                state.has(ItemName.HighJumpBoots)
+                                                state.has(ItemName.HighJumpBoots, player)
                                                 # DBJ and then unmorph
                                                 or can_movement(state, player, Movement.option_enable)
                                             )

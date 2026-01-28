@@ -32,6 +32,12 @@ class IBJ(LogicTrick):
     display_name = "Infinite Bomb Jump"
     option_double = 1
     option_vertical = 2
+    option_diagonal = 3
+
+
+class DamageBoost(LogicTrick):
+    display_name = "Damage Boost"
+    option_enable = 1
 
 
 class Movement(LogicTrick):
@@ -71,6 +77,7 @@ class SamusReturnsOptions(PerGameCommonOptions):
     # Logic
     wall_jump: WallJump
     infinite_bomb_jump: IBJ
+    damabe_boost: DamageBoost
     movement: Movement
 
     # Cosmetic

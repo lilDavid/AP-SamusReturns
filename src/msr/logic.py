@@ -13,6 +13,7 @@ from .options import IBJ, Movement, WallJump
 class Trick(StrEnum):
     WallJump = "wall_jump"
     IBJ = "infinite_bomb_jump"
+    DamageBoost = "damage_boost"
     Movement = "movement"
 
 
@@ -25,12 +26,28 @@ def can_trick(state: CollectionState, player: int, trick: Trick, difficulty: int
     return get_option(state, player, trick) >= difficulty
 
 
+def can_damage_boost(state: CollectionState, player: int, damage_boost: int):
+    return can_trick(state, player, Trick.DamageBoost, damage_boost)
+
+
 def can_movement(state: CollectionState, player: int, movement: int):
     return can_trick(state, player, Trick.Movement, movement)
 
 
 def can_beam_block_through_tunnel(state: CollectionState, player: int):
-    return state.has(ItemName.WaveBeam, player) or can_movement(state, player, Movement.option_enable)
+    return (
+        state.has(ItemName.WaveBeam, player)
+        or can_bomb_block(state, player)
+        or can_movement(state, player, Movement.option_enable)
+    )
+
+
+def can_beam_block_through_fan_tunnel(state: CollectionState, player: int):
+    return (
+        state.has(ItemName.WaveBeam, player)
+        or can_power_bomb(state, player)
+        or can_movement(state, player, Movement.option_enable)
+    )
 
 
 def can_bomb(state: CollectionState, player: int):
@@ -85,6 +102,10 @@ def can_high_ledge(state: CollectionState, player: int):
     return can_climb_wall(state, player) or can_high_jump(state, player)
 
 
+def can_short_shaft(state: CollectionState, player: int):
+    return can_high_ledge(state, player) or can_wall_jump(state, player, WallJump.option_enable)
+
+
 def can_climb_shaft(state: CollectionState, player: int):
     return can_wall_jump(state, player, WallJump.option_enable) or can_climb_wall(state, player)
 
@@ -93,10 +114,20 @@ def can_any_missile(state: CollectionState, player: int):
     return state.has_any((ItemName.MissileLauncher, ItemName.SuperMissile), player)
 
 
+def can_damage_tough_enemy(state: CollectionState, player: int):
+    return state.has_any(
+        (ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst, ItemName.ScrewAttack), player
+    ) or can_power_bomb(state, player)
+
+
 def can_damage_metroid(state: CollectionState, player: int):
     return state.has_any(
         (ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst, ItemName.IceBeam), player
     )
+
+
+def can_blobthrower(state: CollectionState, player: int):
+    return state.has(ItemName.BeamBurst, player) or can_power_bomb(state, player)
 
 
 def can_open_door(state: CollectionState, player: int, door: Door):

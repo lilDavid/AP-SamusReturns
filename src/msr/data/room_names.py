@@ -144,7 +144,7 @@ class Area2Interior(_RoomNameMixin, StrEnum):
     InteriorIntersection = "Interior Intersection Terminal"
     LavaGenerator = "Lava Generator"
     CrumbleCavern = "Crumble Cavern"
-    WhimsicalWaterwhieels = "Whimsical Waterwheels"
+    WhimsicalWaterwheels = "Whimsical Waterwheels"
     InteriorTeleporter = "Interior Teleporter"
     FleechFireContainment = "Fleech Fire Containment"
     DamBasement = "Dam Basement"

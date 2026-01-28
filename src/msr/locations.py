@@ -135,8 +135,12 @@ location_table: dict[str, LocationData] = {
     Area2Interior.HighJumpBoots.location(): ActorLocationData(220, AreaId.AREA_2_INTERIOR, "LE_PowerUp_HighJumpBoots"),
     Area2Interior.TeleporterStorage.location(): ActorLocationData(221, AreaId.AREA_2_INTERIOR, "LE_Item_005"),
     Area2Interior.Gamma.location(): MetroidLocationData(222, AreaId.AREA_2_INTERIOR, "SG_Gamma_001"),
-    Area2Interior.VariaSuit.location("Statue"): ActorLocationData(223, AreaId.AREA_2_INTERIOR, "LE_PowerUp_VariaSuite"),
-    Area2Interior.VariaSuit.location("Tunnel"): ActorLocationData(224, AreaId.AREA_2_INTERIOR, "HP_Item_002"),
+    Area2Interior.InteriorIntersection.location("Statue"): ActorLocationData(
+        223, AreaId.AREA_2_INTERIOR, "LE_PowerUp_VariaSuite"
+    ),
+    Area2Interior.InteriorIntersection.location("Tunnel"): ActorLocationData(
+        224, AreaId.AREA_2_INTERIOR, "HP_Item_002"
+    ),
     # Area 2 - dam entryway
     Area2Entryway.TransportAreas1And3.location("Plants"): ActorLocationData(225, AreaId.AREA_2_ENTRYWAY, "LE_Item_005"),
     Area2Entryway.TransportAreas1And3.location("Tunnel"): ActorLocationData(

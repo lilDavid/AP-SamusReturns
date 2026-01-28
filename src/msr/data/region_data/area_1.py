@@ -18,6 +18,7 @@ from ...logic import (
 from ...options import IBJ, Movement
 from ..internal_names import AreaId
 from ..room_names import Area1
+from ..room_names import Area2Entryway as Area2
 from ..room_names import SurfaceEast as Surface
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData
 
@@ -74,10 +75,10 @@ area_1_data = AreaData(
                                 )
                             ),
                         ),
-                        # ExitData(
-                        #     Door.Elevator,  # TODO
-                        #     Area3.TransportArea2,
-                        # ),
+                        ExitData(
+                            Door.Elevator,
+                            Area2.TransportAreas1And3.subregion("Area 1"),
+                        ),
                         ExitData(
                             Door.Taramarga,
                             Area1.TransportCache,

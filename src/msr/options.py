@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from Options import Choice, DefaultOnToggle, OptionGroup, PerGameCommonOptions, Range, StartInventoryPool
+from Options import Choice, DefaultOnToggle, OptionGroup, PerGameCommonOptions, Range, StartInventoryPool, Toggle
 
 
 class LogicTrick(Choice):
@@ -75,6 +75,16 @@ class Movement(LogicTrick):
     option_enable = 1
 
 
+# Game Patches
+class TanksRefillAmmo(Toggle):
+    """
+    Makes collecting a tank refill its ammo to full capacity. In vanilla, only Energy and Aeion get
+    refilled to maximum capacity.
+    """
+
+    display_name = "Tanks Refill Ammo"
+
+
 # Cosmetics
 class RoomNames(DefaultOnToggle):
     display_name = "Display Room Names"
@@ -93,6 +103,12 @@ msr_option_groups = [
             WallJump,
             IBJ,
             Movement,
+        ],
+    ),
+    OptionGroup(
+        "Game Patches",
+        [
+            TanksRefillAmmo,
         ],
     ),
     OptionGroup(
@@ -118,6 +134,9 @@ class SamusReturnsOptions(PerGameCommonOptions):
     infinite_bomb_jump: IBJ
     damabe_boost: DamageBoost
     movement: Movement
+
+    # Game Patches
+    tanks_refill_ammo: TanksRefillAmmo
 
     # Cosmetic
     display_room_names: RoomNames

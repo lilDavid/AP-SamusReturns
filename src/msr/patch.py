@@ -101,14 +101,15 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 "required_dna": self.required_dna,
                 "placed_dna": world.options.dna_available.value,
             },
+            "game_patches": {
+                "tanks_refill_ammo": bool(world.options.tanks_refill_ammo.value),
+            },
             "cosmetic_patches": {
                 "enable_room_name_display": "ALWAYS" if world.options.display_room_names.value else "NEVER",
                 "camera_names_dict": self.get_room_names(),
             },
             "enable_remote_lua": True,
             "layout_uuid": "00000000-0000-1111-0000-000000000000",
-            # Not required by schema, but patching raises if not included
-            "game_patches": {},
         }
 
     @staticmethod

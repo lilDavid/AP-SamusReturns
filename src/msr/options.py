@@ -10,6 +10,8 @@ class LogicTrick(Choice):
 
 # Game options
 class MetroidDnaAvailable(Range):
+    """Amount of Metroid DNA in the item pool"""
+
     display_name = "Metroid DNA Available"
     range_start = 0
     range_end = 39
@@ -17,6 +19,8 @@ class MetroidDnaAvailable(Range):
 
 
 class MetroidDnaRequired(Range):
+    """Amount of Metroid DNA required to fight the final boss"""
+
     display_name = "Metroid DNA Required"
     range_start = 0
     range_end = 39
@@ -24,11 +28,26 @@ class MetroidDnaRequired(Range):
 
 
 class WallJump(LogicTrick):
+    """
+    Jump off of walls in midair.
+
+    Disable: Wall jumping will not be required by logic
+    Enable: Wall jumping may be required by logic
+    """
+
     display_name = "Wall Jump"
     option_enable = 1
 
 
 class IBJ(LogicTrick):
+    """
+    Fly by bomb jumping in midair.
+
+    Disable: Bomb jumping in midair will not be required by logic
+    Double: Logic may expect you to bomb jump in midair at most once
+    Vertical: Logic may expect you to infinite bomb jump directly up
+    """
+
     display_name = "Infinite Bomb Jump"
     option_double = 1
     option_vertical = 2
@@ -41,6 +60,10 @@ class DamageBoost(LogicTrick):
 
 
 class Movement(LogicTrick):
+    """
+    Miscellaneous movement tricks not encompassed by other logic options.
+    """
+
     display_name = "Movement"
     option_enable = 1
 

@@ -97,7 +97,6 @@ area_1_data = AreaData(
             id="collision_camera_003",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Normal,
@@ -120,7 +119,6 @@ area_1_data = AreaData(
             id="collision_camera_005",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Open,
@@ -242,7 +240,6 @@ area_1_data = AreaData(
             id="collision_camera_014",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Charge,
@@ -337,7 +334,6 @@ area_1_data = AreaData(
             id="collision_camera_017",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Normal,
@@ -462,7 +458,6 @@ area_1_data = AreaData(
             id="collision_camera_023",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Open,
@@ -496,7 +491,6 @@ area_1_data = AreaData(
             id="collision_camera_024",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Open,
@@ -520,7 +514,6 @@ area_1_data = AreaData(
             id="collision_camera_025",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Normal,
@@ -540,7 +533,6 @@ area_1_data = AreaData(
             id="collision_camera_027",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Normal,
@@ -621,7 +613,6 @@ area_1_data = AreaData(
             id="collision_camera_030",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Missile,
@@ -646,7 +637,6 @@ area_1_data = AreaData(
             id="collision_camera_031",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
@@ -827,7 +817,6 @@ area_1_data = AreaData(
             id="collision_camera_042",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Normal,
@@ -887,7 +876,6 @@ area_1_data = AreaData(
             id="collision_camera_044",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Open,
@@ -925,7 +913,6 @@ area_1_data = AreaData(
             id="collision_camera_045",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Open,
@@ -944,7 +931,6 @@ area_1_data = AreaData(
             id="collision_camera_046",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Open,
@@ -968,7 +954,6 @@ area_1_data = AreaData(
             id="collision_camera_047",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Open,
@@ -988,7 +973,6 @@ area_1_data = AreaData(
             id="collision_camera_048",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         # ExitData(
                         #     Door.Locked,
@@ -1011,7 +995,6 @@ area_1_data = AreaData(
             id="collision_camera_049",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
@@ -1031,7 +1014,6 @@ area_1_data = AreaData(
             id="collision_camera_050",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Open,
@@ -1052,7 +1034,6 @@ area_1_data = AreaData(
             id="collision_camera_051",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Taramarga,
@@ -1072,7 +1053,6 @@ area_1_data = AreaData(
             id="collision_camera_052",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Open,
@@ -1091,7 +1071,6 @@ area_1_data = AreaData(
             id="collision_camera_054",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
@@ -1112,7 +1091,6 @@ area_1_data = AreaData(
             id="collision_camera_055",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Open,

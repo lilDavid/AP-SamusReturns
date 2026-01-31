@@ -39,10 +39,10 @@ class RoomData(NamedTuple):
 
 
 class RegionData(NamedTuple):
-    name: str | None
-    exits: Sequence[ExitData]
-    pickups: Sequence[PickupData] = []
-    events: Sequence[EventData] = []
+    name: str | None = None
+    exits: Sequence[ExitData] = ()
+    pickups: Sequence[PickupData] = ()
+    events: Sequence[EventData] = ()
     require_exit_access: bool = False  # Require access to one of this room's exits for pickups/events to be reachable
 
 

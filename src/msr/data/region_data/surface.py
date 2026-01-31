@@ -82,7 +82,6 @@ surface_east_data = AreaData(
             id="collision_camera_002",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Normal,
@@ -191,7 +190,6 @@ surface_east_data = AreaData(
             id="collision_camera_006",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Normal,
@@ -226,7 +224,6 @@ surface_east_data = AreaData(
             id="collision_camera_007",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
@@ -244,7 +241,6 @@ surface_east_data = AreaData(
             id="collision_camera_008",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Missile,
@@ -367,7 +363,6 @@ surface_east_data = AreaData(
             id="collision_camera_012",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Gryncore,
@@ -385,7 +380,6 @@ surface_east_data = AreaData(
             id="collision_camera_013",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
@@ -404,7 +398,6 @@ surface_east_data = AreaData(
             id="collision_camera_014",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Open,
@@ -428,7 +421,6 @@ surface_east_data = AreaData(
             id="collision_camera_015",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Charge,
@@ -509,7 +501,6 @@ surface_east_data = AreaData(
             id="collision_camera_018",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Gigadora,
@@ -536,7 +527,6 @@ surface_east_data = AreaData(
             id="collision_camera_019",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Open,
@@ -556,7 +546,6 @@ surface_east_data = AreaData(
             id="collision_camera_020",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Open,
@@ -575,7 +564,6 @@ surface_east_data = AreaData(
             id="collision_camera_021",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
@@ -632,7 +620,6 @@ surface_east_data = AreaData(
             id="collision_camera_024",
             regions=[
                 RegionData(
-                    None,
                     exits=[
                         ExitData(
                             Door.Normal,

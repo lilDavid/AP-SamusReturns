@@ -70,20 +70,6 @@ class TankData(NamedTuple):
         return ItemClassification.filler
 
 
-class LauncherData(NamedTuple):
-    ap_id: int
-    item_id: ItemId
-    ammo_id: ItemId
-    model: ItemModel
-    is_progression: bool = True
-    sound: PickupSound | None = None
-
-    def classification(self):
-        if self.is_progression:
-            return ItemClassification.progression | ItemClassification.useful
-        return ItemClassification.useful
-
-
 class UniqueItemData(NamedTuple):
     ap_id: int
     item_id: ItemId
@@ -108,7 +94,7 @@ class OtherItemData(NamedTuple):
         return self.item_type
 
 
-ItemData = TankData | LauncherData | UniqueItemData | OtherItemData
+ItemData = TankData | UniqueItemData | OtherItemData
 
 
 tanks = {
@@ -119,21 +105,10 @@ tanks = {
     ItemName.AeionTank: TankData(5, ItemId.MAX_AEION, ItemModel.AeionTank),
 }
 
-launchers = {
-    ItemName.MissileLauncher: LauncherData(
-        11, ItemId.MISSILE_LAUNCHER, ItemId.MISSILE_TANKS, ItemModel.MissileLauncher
-    ),
-    ItemName.SuperMissile: LauncherData(12, ItemId.SUPER_MISSILE, ItemId.SUPER_MISSILE_TANKS, ItemModel.SuperMissile),
-    ItemName.PowerBomb: LauncherData(13, ItemId.POWER_BOMB, ItemId.POWER_BOMB_TANKS, ItemModel.PowerBomb),
-    ItemName.ScanPulse: LauncherData(
-        61, ItemId.SCAN_PULSE, ItemId.MAX_AEION, ItemModel.ScanPulse, is_progression=False
-    ),
-    ItemName.LightningArmor: LauncherData(62, ItemId.LIGHTNING_ARMOR, ItemId.MAX_AEION, ItemModel.LightningArmor),
-    ItemName.BeamBurst: LauncherData(63, ItemId.BEAM_BURST, ItemId.MAX_AEION, ItemModel.BeamBurst),
-    ItemName.PhaseDrift: LauncherData(64, ItemId.PHASE_DRIFT, ItemId.MAX_AEION, ItemModel.PhaseDrift),
-}
-
 major_items = {
+    ItemName.MissileLauncher: UniqueItemData(11, ItemId.MISSILE_LAUNCHER, ItemModel.MissileLauncher),
+    ItemName.SuperMissile: UniqueItemData(12, ItemId.SUPER_MISSILE, ItemModel.SuperMissile),
+    ItemName.PowerBomb: UniqueItemData(13, ItemId.POWER_BOMB, ItemModel.PowerBomb),
     ItemName.ChargeBeam: UniqueItemData(21, ItemId.CHARGE_BEAM, ItemModel.ChargeBeam),
     ItemName.IceBeam: UniqueItemData(22, ItemId.ICE_BEAM, ItemModel.IceBeam),
     ItemName.WaveBeam: UniqueItemData(23, ItemId.WAVE_BEAM, ItemModel.WaveBeam),
@@ -150,6 +125,10 @@ major_items = {
     ItemName.SpaceJump: UniqueItemData(53, ItemId.SPACE_JUMP, ItemModel.SpaceJump),
     ItemName.ScrewAttack: UniqueItemData(54, ItemId.SCREW_ATTACK, ItemModel.ScrewAttack),
     ItemName.Hatchling: UniqueItemData(55, ItemId.METROID_HATCHLING, ItemModel.Hatchling),
+    ItemName.ScanPulse: UniqueItemData(61, ItemId.SCAN_PULSE, ItemModel.ScanPulse, is_progression=False),
+    ItemName.LightningArmor: UniqueItemData(62, ItemId.LIGHTNING_ARMOR, ItemModel.LightningArmor),
+    ItemName.BeamBurst: UniqueItemData(63, ItemId.BEAM_BURST, ItemModel.BeamBurst),
+    ItemName.PhaseDrift: UniqueItemData(64, ItemId.PHASE_DRIFT, ItemModel.PhaseDrift),
 }
 
 reserve_tanks = {
@@ -166,15 +145,24 @@ other_items: dict[ItemName, OtherItemData] = {
 }
 
 unique_items: dict[str, ItemData] = {
-    **launchers,
     **major_items,
     **reserve_tanks,
 }
 
 item_data_table: dict[str, ItemData] = {
     **tanks,
-    **launchers,
     **major_items,
     **reserve_tanks,
     **other_items,
+}
+
+
+launcher_to_ammo: dict[str, ItemId] = {
+    ItemName.MissileLauncher: ItemId.MISSILE_TANKS,
+    ItemName.SuperMissile: ItemId.SUPER_MISSILE_TANKS,
+    ItemName.PowerBomb: ItemId.POWER_BOMB_TANKS,
+    ItemName.ScanPulse: ItemId.MAX_AEION,
+    ItemName.LightningArmor: ItemId.MAX_AEION,
+    ItemName.BeamBurst: ItemId.MAX_AEION,
+    ItemName.PhaseDrift: ItemId.MAX_AEION,
 }

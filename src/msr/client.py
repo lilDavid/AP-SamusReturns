@@ -16,7 +16,7 @@ from worlds._bizhawk.context import AuthStatus
 from .data.constants import GAME_NAME
 from .data.internal_names import ItemId
 from .game_interface import LuaError, SamusReturnsInterface
-from .items import ItemName, LauncherData, item_data_table, tanks, unique_items
+from .items import ItemName, item_data_table, launcher_to_ammo, tanks, unique_items
 from .patch import GAME_ID_US, SamusReturnsPatch
 from .settings import SamusReturnsSettings, TargetSystem
 
@@ -262,12 +262,11 @@ class SamusReturnsContext(CommonContext):
             return
 
         item_data = item_data_table[item_name]
-        if type(item_data) is LauncherData:
-            await self.game_interface.give_items(
-                [(item_data.item_id, 1), (item_data.ammo_id, self.ammo_amounts[item_name])]
-            )
-        else:
+        ammo_id = launcher_to_ammo.get(item_name)
+        if ammo_id is None:
             await self.game_interface.give_items([(item_data.item_id, 1)])
+        else:
+            await self.game_interface.give_items([(item_data.item_id, 1), (ammo_id, self.ammo_amounts[item_name])])
         current_inventory[item_name] = 1
         message = f"{item_name} online"
         if network_item.player != self.slot:

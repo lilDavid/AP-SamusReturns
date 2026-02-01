@@ -13,7 +13,7 @@ from worlds.Files import APAutoPatchInterface
 
 from .data.constants import GAME_NAME
 from .data.internal_names import RANDO_DNA_TEMPLATE, AreaId, ItemId, ItemModel, PickupSound
-from .items import ItemName, LauncherData, OtherItemData, TankData, UniqueItemData, item_data_table
+from .items import ItemName, OtherItemData, TankData, UniqueItemData, item_data_table, launcher_to_ammo
 from .locations import location_table
 from .regions import all_areas_data
 
@@ -140,15 +140,16 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 continue
             item_data = item_data_table[item.name]
             match item_data:
-                case TankData(_, ItemId.ENERGY_TANKS):
-                    starting_items[ItemId.ENERGY_TANKS] += 1
                 case TankData(_, item_id):
-                    starting_items[item_id] += world.ammo_amounts[item.name]
-                case LauncherData(_, item_id, ammo_id):
-                    starting_items[item_id] += 1
-                    starting_items[ammo_id] += world.ammo_amounts[item.name]
+                    if item_id == ItemId.ENERGY_TANKS:
+                        starting_items[ItemId.ENERGY_TANKS] += 1
+                    else:
+                        starting_items[item_id] += world.ammo_amounts[item.name]
                 case UniqueItemData(_, item_id) | OtherItemData(_, item_id):
                     starting_items[item_id] += 1
+                    ammo_id = launcher_to_ammo.get(item.name)
+                    if ammo_id is not None:
+                        starting_items[ammo_id] += world.ammo_amounts[item.name]
         return starting_items
 
     def create_pickups(self, world: SamusReturnsWorld):
@@ -188,10 +189,12 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 return [[self.create_resource(item_id, 1)]]
             case TankData(_, item_id):
                 return [[self.create_resource(item_id, world.ammo_amounts[item])]]
-            case LauncherData(_, item_id, ammo_id):
-                return [[self.create_resource(item_id, 1), self.create_resource(ammo_id, world.ammo_amounts[item])]]
             case UniqueItemData(_, item_id) | OtherItemData(_, item_id):
-                return [[self.create_resource(item_id, 1)]]
+                ammo_id = launcher_to_ammo.get(item.name)
+                if ammo_id is None:
+                    return [[self.create_resource(item_id, 1)]]
+                else:  # noqa: RET505
+                    return [[self.create_resource(item_id, 1), self.create_resource(ammo_id, world.ammo_amounts[item])]]
 
     @staticmethod
     def create_resource(item_id: ItemId, quantity: int):

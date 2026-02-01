@@ -11,7 +11,7 @@ from worlds.generic.Rules import add_rule
 from . import lib as lib  # Set up module importer for open-samus-returns-rando
 from .data.constants import GAME_NAME
 from .data.room_names import SurfaceWest
-from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, launchers, major_items
+from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, major_items
 from .locations import location_table
 from .options import SamusReturnsOptions, msr_option_groups
 from .patch import SamusReturnsPatch
@@ -101,7 +101,6 @@ class SamusReturnsWorld(World):
         item_pool: list[Item] = []
 
         # Major items
-        item_pool += [self.create_item(name) for name in launchers if self.starting_items[name] <= 0]
         item_pool += [self.create_item(name) for name in major_items if self.starting_items[name] <= 0]
 
         # DNA

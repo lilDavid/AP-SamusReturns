@@ -172,7 +172,7 @@ area_3_exterior_location_table: dict[str, LocationData] = {
     Area3Exterior.BeamBurst.location(): ActorLocationData(308, AreaId.AREA_3_EXTERIOR, "LE_SpecialAbility_EnergyWave"),
     Area3Exterior.HalzynHangout.location("Top"): ActorLocationData(309, AreaId.AREA_3_EXTERIOR, "HiddenPowerup001"),
     Area3Exterior.HalzynHangout.location("Bottom"): ActorLocationData(310, AreaId.AREA_3_EXTERIOR, "HiddenPowerup002"),
-    Area3Exterior.Gamma.location("Bottom"): MetroidLocationData(311, AreaId.AREA_3_EXTERIOR, "SG_Gamma_005_C"),
+    Area3Exterior.Gamma.location(): MetroidLocationData(311, AreaId.AREA_3_EXTERIOR, "SG_Gamma_005_C"),
 }
 
 area_3_caverns_location_table: dict[str, LocationData] = {

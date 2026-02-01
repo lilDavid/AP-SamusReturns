@@ -154,6 +154,7 @@ class SamusReturnsWorld(World):
                 "wall_jump",
                 "infinite_bomb_jump",
                 "damage_boost",
+                "knowledge",
                 "movement",
                 toggles_as_bools=True,
             ),

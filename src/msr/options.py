@@ -47,11 +47,13 @@ class WallJump(LogicTrick):
     Jump off of walls in midair.
 
     Disable: Wall jumping will not be required by logic
-    Enable: Wall jumping may be required by logic
+    Simple: Logic can expect wall jumping to high ledges and up shafts
+    Advanced: Logic can expect wall jumping into tight spaces
     """
 
     display_name = "Wall Jump"
-    option_enable = 1
+    option_simple = 1
+    option_advanced = 2
 
 
 class IBJ(LogicTrick):
@@ -59,8 +61,9 @@ class IBJ(LogicTrick):
     Fly by bomb jumping in midair.
 
     Disable: Bomb jumping in midair will not be required by logic
-    Double: Logic may expect you to bomb jump in midair at most once
-    Vertical: Logic may expect you to infinite bomb jump directly up
+    Double: Bomb jump in midair once, usually unmorphing in midair to grab ledges
+    Vertical: Infinite bomb jump straight up to gain great height
+    Diagonal: IBJ off the sides of bombs to fly at angles
     """
 
     display_name = "Infinite Bomb Jump"
@@ -70,7 +73,20 @@ class IBJ(LogicTrick):
 
 
 class DamageBoost(LogicTrick):
+    """
+    Taking damage and knockback to gain distance, or otherwise deliberately as part of navigation.
+    """
+
     display_name = "Damage Boost"
+    option_enable = 1
+
+
+class Knowledge(LogicTrick):
+    """
+    Tricks that require knowledge of how the game works.
+    """
+
+    display_name = "Knowledge"
     option_enable = 1
 
 
@@ -147,6 +163,8 @@ msr_option_groups = [
         [
             WallJump,
             IBJ,
+            DamageBoost,
+            Knowledge,
             Movement,
         ],
     ),
@@ -181,6 +199,7 @@ class SamusReturnsOptions(PerGameCommonOptions):
     wall_jump: WallJump
     infinite_bomb_jump: IBJ
     damage_boost: DamageBoost
+    knowledge: Knowledge
     movement: Movement
 
     # Game Patches

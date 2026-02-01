@@ -9,7 +9,7 @@ from ...logic import (
     can_climb_shaft,
     can_climb_wall,
     can_damage_metroid,
-    can_fly_straight_up,
+    can_fly_vertical,
     can_high_jump,
     can_high_ledge,
     can_ibj,
@@ -22,7 +22,7 @@ from ..internal_names import AreaId
 from ..room_names import Area1
 from ..room_names import Area2Entryway as Area2
 from ..room_names import SurfaceEast as Surface
-from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData
+from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData
 
 area_1_data = AreaData(
     name="Area 1",
@@ -590,17 +590,11 @@ area_1_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Area1.CavernsSaveStation.subregion("Main"),
-                            access_rule=Has(Area1.WaterMaze.location("Grapple Block")),
+                            access_rule=Has(ItemName.GrappleBeam),
                         ),
                     ],
                     pickups=[
                         PickupData(),
-                    ],
-                    events=[
-                        EventData(
-                            "Grapple Block",
-                            access_rule=Has(ItemName.GrappleBeam),
-                        )
                     ],
                 ),
             ],
@@ -680,7 +674,7 @@ area_1_data = AreaData(
                                     ItemName.MorphBall,
                                 ),
                                 Or(
-                                    can_fly_straight_up,
+                                    can_fly_vertical,
                                     And(
                                         can_high_jump,
                                         Or(
@@ -777,17 +771,11 @@ area_1_data = AreaData(
                             Door.Open,
                             Area1.CavernsHub,
                         ),
-                        ExitData(
-                            Door.MorphTunnel,
-                            Area1.WaterMaze.subregion("Pickup"),
-                            access_rule=And(
-                                Has(Area1.WaterMaze.location("Grapple Block")),
-                                Or(
-                                    can_spider,
-                                    Has(ItemName.GravitySuit) & can_climb_shaft,
-                                ),
-                            ),
-                        ),
+                        # ExitData(
+                        #     Door.MorphTunnel,
+                        #     Area1.WaterMaze.subregion("Pickup"),
+                        #     Grapple block
+                        # ),
                         ExitData(
                             Door.MorphTunnel,
                             Area1.CavernsSaveStation.subregion("Pickup tunnel"),

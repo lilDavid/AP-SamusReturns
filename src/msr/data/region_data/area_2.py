@@ -13,7 +13,7 @@ from ...logic import (
     can_damage_boost,
     can_damage_metroid,
     can_damage_tough_enemy,
-    can_fly_straight_up,
+    can_fly_vertical,
     can_high_jump,
     can_high_ledge,
     can_ibj,
@@ -30,6 +30,7 @@ from ..room_names import Area1
 from ..room_names import Area2Entryway as Entryway
 from ..room_names import Area2Exterior as Exterior
 from ..room_names import Area2Interior as Interior
+from ..room_names import Area3Exterior as Area3
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData
 
 area_2_exterior_data = AreaData(
@@ -58,12 +59,12 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Exterior.DamExterior.subregion("Top"),
-                            access_rule=can_fly_straight_up,
+                            access_rule=can_fly_vertical,
                         ),
                     ],
                     pickups=[
                         # Spider boost as a solution is a little obscure but not too bad?
-                        PickupData(access_rule=can_fly_straight_up),
+                        PickupData(access_rule=can_fly_vertical),
                     ],
                 ),
                 RegionData(
@@ -124,7 +125,7 @@ area_2_exterior_data = AreaData(
                             Door.Open,
                             Exterior.DamExterior.subregion("Alpha Ledge"),
                             access_rule=Or(
-                                can_fly_straight_up,
+                                can_fly_vertical,
                                 Has(ItemName.LightningArmor) & can_spider,
                             ),
                         ),
@@ -155,10 +156,7 @@ area_2_exterior_data = AreaData(
                             Exterior.DamExterior.subregion("West"),
                             access_rule=Or(
                                 can_bomb_block,
-                                And(
-                                    Has(ItemName.Hatchling),
-                                    can_climb_wall | can_wall_jump(WallJump.option_enable),
-                                ),
+                                Has(ItemName.Hatchling) & can_climb_shaft,
                             ),
                         ),
                         # ExitData(
@@ -1107,7 +1105,7 @@ area_2_interior_data = AreaData(
                                             can_ibj(IBJ.option_double),
                                             And(
                                                 can_movement(Movement.option_enable),
-                                                can_wall_jump(WallJump.option_enable) | can_high_jump,
+                                                can_wall_jump(WallJump.option_simple) | can_high_jump,
                                             ),
                                         ),
                                     ),
@@ -1532,10 +1530,10 @@ area_2_entryway_data = AreaData(
                             Door.MorphTunnel,
                             Entryway.TransportAreas1And3.subregion("Seal"),
                         ),
-                        # ExitData(
-                        #     Door.Elevator,
-                        #     # TODO: Area 3
-                        # ),
+                        ExitData(
+                            Door.Elevator,
+                            Area3.TransportArea2.subregion("Upper"),
+                        ),
                     ],
                 ),
             ],

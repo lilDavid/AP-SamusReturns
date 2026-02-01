@@ -1,80 +1,798 @@
+from rule_builder.rules import And, Has, HasAll, HasAny, Or
+
+from ...items import ItemName
+from ...logic import (
+    can_any_missile,
+    can_beam_block_through_tunnel,
+    can_blobthrower,
+    can_bomb,
+    can_bomb_block,
+    can_climb_shaft,
+    can_climb_wall,
+    can_damage_boost,
+    can_damage_metroid,
+    can_damage_tough_enemy,
+    can_fly,
+    can_fly_vertical,
+    can_gamma_metroid,
+    can_high_ledge,
+    can_ibj,
+    can_medium_bomb_block,
+    can_movement,
+    can_power_bomb,
+    can_short_shaft,
+    can_spider,
+    can_spider_boost,
+    can_spider_boost_underwater,
+    can_tunnel_steel_orb,
+    can_underwater_high_jump,
+    can_wall_jump,
+    has_knowledge,
+)
+from ...options import IBJ, DamageBoost, Knowledge, Movement, WallJump
 from ..internal_names import AreaId
-from ..room_names import Area3Caverns, Area3Exterior, Area3Interior
-from . import AreaData, RoomData
+from ..room_names import Area2Entryway as Area2
+from ..room_names import Area3Caverns as Caverns
+from ..room_names import Area3Exterior as Exterior
+from ..room_names import Area3Interior as Interior
+from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData
+
+can_climb_ascending_alleyway = And(
+    can_any_missile,
+    Has(ItemName.GrappleBeam) | can_fly_vertical,
+    Has(ItemName.MorphBall),
+)
+can_grapple_tunnel = Has(ItemName.GrappleBeam) | can_fly_vertical
+
 
 area_3_exterior_data = AreaData(
     name="Area 3 Factory Exterior",
     id=AreaId.AREA_3_EXTERIOR,
     rooms=[
         RoomData(
-            Area3Exterior.TransportArea2,
+            Exterior.TransportArea2,
             id="collision_camera_002",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Upper",
+                    exits=[
+                        ExitData(
+                            Door.Elevator,
+                            Area2.TransportAreas1And3.subregion("Area 3"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Exterior.TransportArea2.subregion("Middle left"),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Exterior.BeamBurst.subregion("Main"),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Exterior.TransportArea4.subregion("Upper"),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Middle left",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Exterior.TransportArea2.subregion("Upper"),
+                            access_rule=can_short_shaft,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.TransportArea2.subregion("Middle right"),
+                            access_rule=can_bomb_block,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Exterior.TransportArea4.subregion("Middle"),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Middle right",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.TransportArea2.subregion("Upper"),
+                            access_rule=can_bomb_block,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.TransportArea2.subregion("Lower"),
+                            access_rule=can_beam_block_through_tunnel & can_any_missile,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Exterior.EntranceMaze,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Lower",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.TransportArea2.subregion("Middle right"),
+                            access_rule=can_any_missile,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Exterior.TransportArea4.subregion("Lower"),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Exterior.EntranceMaze,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Exterior.TransportArea4.subregion("Transport"),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Exterior.ExteriorMaze,
+            Exterior.ExteriorMaze,
             id="collision_camera_016",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.FactoryExt.subregion("Shaft middle"),
+                        )
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=And(
+                                Or(
+                                    And(
+                                        Has(ItemName.Hatchling),
+                                        Or(
+                                            can_spider,
+                                            # Unmorph to grab the ledge in the small tunnel
+                                            can_movement(Movement.option_enable),
+                                        ),
+                                    ),
+                                    # Slide down the goop to attach to the left wall
+                                    can_spider_boost,
+                                    # Unmorph to grab the ledges
+                                    can_movement(Movement.option_enable),
+                                ),
+                                # Courtesy in case of mistake, which also happens to solve the exit condition
+                                can_bomb_block,
+                            )
+                        )
+                    ],
+                )
+            ],
         ),
         RoomData(
-            Area3Exterior.GrappleBeam,
+            Exterior.GrappleBeam,
             id="collision_camera_022",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Missile,
+                            Exterior.FactoryExt.subregion("Crevice"),
+                        )
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=HasAll(ItemName.MorphBall, ItemName.GrappleBeam),
+                        ),
+                    ],
+                )
+            ],
         ),
         RoomData(
-            Area3Exterior.FactoryExtTeleporter,
+            Exterior.FactoryExtTeleporter,
             id="collision_camera_023",
-            regions=[],  # TODO
+            regions=[],  # Not logically relevant
         ),
         RoomData(
-            Area3Exterior.FactoryExt,
+            Exterior.FactoryExt,
             id="collision_camera_030",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Entrance",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Exterior.FactoryExtAccess.subregion("Exit"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Exterior.FactoryExt.subregion("Platform"),
+                            access_rule=can_high_ledge,
+                        ),
+                        # ExitData(
+                        #     Door.Open,
+                        #     Exterior.FactoryExtTeleporter,
+                        # ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Ceiling",
+                            access_rule=Or(
+                                Has(ItemName.SpaceJump),
+                                can_spider_boost,
+                                # Technically you can just IBJ from the right place, but I can't in good conscience
+                                # require that kind of height without splitting the option
+                                can_ibj(IBJ.option_vertical) & can_spider,
+                            ),
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Platform",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Exterior.FactoryExt.subregion("Entrance"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Exterior.FactoryExt.subregion("Crevice"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Exterior.FactoryExt.subregion("Top"),
+                            access_rule=Or(
+                                Has(ItemName.SpaceJump),
+                                can_ibj(IBJ.option_vertical),
+                                # Drop off before the spikes and unmorph (morph ball falls super fast)
+                                # Alternatively, you can spider boost from just the right spot in the crevice and hit
+                                # the ceiling just to the right of the spikes
+                                can_movement(Movement.option_enable) & can_spider_boost,
+                            ),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Crevice",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Exterior.FactoryExt.subregion("Platform"),
+                            access_rule=can_climb_wall,
+                        ),
+                        ExitData(
+                            Door.Missile,
+                            Exterior.GrappleBeam,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.FactoryExt.subregion("Top"),
+                            access_rule=And(
+                                # Grapple point is offscreen without high jump
+                                has_knowledge(Knowledge.option_enable) | can_high_ledge,
+                                Has(ItemName.GrappleBeam),
+                                can_spider,
+                            ),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Top",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Exterior.FactoryExt.subregion("Platform"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Exterior.FactoryExt.subregion("Shaft middle"),
+                        ),
+                        ExitData(Door.Elevator, Interior.TransportFactoryExtE),
+                    ],
+                ),
+                RegionData(
+                    "Shaft middle",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Exterior.FactoryExt.subregion("Top"),
+                            access_rule=can_high_ledge,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.ExteriorMaze,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Exterior.FactoryExt.subregion("Shaft bottom"),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData("Shaft"),
+                    ],
+                ),
+                RegionData(
+                    "Shaft bottom",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Exterior.FactoryExt.subregion("Shaft middle"),
+                            access_rule=can_high_ledge | can_climb_shaft,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Exterior.HalzynHangout.subregion("Lower"),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Exterior.TransportCavernsW,
+            Exterior.TransportCavernsW,
             id="collision_camera_031",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Elevator,
+                            Caverns.TransportFactoryExtW,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Exterior.BeamBurst.subregion("Main"),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=can_any_missile,
+                        )
+                    ],
+                )
+            ],
         ),
         RoomData(
-            Area3Exterior.TransportArea4,
+            Exterior.TransportArea4,
             id="collision_camera_032",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Upper",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Exterior.TransportArea2.subregion("Upper"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.TransportArea4.subregion("Middle"),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Middle",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Exterior.TransportArea2.subregion("Middle left"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.TransportArea4.subregion("Upper"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.TransportArea4.subregion("Lower"),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            # The jump into the morph tunnel is a little awkward with no items
+                            access_rule=HasAll(ItemName.MorphBall, ItemName.GrappleBeam),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Lower",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Exterior.TransportArea2.subregion("Lower"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.TransportArea4.subregion("Middle"),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Transport",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Exterior.TransportArea2.subregion("Lower"),
+                        ),
+                        # ExitData(
+                        #     Door.Elevator,
+                        #     # TODO: Area 4
+                        # ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Exterior.EntranceMaze,
+            Exterior.EntranceMaze,
             id="collision_camera_033",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Exterior.TransportArea2.subregion("Lower"),
+                            access_rule=Has(ItemName.MorphBall),
+                        )
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=And(
+                                Has(ItemName.MorphBall),
+                                Or(
+                                    HasAny(ItemName.SpaceJump, ItemName.PhaseDrift),
+                                    can_spider,
+                                    can_movement(Movement.option_enable),
+                                ),
+                            )
+                        )
+                    ],
+                )
+            ],
         ),
         RoomData(
-            Area3Exterior.TransportCavernsN,
+            Exterior.TransportCavernsN,
             id="collision_camera_035",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Transport",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Exterior.BeamBurst.subregion("Transport access"),
+                        ),
+                        ExitData(
+                            Door.Elevator,
+                            Caverns.TransportFactoryExtN.subregion("Transport"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.TransportCavernsN.subregion("Upper"),
+                            access_rule=Or(
+                                can_tunnel_steel_orb,
+                                And(
+                                    can_bomb_block,
+                                    can_short_shaft,
+                                    Or(
+                                        HasAll(ItemName.WaveBeam, ItemName.BeamBurst),
+                                        can_spider,
+                                        can_power_bomb,
+                                        can_damage_boost(DamageBoost.option_enable),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Upper",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Exterior.FactoryExtAccess.subregion("Lower"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.TransportCavernsN.subregion("Transport"),
+                            access_rule=Or(
+                                can_tunnel_steel_orb,
+                                And(
+                                    can_spider | can_damage_tough_enemy,
+                                    can_bomb_block,
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Exterior.BeamBurst,
+            Exterior.BeamBurst,
             id="collision_camera_036",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Main",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Exterior.TransportArea2.subregion("Upper"),
+                        ),
+                        # ExitData(
+                        #     Door.Locked,
+                        #     Exterior.TransportCavernsW,
+                        # ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.BeamBurst.subregion("Pickup"),
+                            access_rule=Has(ItemName.LightningArmor) | can_spider,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Exterior.BeamBurst.subregion("Intersection"),
+                            access_rule=can_blobthrower,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Pickup",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.BeamBurst.subregion("Main"),
+                            access_rule=Has(ItemName.LightningArmor) | can_spider,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.BeamBurst.subregion("Intersection"),
+                            access_rule=can_bomb_block,
+                        ),
+                        # ExitData(
+                        #     Door.MorphTunnel,
+                        #     Exterior.FactoryExtAccess.subregion("Lower"),
+                        #     Grapple block
+                        # ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=Has(ItemName.MorphBall),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Intersection",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.BeamBurst.subregion("Pickup"),
+                            access_rule=can_bomb_block,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Exterior.BeamBurst.subregion("Main"),
+                            access_rule=can_blobthrower,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Exterior.BeamBurst.subregion("Transport access"),
+                            access_rule=can_blobthrower,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Transport access",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Exterior.BeamBurst.subregion("Intersection"),
+                            access_rule=can_blobthrower,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Exterior.TransportCavernsN.subregion("Transport"),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Exterior.HalzynHangout,
+            Exterior.HalzynHangout,
             id="collision_camera_037",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Lower",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Exterior.FactoryExt.subregion("Shaft bottom"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.HalzynHangout.subregion("Upper"),
+                            access_rule=Has(ItemName.GrappleBeam) & can_climb_wall,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Bottom",
+                            access_rule=Has(ItemName.LightningArmor) & can_power_bomb,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Upper",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Exterior.HalzynHangout.subregion("Lower"),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Exterior.Gamma.subregion("Entrance"),
+                            access_rule=Has(ItemName.GrappleBeam) & can_climb_wall,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Top",
+                            access_rule=HasAll(ItemName.SpaceJump, ItemName.ScrewAttack),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Exterior.Gamma,
+            Exterior.Gamma,
             id="collision_camera_038",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Entrance",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Exterior.HalzynHangout.subregion("Upper"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.NooksCranny,
+                            access_rule=can_bomb_block,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.Gamma.subregion("Middle arena"),
+                            access_rule=can_bomb_block,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.Gamma.subregion("Upper arena"),
+                            access_rule=can_high_ledge & can_bomb,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=can_gamma_metroid(
+                                Exterior.Gamma.location("Upper arena"),
+                                Exterior.Gamma.location("Middle arena"),
+                                Exterior.NooksCranny.location("Lower arena"),
+                            )
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Middle arena",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.Gamma.subregion("Entrance"),
+                            access_rule=Or(
+                                can_power_bomb,
+                                And(
+                                    can_bomb,
+                                    can_spider | Has(ItemName.GravitySuit),
+                                ),
+                            ),
+                        ),
+                    ],
+                    events=[
+                        EventData("Middle arena"),
+                    ],
+                    require_exit_access=True,
+                ),
+                RegionData(
+                    "Upper arena",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.Gamma.subregion("Entrance"),
+                            access_rule=can_bomb_block & can_beam_block_through_tunnel,
+                        ),
+                    ],
+                    events=[
+                        EventData("Upper arena"),
+                    ],
+                    require_exit_access=True,
+                ),
+            ],
         ),
         RoomData(
-            Area3Exterior.NooksCranny,
+            Exterior.NooksCranny,
             id="collision_camera_039",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.Gamma.subregion("Entrance"),
+                            access_rule=Or(
+                                can_power_bomb,
+                                can_bomb & can_spider,
+                            ),
+                        )
+                    ],
+                    events=[
+                        EventData("Lower arena"),
+                    ],
+                    require_exit_access=True,
+                )
+            ],
         ),
         RoomData(
-            Area3Exterior.FactoryExtAccess,
+            Exterior.FactoryExtAccess,
             id="collision_camera_040",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Lower",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Exterior.TransportCavernsN.subregion("Transport"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.BeamBurst.subregion("Pickup"),
+                            access_rule=Has(ItemName.GrappleBeam),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.FactoryExtAccess.subregion("Upper"),
+                            # FIXME: Dangerous action
+                            access_rule=Or(
+                                can_climb_wall,
+                                And(
+                                    can_high_ledge | can_wall_jump(WallJump.option_advanced),
+                                    can_damage_tough_enemy,
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Upper",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Exterior.FactoryExtAccess.subregion("Exit"),
+                            access_rule=Or(can_blobthrower, can_spider, can_fly),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Exterior.FactoryExtAccess.subregion("Lower"),
+                            access_rule=Has(ItemName.GrappleBeam),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Exit",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Exterior.FactoryExtAccess.subregion("Upper"),
+                            access_rule=Or(can_blobthrower, can_spider, can_fly),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Exterior.FactoryExt.subregion("Entrance"),
+                        ),
+                    ],
+                ),
+            ],
         ),
     ],
 )
@@ -84,109 +802,886 @@ area_3_caverns_data = AreaData(
     id=AreaId.AREA_3_CAVERNS,
     rooms=[
         RoomData(
-            Area3Caverns.TransportFactoryExtN,
+            Caverns.TransportFactoryExtN,
             id="collision_camera_006",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Transport",
+                    exits=[
+                        ExitData(
+                            Door.Elevator,
+                            Exterior.TransportCavernsN.subregion("Transport"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Caverns.TransportFactoryExtN.subregion("Upper"),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Upper",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Caverns.TransportFactoryExtN.subregion("Transport"),
+                            access_rule=can_climb_shaft,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Caverns.Alpha2W,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Caverns.TransportFactoryExtN.subregion("Lower"),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Lower",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Caverns.TransportFactoryExtN.subregion("Upper"),
+                            access_rule=can_short_shaft | Has(ItemName.MorphBall),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Caverns.GammaC.subregion("Arena"),
+                        ),
+                        # ExitData(
+                        #     Door.Locked,
+                        #     Caverns.GammaS.subregion("West"),
+                        # ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.TransportFactoryExtN.subregion("Bottom"),
+                            access_rule=can_underwater_high_jump,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=can_bomb_block,
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Bottom",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.TransportFactoryExtN.subregion("Lower"),
+                            access_rule=Has(ItemName.GravitySuit) | can_spider,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.GammaS.subregion("Maze Entrance"),
+                            access_rule=Has(ItemName.SuperMissile),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Caverns.Alpha2W,
+            Caverns.Alpha2W,
             id="collision_camera_007",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Caverns.TransportFactoryExtN.subregion("Upper"),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Caverns.TransportFactoryExtW,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=can_damage_metroid,
+                        )
+                    ],
+                )
+            ],
         ),
         RoomData(
-            Area3Caverns.GammaC,
+            Caverns.GammaC,
             id="collision_camera_008",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Arena",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Caverns.TransportFactoryExtN.subregion("Lower"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.GammaC.subregion("Exit"),
+                            access_rule=can_blobthrower,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=can_damage_metroid,
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Exit",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.GammaC.subregion("Arena"),
+                            access_rule=can_blobthrower,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Caverns.LetumShrine,
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Caverns.GammaS,
+            Caverns.GammaS,
             id="collision_camera_009",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Maze Entrance",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.TransportFactoryExtN.subregion("Bottom"),
+                            access_rule=Has(ItemName.SuperMissile),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.GammaS.subregion("Maze Junction Access"),
+                            access_rule=can_underwater_high_jump,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Maze Junction Access",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.GammaS.subregion("Maze Entrance"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.GammaS.subregion("Maze Junction"),
+                            access_rule=can_bomb_block,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Tunnels",
+                            access_rule=Or(
+                                And(
+                                    can_any_missile,
+                                    Has(ItemName.GravitySuit),
+                                ),
+                                And(
+                                    Has(ItemName.Hatchling),
+                                    can_spider | Has(ItemName.PhaseDrift),
+                                ),
+                            ),
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Maze Junction",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.GammaS.subregion("Maze Junction Access"),
+                            access_rule=can_power_bomb,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.GammaS.subregion("West"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.GammaS.subregion("Arena"),
+                            access_rule=can_bomb_block,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.GammaS.subregion("East"),
+                            access_rule=Has(ItemName.GravitySuit) | can_climb_shaft,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "West",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.GammaS.subregion("Maze Junction"),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Caverns.TransportFactoryExtN.subregion("Lower"),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Arena",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.GammaS.subregion("Maze Junction"),
+                            access_rule=can_power_bomb,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Caverns.GammaS.subregion("East"),
+                            access_rule=can_bomb_block,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Gamma Metroid",
+                            access_rule=can_damage_metroid,
+                        )
+                    ],
+                ),
+                RegionData(
+                    "East",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.GammaS.subregion("Maze Junction"),
+                        ),
+                        ExitData(
+                            Door.Taramarga,
+                            Caverns.RamulkenRollway.subregion("Lower"),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Caverns.SaveStationN,
+            Caverns.SaveStationN,
             id="collision_camera_010",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Caverns.GravittGarden.subregion("Middle"),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Caverns.QuarryTunnel.subregion("Left"),
+                        ),
+                    ]
+                )
+            ],
         ),
         RoomData(
-            Area3Caverns.GravittGarden,
+            Caverns.GravittGarden,
             id="collision_camera_012",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Lower",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.LetumShrine,
+                            access_rule=Has(ItemName.GrappleBeam),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Caverns.GravittGarden.subregion("Middle"),
+                            access_rule=Has(ItemName.GrappleBeam) | can_fly_vertical,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(),
+                    ],
+                ),
+                RegionData(
+                    "Middle",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Caverns.GravittGarden.subregion("Lower"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Caverns.SaveStationN,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Caverns.GravittGarden.subregion("Upper"),
+                            access_rule=can_climb_shaft,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Upper",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Caverns.GravittGarden.subregion("Middle"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Caverns.Alpha2N.subregion("Arena"),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Caverns.AscendingAlleyway,
+            Caverns.AscendingAlleyway,
             id="collision_camera_024",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.RamulkenRollway.subregion("Upper"),
+                            access_rule=can_bomb_block,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.QuarryShaft.subregion("Grapple Block"),
+                            access_rule=can_climb_ascending_alleyway & Has(ItemName.GrappleBeam),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=can_climb_ascending_alleyway,
+                        )
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Caverns.RamulkenRollway,
+            Caverns.RamulkenRollway,
             id="collision_camera_025",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Lower",
+                    exits=[
+                        ExitData(
+                            Door.Charge,
+                            Caverns.CavernsTeleporterE.subregion("Upper"),
+                            access_rule=Has(ItemName.MorphBall) | can_short_shaft,
+                        ),
+                        ExitData(
+                            Door.Taramarga,
+                            Caverns.GammaS.subregion("East"),
+                            access_rule=Has(ItemName.MorphBall) | can_short_shaft,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Caverns.RamulkenRollway.subregion("Upper"),
+                            access_rule=Or(
+                                can_fly_vertical,
+                                And(
+                                    has_knowledge(Knowledge.option_enable) | can_climb_wall,
+                                    Has(ItemName.GrappleBeam),
+                                ),
+                            ),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=And(
+                                HasAll(ItemName.GravitySuit, ItemName.SpaceJump) | can_spider_boost_underwater,
+                                can_any_missile,
+                                can_bomb_block,
+                            )
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Upper",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Caverns.RamulkenRollway.subregion("Lower"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.AscendingAlleyway,
+                            access_rule=can_bomb_block,
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Caverns.CavernsTeleporterE,
+            Caverns.CavernsTeleporterE,
             id="collision_camera_026",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Lower",
+                    exits=[
+                        ExitData(
+                            Door.Charge,
+                            Caverns.QuarryShaft.subregion("Bottom"),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Caverns.WaterfallCavern,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Caverns.CavernsTeleporterE.subregion("Upper"),
+                            access_rule=can_climb_wall,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Upper",
+                    exits=[
+                        ExitData(
+                            Door.Charge,
+                            Caverns.RamulkenRollway.subregion("Lower"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Caverns.CavernsTeleporterE.subregion("Lower"),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=And(
+                                Has(ItemName.GrappleBeam) | can_fly_vertical,
+                                HasAll(ItemName.BeamBurst, ItemName.WaveBeam) | can_power_bomb,
+                                Has(ItemName.MorphBall),
+                            ),
+                        )
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Caverns.QuarryShaft,
+            Caverns.QuarryShaft,
             id="collision_camera_027",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Bottom",
+                    exits=[
+                        ExitData(
+                            Door.Charge,
+                            Caverns.CavernsTeleporterE.subregion("Lower"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Caverns.QuarryShaft.subregion("Lower"),
+                            access_rule=Has(ItemName.MorphBall) | can_climb_shaft,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Lower",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Caverns.QuarryShaft.subregion("Bottom"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Caverns.QuarryShaft.subregion("Upper"),
+                            access_rule=can_short_shaft,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.LonelyLoop.subregion("Bottom"),
+                            access_rule=can_climb_wall,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Upper",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Caverns.QuarryShaft.subregion("Lower"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.QuarryShaft.subregion("Top"),
+                        ),
+                        # ExitData(
+                        #     Door.Open,
+                        #     Caverns.QuarryShaft.subregion("Grapple Block"),
+                        # ),
+                    ],
+                ),
+                RegionData(
+                    "Top",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.QuarryShaft.subregion("Upper"),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Caverns.TransportFactoryIntS.subregion("Left"),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Grapple Block",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.QuarryShaft.subregion("Upper"),
+                            access_rule=can_climb_shaft,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Pickup",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Caverns.LonelyLoop.subregion("Top"),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Caverns.LonelyLoop,
+            Caverns.LonelyLoop,
             id="collision_camera_028",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Bottom",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.QuarryShaft.subregion("Lower"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.LonelyLoop.subregion("Top"),
+                            access_rule=HasAny(ItemName.GrappleBeam, ItemName.SpaceJump),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Top",
+                    exits=[
+                        ExitData(
+                            Door.Gigadora,
+                            Caverns.QuarryShaft.subregion("Pickup"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.LonelyLoop.subregion("Bottom"),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Caverns.QuarryTunnel,
+            Caverns.QuarryTunnel,
             id="collision_camera_031",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Left",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Caverns.SaveStationN,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Caverns.QuarryTunnel.subregion("Right"),
+                            access_rule=Has(ItemName.GrappleBeam),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Right",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Caverns.TransportFactoryIntS.subregion("Left"),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Caverns.TransportFactoryIntS,
+            Caverns.TransportFactoryIntS,
             id="collision_camera_032",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Left",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Caverns.QuarryTunnel.subregion("Right"),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Caverns.QuarryShaft.subregion("Top"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Caverns.TransportFactoryIntS.subregion("Right"),
+                            access_rule=can_spider_boost | Has(ItemName.PhaseDrift),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Right",
+                    exits=[
+                        ExitData(
+                            Door.Elevator,
+                            Interior.GammaTransportCavernsE.subregion("Elevator"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Caverns.TransportFactoryIntS.subregion("Left"),
+                            access_rule=Or(
+                                can_spider_boost,
+                                Has(ItemName.PhaseDrift),
+                                can_any_missile & Has(ItemName.GrappleBeam),
+                            ),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=can_any_missile,
+                        )
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Caverns.Gamma2S,
+            Caverns.Gamma2S,
             id="collision_camera_033",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    # "Fake" region to cover both arenas
+                    pickups=[
+                        PickupData(
+                            access_rule=can_gamma_metroid(
+                                Caverns.Gamma2S.location("Northwest arena"),
+                                Caverns.Gamma2S.location("Southwest arena"),
+                                Caverns.Gamma2SAccess.location("Southeast arena"),
+                            )
+                        )
+                    ]
+                ),
+                RegionData(
+                    "Upper",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.Gamma2SAccess.subregion("Hub"),
+                            access_rule=can_medium_bomb_block,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.Gamma2S.subregion("Lower"),
+                            access_rule=can_bomb_block,
+                        ),
+                    ],
+                    events=[
+                        EventData("Northwest arena"),
+                    ],
+                ),
+                RegionData(
+                    "Lower",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.Gamma2SAccess.subregion("Hub"),
+                            access_rule=can_bomb_block,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.Gamma2S.subregion("Upper"),
+                            access_rule=can_medium_bomb_block & can_climb_shaft,
+                        ),
+                    ],
+                    events=[
+                        EventData("Southwest arena"),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Caverns.Gamma2SAccess,
+            Caverns.Gamma2SAccess,
             id="collision_camera_034",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Hub",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Caverns.Gamma2S,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.Gamma2S.subregion("Upper"),
+                            access_rule=can_bomb_block,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.Gamma2S.subregion("Lower"),
+                            access_rule=can_bomb_block,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.Gamma2SAccess.subregion("Arena"),
+                            access_rule=can_bomb_block,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Arena",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.Gamma2SAccess.subregion("Hub"),
+                            access_rule=can_high_ledge & can_bomb_block,
+                        ),
+                    ],
+                    events=[
+                        EventData("Southeast arena"),
+                    ],
+                    require_exit_access=True,
+                ),
+            ],
         ),
         RoomData(
-            Area3Caverns.WaterfallCavern,
+            Caverns.WaterfallCavern,
             id="collision_camera_035",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Caverns.CavernsTeleporterE.subregion("Lower"),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Caverns.Gamma2SAccess.subregion("Hub"),
+                        ),
+                    ]
+                )
+            ],
         ),
         RoomData(
-            Area3Caverns.Gamma2N,
+            Caverns.Gamma2N,
             id="collision_camera_036",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Caverns.Alpha2N.subregion("Exit"),
+                            access_rule=Has(ItemName.VariaSuit),
+                        )
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=And(
+                                can_bomb_block,
+                                can_spider | Has(ItemName.GravitySuit),
+                                can_damage_metroid,
+                            )
+                        )
+                    ],
+                )
+            ],
         ),
         RoomData(
-            Area3Caverns.TransportFactoryExtW,
+            Caverns.TransportFactoryExtW,
             id="collision_camera_037",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Caverns.Alpha2W,
+                        ),
+                        ExitData(
+                            Door.Elevator,
+                            Exterior.TransportCavernsW,
+                        ),
+                    ]
+                )
+            ],
         ),
         RoomData(
-            Area3Caverns.Alpha2W,
+            Caverns.Alpha2N,
             id="collision_camera_038",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Arena",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Caverns.GravittGarden.subregion("Upper"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.Alpha2N.subregion("Exit"),
+                            access_rule=can_medium_bomb_block,  # FIXME: Dangerous action
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Exit",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Caverns.Gamma2N,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.Alpha2N.subregion("Arena"),
+                            access_rule=can_climb_wall & can_bomb_block,
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Caverns.LetumShrine,
+            Caverns.LetumShrine,
             id="collision_camera_039",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Caverns.GammaC.subregion("Exit"),
+                        ),
+                        # ExitData(
+                        #     Door.Normal,
+                        #     Caverns.CavernsTeleporterW,
+                        # ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.GravittGarden.subregion("Lower"),
+                            access_rule=Has(ItemName.GrappleBeam),
+                        ),
+                    ]
+                )
+            ],
         ),
         RoomData(
-            Area3Caverns.CavernsTeleporterW,
+            Caverns.CavernsTeleporterW,
             id="collision_camera_040",
-            regions=[],  # TODO
+            regions=[],  # Not logically relevant
         ),
     ],
 )
@@ -196,89 +1691,541 @@ area_3_interior_data = AreaData(
     id=AreaId.AREA_3_INTERIOR,
     rooms=[
         RoomData(
-            Area3Interior.SecuritySite,
+            Interior.SecuritySite,
             id="collision_camera_011",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.PowerBomb,
+                            Interior.GammaS,
+                        )
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=And(
+                                Or(
+                                    # Destroy the robot
+                                    can_damage_tough_enemy,
+                                    # Nullify it
+                                    Has(ItemName.LightningArmor),
+                                    # Trick it
+                                    And(
+                                        Has(ItemName.MorphBall),
+                                        HasAny(ItemName.Bomb, ItemName.SpiderBall, ItemName.SpringBall),
+                                    ),
+                                ),
+                                Has(ItemName.GrappleBeam),
+                                # Feels like there's supposed to be a block but it isn't there, you can just fall in
+                            )
+                        )
+                    ],
+                )
+            ],
         ),
         RoomData(
-            Area3Interior.GammaSAccess,
+            Interior.GammaSAccess,
             id="collision_camera_013",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Taramarga,
+                            Interior.GammaTransportCavernsE.subregion("Southwest"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GammaS,
+                            access_rule=can_grapple_tunnel,
+                        ),
+                    ],
+                    events=[
+                        EventData("Right arena"),
+                    ],
+                )
+            ],
         ),
         RoomData(
-            Area3Interior.ParabyPeriphery,
+            Interior.ParabyPeriphery,
             id="collision_camera_014",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Left",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Interior.GammaTransportCavernsE.subregion("Southeast"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Interior.ParabyPeriphery.subregion("Right"),
+                            # FIXME: Dangerous action
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Right",
+                    exits=[
+                        ExitData(
+                            Door.Charge,
+                            Interior.AlphaAccess.subregion("Bottom"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Interior.ParabyPeriphery.subregion("Left"),
+                            access_rule=can_climb_wall,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=can_bomb_block,
+                        )
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Interior.FanControl,
+            Interior.FanControl,
             id="collision_camera_015",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Super,
+                            Interior.WallfireWatch.subregion("Top"),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=Or(
+                                can_power_bomb,
+                                can_any_missile & can_bomb,
+                            )
+                        )
+                    ],
+                )
+            ],
         ),
         RoomData(
-            Area3Interior.GrappleCircuit,
+            Interior.GrappleCircuit,
             id="collision_camera_017",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Main",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.TransportFactoryExtE,
+                            access_rule=can_short_shaft,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.FactoryIntersection.subregion("Pickup"),
+                            access_rule=Has(Interior.GrappleCircuit.location("Lower Grapple Block")) & can_bomb,
+                        ),
+                    ],
+                    events=[
+                        EventData(
+                            "Upper Grapple Block",
+                            access_rule=Has(ItemName.GrappleBeam),
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Lower Block",
+                    events=[
+                        EventData(
+                            "Lower Grapple Block",
+                            access_rule=Has(ItemName.GrappleBeam),
+                        )
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Interior.FactoryIntersection,
+            Interior.FactoryIntersection,
             id="collision_camera_018",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Top",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Interior.TransportFactoryExtE,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GrappleCircuit.subregion("Lower Block"),
+                            access_rule=Has(Interior.GrappleCircuit.location("Upper Grapple Block")),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Interior.FactoryIntersection.subregion("Bottom"),
+                            # FIXME: Dangerous action
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Pickup",
+                    pickups=[
+                        PickupData(),
+                    ],
+                ),
+                # Access to Dedicated Callisto Roost is not relevant
+                RegionData(
+                    "Bottom",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Interior.TransportFactoryExtE,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Interior.RamulkenResidence,
+                            # FIXME: Dangerous action
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Interior.FactoryIntTeleporter,
+            Interior.FactoryIntTeleporter,
             id="collision_camera_019",
-            regions=[],  # TODO
+            regions=[],  # Not logically relevant
         ),
         RoomData(
-            Area3Interior.TransportFactoryExtE,
+            Interior.TransportFactoryExtE,
             id="collision_camera_021",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Interior.FactoryIntersection.subregion("Top"),
+                        ),
+                        ExitData(
+                            Door.Elevator,
+                            Exterior.FactoryExt.subregion("Top"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GrappleCircuit.subregion("Main"),
+                        ),
+                    ]
+                )
+            ],
         ),
         RoomData(
-            Area3Interior.AlphaAccess,
+            Interior.AlphaAccess,
             id="collision_camera_022",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Bottom",
+                    exits=[
+                        ExitData(
+                            Door.Charge,
+                            Interior.ParabyPeriphery.subregion("Right"),
+                            access_rule=Has(ItemName.VariaSuit),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.AlphaAccess.subregion("Top"),
+                            access_rule=And(
+                                Has(ItemName.VariaSuit),
+                                HasAny(ItemName.GrappleBeam, ItemName.GravitySuit) | can_spider_boost,
+                                HasAny(ItemName.GravitySuit) | can_spider,
+                                can_fly,
+                            ),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Top",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Interior.Alpha,
+                            access_rule=Has(ItemName.VariaSuit),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.AlphaAccess.subregion("Bottom"),
+                            access_rule=And(
+                                Has(ItemName.VariaSuit),
+                                can_climb_wall,
+                                HasAny(ItemName.GrappleBeam, ItemName.GravitySuit) | can_spider_boost,
+                                HasAny(ItemName.GravitySuit) | can_spider,
+                            ),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Interior.GammaTransportCavernsE,
+            Interior.GammaTransportCavernsE,
             id="collision_camera_023",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Arena",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GammaCAccess.subregion("Upper"),
+                            access_rule=can_grapple_tunnel,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GammaTransportCavernsE.subregion("Center"),
+                            access_rule=can_grapple_tunnel,
+                            # FIXME: Dangerous action
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=Has(Interior.GammaCAccess.location("Found Gamma Metroid")) & can_damage_metroid,
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Center",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GammaTransportCavernsE.subregion("Arena"),
+                            access_rule=can_climb_wall,
+                            # FIXME: Dangerous action
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GammaCAccess.subregion("Lower"),
+                            access_rule=can_high_ledge,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GammaTransportCavernsE.subregion("Southwest"),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Southwest",
+                    exits=[
+                        ExitData(
+                            Door.Taramarga,
+                            Interior.GammaSAccess,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Interior.GammaTransportCavernsE.subregion("Southeast"),
+                            access_rule=can_spider_boost | HasAny(ItemName.GravitySuit, ItemName.GrappleBeam),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GammaCAccess.subregion("Lower"),
+                            access_rule=can_high_ledge,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Southeast",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Interior.ParabyPeriphery.subregion("Left"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Interior.GammaTransportCavernsE.subregion("Southwest"),
+                            # FIXME: Dangerous action
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Elevator",
+                    exits=[
+                        ExitData(
+                            Door.Elevator,
+                            Caverns.TransportFactoryIntS.subregion("Right"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GammaTransportCavernsE.subregion("Southwest"),
+                            access_rule=Has(ItemName.GrappleBeam),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Interior.RamulkenResidence,
+            Interior.RamulkenResidence,
             id="collision_camera_024",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Interior.FactoryIntersection.subregion("Bottom"),
+                            access_rule=can_climb_shaft,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Interior.WallfireWatch.subregion("Main"),
+                        ),
+                    ]
+                )
+            ],
         ),
         RoomData(
-            Area3Interior.WallfireWatch,
+            Interior.WallfireWatch,
             id="collision_camera_025",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Main",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Interior.RamulkenResidence,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Interior.GammaCAccess.subregion("Upper"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.WallfireWatch.subregion("Top"),
+                            access_rule=can_fly_vertical,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Top",
+                    exits=[
+                        ExitData(
+                            Door.Super,
+                            Interior.FanControl,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.WallfireWatch.subregion("Main"),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
-            Area3Interior.Alpha,
+            Interior.Alpha,
             id="collision_camera_026",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Interior.AlphaAccess.subregion("Top"),
+                            access_rule=Has(ItemName.VariaSuit),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Alpha Metroid",
+                            access_rule=Has(ItemName.VariaSuit) & can_damage_metroid,
+                        ),
+                        PickupData(
+                            "Lava",
+                            access_rule=HasAll(ItemName.VariaSuit, ItemName.GravitySuit, ItemName.GrappleBeam),
+                        ),
+                    ],
+                )
+            ],
         ),
         RoomData(
-            Area3Interior.GammaS,
+            Interior.GammaS,
             id="collision_camera_027",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GammaSAccess,
+                            access_rule=can_grapple_tunnel,
+                        ),
+                        ExitData(
+                            Door.PowerBomb,
+                            Interior.SecuritySite,
+                            access_rule=can_high_ledge,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=can_gamma_metroid(Interior.GammaSAccess.location("Right arena")),
+                        )
+                    ],
+                )
+            ],
         ),
         RoomData(
-            Area3Interior.DedicatedCallisoRoost,
+            Interior.DedicatedCallisoRoost,
             id="collision_camera_028",
-            regions=[],  # TODO
+            regions=[],  # Not logically relevant
         ),
         RoomData(
-            Area3Interior.FactoryTeleporterAccess,
+            Interior.FactoryTeleporterAccess,
             id="collision_camera_029",
-            regions=[],  # TODO
+            regions=[],  # Not logically relevant
         ),
         RoomData(
-            Area3Interior.GammaCAccess,
+            Interior.GammaCAccess,
             id="collision_camera_030",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Upper",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Interior.WallfireWatch.subregion("Main"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GammaTransportCavernsE.subregion("Arena"),
+                            # FIXME: Dangerous action
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GammaCAccess.subregion("Hiding Spot"),
+                            access_rule=can_power_bomb,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Hiding Spot",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Interior.WallfireWatch.subregion("Main"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GammaCAccess.subregion("Upper"),
+                            access_rule=can_bomb_block,
+                        ),
+                    ],
+                    events=[
+                        EventData("Found Gamma Metroid"),
+                    ],
+                ),
+                RegionData(
+                    "Lower",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GammaCAccess.subregion("Hiding Spot"),
+                            access_rule=Has(ItemName.LightningArmor) & can_bomb_block,  # To escape from the hiding spot
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Interior.GammaTransportCavernsE.subregion("Center"),
+                        ),
+                    ],
+                ),
+            ],
         ),
     ],
 )

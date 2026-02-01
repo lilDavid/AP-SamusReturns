@@ -4,13 +4,13 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from rule_builder.options import OptionFilter
-from rule_builder.rules import Has, HasAll, HasAny, Or, Rule, True_
+from rule_builder.rules import And, CanReachLocation, Has, HasAll, HasAny, Or, Rule, True_
 from typing_extensions import override
 
 from .data.constants import GAME_NAME
 from .data.region_data import Door
 from .items import ItemName
-from .options import IBJ, DamageBoost, LogicTrick, Movement, WallJump
+from .options import IBJ, DamageBoost, Knowledge, LogicTrick, Movement, WallJump
 
 if TYPE_CHECKING:
     from . import SamusReturnsWorld
@@ -31,6 +31,10 @@ def can_trick(trick: type[LogicTrick], difficulty: int):
 
 def can_damage_boost(damage_boost: int):
     return can_trick(DamageBoost, damage_boost)
+
+
+def has_knowledge(knowledge: int):
+    return can_trick(Knowledge, knowledge)
 
 
 def can_movement(movement: int):
@@ -55,14 +59,20 @@ can_beam_block_through_fan_tunnel = Or(Has(ItemName.WaveBeam), can_power_bomb, c
 
 can_spider = HasAll(ItemName.MorphBall, ItemName.SpiderBall)
 can_spider_boost = HasAll(ItemName.MorphBall, ItemName.SpiderBall, ItemName.PowerBomb)
-can_fly_straight_up = Or(Has(ItemName.SpaceJump), can_spider_boost, can_ibj(IBJ.option_vertical))
-can_climb_wall = can_spider | can_fly_straight_up
+can_spider_boost_underwater = And(can_spider_boost, has_knowledge(Knowledge.option_enable), Has(ItemName.GravitySuit))
+can_fly_vertical = Or(Has(ItemName.SpaceJump), can_spider_boost, can_ibj(IBJ.option_vertical))
+can_fly = Or(Has(ItemName.SpaceJump), can_ibj(IBJ.option_diagonal))
+can_climb_wall = can_spider | can_fly_vertical
 
-can_high_jump = Or(Has(ItemName.HighJumpBoots), can_ibj(IBJ.option_double), can_fly_straight_up)
+can_high_jump = Or(Has(ItemName.HighJumpBoots), can_ibj(IBJ.option_double), can_fly_vertical)
 can_high_ledge = can_climb_wall | can_high_jump
+can_underwater_high_jump = Or(Has(ItemName.GravitySuit) & can_high_jump, can_spider_boost_underwater)
 
-can_short_shaft = can_high_ledge | can_wall_jump(WallJump.option_enable)
-can_climb_shaft = can_wall_jump(WallJump.option_enable) | can_climb_wall
+# Needs ~hi-jump height to break but not to access the tunnel
+can_medium_bomb_block = Or(can_high_ledge & can_bomb, can_power_bomb)
+
+can_short_shaft = can_high_ledge | can_wall_jump(WallJump.option_simple)
+can_climb_shaft = can_wall_jump(WallJump.option_simple) | can_climb_wall
 
 can_any_missile = HasAny(ItemName.MissileLauncher, ItemName.SuperMissile)
 can_damage_tough_enemy = Or(
@@ -70,7 +80,20 @@ can_damage_tough_enemy = Or(
     can_power_bomb,
 )
 can_damage_metroid = HasAny(ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst, ItemName.IceBeam)
+
+
+def can_gamma_metroid(*arenas: str):
+    return And(
+        *(CanReachLocation(arena) for arena in arenas),
+        can_damage_metroid,
+    )
+
+
 can_blobthrower = Has(ItemName.BeamBurst) | can_power_bomb
+can_tunnel_steel_orb = Or(
+    Has(ItemName.BeamBurst) & can_beam_block_through_tunnel,
+    can_power_bomb,
+)
 
 door_rules = {
     Door.Open: True_(),

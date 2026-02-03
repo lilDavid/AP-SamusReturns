@@ -12,7 +12,7 @@ from . import lib as lib  # Set up module importer for open-samus-returns-rando
 from .data.constants import GAME_NAME
 from .data.room_names import SurfaceWest
 from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, major_items
-from .locations import location_table
+from .locations import SamusReturnsLocation, location_table
 from .options import SamusReturnsOptions, msr_option_groups
 from .patch import SamusReturnsPatch
 from .regions import connect_entrances, create_regions, set_starting_room
@@ -83,7 +83,9 @@ class SamusReturnsWorld(World):
 
         region = Region("Placeholder", self.player, self.multiworld)
         locations = {location.name for location in self.get_locations()}
-        region.add_locations({name: data.ap_id for name, data in location_table.items() if name not in locations})
+        region.add_locations(
+            {name: data.ap_id for name, data in location_table.items() if name not in locations}, SamusReturnsLocation
+        )
         self.multiworld.regions.append(region)
         self.get_region(self.origin_region_name).connect(
             region,

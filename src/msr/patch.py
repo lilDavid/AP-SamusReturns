@@ -165,8 +165,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 item_data = item_data_table[location.item.name]
                 pickup["resources"] = self.create_resources(world, ItemName(location.item.name))
                 pickup["caption"] = f"{location.item.name} acquired."
-                if item_data.sound:
-                    pickup["sound"] = item_data.sound
+                pickup["sound"] = item_data.pickup_sound()
             else:
                 pickup["resources"] = [[self.create_resource(ItemId.NOTHING, 1)]]
                 pickup["caption"] = (

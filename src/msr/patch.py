@@ -104,6 +104,10 @@ class SamusReturnsPatch(APAutoPatchInterface):
             "game_patches": {
                 "tanks_refill_ammo": bool(world.options.tanks_refill_ammo.value),
             },
+            "constant_environment_damage": {
+                "heat": 20,
+                "lava": 20,
+            },
             "cosmetic_patches": {
                 "enable_room_name_display": "ALWAYS" if world.options.display_room_names.value else "NEVER",
                 "camera_names_dict": self.get_room_names(),

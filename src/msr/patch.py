@@ -160,13 +160,13 @@ class SamusReturnsPatch(APAutoPatchInterface):
         return starting_items
 
     def create_pickups(self, world: SamusReturnsWorld):
+        self.placed_dna = 0
         pickups = []
         for location in world.get_locations():
             assert location.item is not None
             if location.address is None:
                 continue
 
-            self.placed_dna = 0
             pickup = location_table[location.name].to_pickup()
             pickup["model"] = [self.get_pickup_model(world, location.item)]
             if location.item.player == world.player:

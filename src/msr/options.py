@@ -87,6 +87,10 @@ class TanksRefillAmmo(Toggle):
 
 # Cosmetics
 class RoomNames(DefaultOnToggle):
+    """
+    Display the names of rooms at the bottom of the touch screen map
+    """
+
     display_name = "Display Room Names"
 
 

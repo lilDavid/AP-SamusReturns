@@ -9,10 +9,12 @@ from typing import TYPE_CHECKING
 from zipfile import ZipFile
 
 import Utils
+from BaseClasses import Item
 from worlds.Files import APAutoPatchInterface
 
 from .data.constants import GAME_NAME
 from .data.internal_names import RANDO_DNA_TEMPLATE, AreaId, ItemId, ItemModel, PickupSound
+from .data.remote_items import REMOTE_ITEM_MAPPING
 from .items import ItemName, OtherItemData, TankData, UniqueItemData, item_data_table, launcher_to_ammo
 from .locations import location_table
 from .regions import all_areas_data
@@ -165,6 +167,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
 
             self.placed_dna = 0
             pickup = location_table[location.name].to_pickup()
+            pickup["model"] = [self.get_pickup_model(location.item)]
             if location.item.player == world.player:
                 item_data = item_data_table[location.item.name]
                 pickup["resources"] = self.create_resources(world, ItemName(location.item.name))
@@ -176,12 +179,26 @@ class SamusReturnsPatch(APAutoPatchInterface):
                     f"{world.multiworld.player_name[location.item.player]}'s {location.item.name} acquired."
                 )
                 pickup["sound"] = PickupSound.TANK
-            if location.native_item:
-                pickup["model"] = [item_data_table[location.item.name].model]
-            else:
-                pickup["model"] = [ItemModel.OffworldGeneric]
             pickups.append(pickup)
         return pickups
+
+    @staticmethod
+    def get_pickup_model(item: Item):
+        # Native item
+        if item.game == GAME_NAME:
+            return item_data_table[item.name].model
+
+        # From Metroid game
+        game_lookup = REMOTE_ITEM_MAPPING.get(item.game)
+        if game_lookup is not None:
+            model = game_lookup.get(item.name)
+            if model is not None:
+                return model
+
+        # AP item
+        if item.advancement or item.trap:
+            return ItemModel.OffworldGeneric
+        return ItemModel.ItemSphere
 
     def create_resources(self, world: SamusReturnsWorld, item: ItemName):
         data = item_data_table[item]

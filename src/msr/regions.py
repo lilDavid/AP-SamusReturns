@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from BaseClasses import CollectionState, ItemClassification, Region
-from worlds.generic.Rules import CollectionRule, add_rule
+from BaseClasses import ItemClassification, Region
+from rule_builder.rules import False_
 
-from .data.region_data import AccessRule, ExitData, RegionData
+from .data.region_data import ExitData, RegionData
 from .data.region_data.area_1 import area_1_data
 from .data.region_data.area_2 import area_2_entryway_data, area_2_exterior_data, area_2_interior_data
 from .data.region_data.area_3 import area_3_caverns_data, area_3_exterior_data, area_3_interior_data
@@ -18,7 +18,7 @@ from .data.region_data.surface import surface_east_data, surface_west_data
 from .data.room_names import RoomName, SurfaceWest
 from .items import SamusReturnsItem
 from .locations import SamusReturnsLocation, location_table
-from .logic import can_open_door
+from .logic import door_rules
 
 if TYPE_CHECKING:
     from . import SamusReturnsWorld
@@ -44,34 +44,14 @@ all_areas_data = (
 )
 
 
-def create_rule(logic_rule: AccessRule, player: int) -> CollectionRule:
-    if logic_rule is None:
-        return None
-    return lambda state: logic_rule(state, player)
+def can_take_exit(exit: ExitData):
+    return door_rules[exit.door] & exit.access_rule
 
 
-def exit_rule(state: CollectionState, player: int, exit: ExitData):
-    if not can_open_door(state, player, exit.door):
-        return False
-    if exit.access_rule and not exit.access_rule(state, player):
-        return False
-    return True
-
-
-def can_take_exit(player: int, exit: ExitData):
-    def rule(state: CollectionState):
-        return exit_rule(state, player, exit)
-
-    return rule
-
-
-def can_leave_area(subregion: RegionData, player: int):
-    def rule(state: CollectionState):
-        for exit in subregion.exits:
-            if exit_rule(state, player, exit):
-                return True
-        return False
-
+def can_leave_area(subregion: RegionData):
+    rule = False_()
+    for exit in subregion.exits:
+        rule |= can_take_exit(exit)
     return rule
 
 
@@ -92,19 +72,19 @@ def create_regions(world: SamusReturnsWorld):
                     location = SamusReturnsLocation(
                         world.player, pickup_name, location_table[pickup_name].ap_id, region
                     )
-                    if pickup.access_rule:
-                        add_rule(location, create_rule(pickup.access_rule, world.player))
+                    access_rule = pickup.access_rule
                     if subregion.require_exit_access:
-                        add_rule(location, can_leave_area(subregion, world.player))
+                        access_rule &= can_leave_area(subregion)
+                    world.set_rule(location, access_rule)
                     region.locations.append(location)
 
                 for event in subregion.events:
                     event_name = room.name.location(event.name)
                     location = SamusReturnsLocation(world.player, event_name, None, region)
-                    if event.access_rule:
-                        add_rule(location, create_rule(event.access_rule, world.player))
+                    access_rule = event.access_rule
                     if subregion.require_exit_access:
-                        add_rule(location, can_leave_area(subregion, world.player))
+                        access_rule &= can_leave_area(subregion)
+                    world.set_rule(location, access_rule)
                     location.place_locked_item(
                         SamusReturnsItem(
                             event_name if event.item_name is None else event.item_name,
@@ -126,10 +106,11 @@ def connect_entrances(world: SamusReturnsWorld):
                 region_name = room.name.subregion(subregion.name) if subregion.name else room.name.with_area()
                 region = world.get_region(region_name)
                 for exit in subregion.exits:
-                    region.connect(
+                    world.create_entrance(
+                        region,
                         world.get_region(
                             exit.destination.with_area() if isinstance(exit.destination, RoomName) else exit.destination
                         ),
+                        can_take_exit(exit),
                         f"{region_name} - {exit.door.value} to {exit.destination}",
-                        can_take_exit(world.player, exit),
                     )

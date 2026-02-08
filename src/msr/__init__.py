@@ -4,13 +4,12 @@ from typing import ClassVar
 
 import Utils
 from BaseClasses import Item
+from rule_builder.rules import Has
 from worlds import LauncherComponents as Launcher
 from worlds.AutoWorld import WebWorld, World
-from worlds.generic.Rules import add_rule
 
 from . import lib as lib  # Set up module importer for open-samus-returns-rando
 from .data.constants import GAME_NAME
-from .data.room_names import SurfaceWest
 from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, major_items
 from .locations import SamusReturnsLocation, location_table
 from .options import SamusReturnsOptions, msr_option_groups
@@ -87,17 +86,14 @@ class SamusReturnsWorld(World):
             {name: data.ap_id for name, data in location_table.items() if name not in locations}, SamusReturnsLocation
         )
         self.multiworld.regions.append(region)
-        self.get_region(self.origin_region_name).connect(
+        self.create_entrance(
+            self.get_region(self.origin_region_name),
             region,
-            rule=lambda state: state.has(ItemName.MetroidDna, self.player, self.options.dna_required.value),
+            Has(ItemName.MetroidDna, self.options.dna_required.value),
         )
 
     def set_rules(self):
-        add_rule(
-            self.get_location(SurfaceWest.LandingSite.location("Proteus Ridley")),
-            lambda state: state.has(ItemName.MetroidDna, self.player, self.options.dna_required.value),
-        )
-        self.multiworld.completion_condition[self.player] = lambda state: state.has(VICTORY, self.player)
+        self.set_completion_rule(Has(VICTORY))
 
     def create_items(self):
         item_pool: list[Item] = []

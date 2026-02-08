@@ -1,5 +1,8 @@
+from rule_builder.rules import And, Has, HasAll, Or
+
 from ...items import VICTORY, ItemName
 from ...logic import (
+    HasDna,
     can_any_missile,
     can_bomb_block,
     can_climb_shaft,
@@ -56,22 +59,21 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.Open,
                             East.SurfaceCrumbleChallenge,
-                            access_rule=lambda state, player: can_climb_wall(state, player)
-                            and can_power_bomb(state, player),
+                            access_rule=can_climb_wall | can_power_bomb,
                         ),
                         # TODO
                         # ExitData(
                         #     Door.Open,
                         #     West.TransportArea8,
-                        #     access_rule=lambda state, player: state.has(ItemName.Hatchling, player),
+                        #     access_rule=Has(ItemName.Hatchling),
                         # ),
                     ],
                     events=[
                         EventData(
                             "Proteus Ridley",
                             VICTORY,
-                            access_rule=lambda state, player: state.has(ItemName.Hatchling, player),  # TODO
-                            show_in_spoiler=False,
+                            # TODO
+                            access_rule=Has(ItemName.Hatchling) & HasDna(),
                         )
                     ],
                 ),
@@ -94,7 +96,7 @@ surface_east_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=lambda state, player: state.has("Morph Ball", player),
+                            access_rule=Has(ItemName.MorphBall),
                         ),
                     ],
                 ),
@@ -207,13 +209,12 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.Open,
                             East.TransportCache,
-                            access_rule=lambda state, player: state.has(ItemName.Hatchling, player),
+                            access_rule=Has(ItemName.Hatchling),
                         ),
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=lambda state, player: state.has(ItemName.MorphBall, player)
-                            and can_high_ledge(state, player),
+                            access_rule=Has(ItemName.MorphBall) & can_high_ledge,
                         ),
                     ],
                 ),
@@ -445,7 +446,7 @@ surface_east_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=lambda state, player: state.has(ItemName.MorphBall, player),
+                            access_rule=Has(ItemName.MorphBall),
                         ),
                     ],
                 ),
@@ -465,15 +466,13 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.Open,
                             East.HornoadHallway.subregion("East"),
-                            access_rule=lambda state, player:
-                            # Break or morph under the block
-                            can_any_missile(state, player)
-                            or state.has(ItemName.MorphBall, player)
-                            # Climb the shaft overhead
-                            or can_fly_straight_up(state, player)
-                            or (
-                                state.has(ItemName.HighJumpBoots, player)
-                                and can_wall_jump(state, player, WallJump.option_enable)
+                            access_rule=Or(
+                                # Break or morph under the block
+                                can_any_missile,
+                                Has(ItemName.MorphBall),
+                                # Climb the shaft overhead
+                                can_fly_straight_up,
+                                Has(ItemName.HighJumpBoots) & can_wall_jump(WallJump.option_enable),
                             ),
                         ),
                     ],
@@ -484,13 +483,12 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.Open,
                             East.HornoadHallway.subregion("West"),
-                            access_rule=None,  # Drop down the upper path
+                            # Drop down the upper path
                         ),
                         ExitData(
                             Door.Open,
                             East.TwistyTunnel,
-                            access_rule=lambda state, player: can_any_missile(state, player)
-                            or can_climb_shaft(state, player),
+                            access_rule=can_any_missile | can_climb_shaft,
                         ),
                     ],
                 ),
@@ -509,14 +507,15 @@ surface_east_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=lambda state, player:
-                            # Reach the top
-                            can_any_missile(state, player)
-                            and state.has_all((ItemName.GrappleBeam, ItemName.MorphBall), player)
-                            # Cross the pitfall blocks
-                            and (can_spider(state, player) or state.has(ItemName.PhaseDrift, player))
-                            # Escape
-                            and can_climb_shaft(state, player)
+                            access_rule=And(
+                                # Reach the top
+                                can_any_missile,
+                                HasAll(ItemName.GrappleBeam, ItemName.MorphBall),
+                                # Cross the pitfall blocks
+                                can_spider | Has(ItemName.PhaseDrift),
+                                # Escape
+                                can_climb_shaft,
+                            )
                         )
                     ],
                 ),
@@ -535,7 +534,7 @@ surface_east_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=None  # Drop off and power grip for it (movement trick?)
+                            # Drop off and power grip for it (movement trick?)
                         ),
                     ],
                 ),
@@ -550,7 +549,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.Open,
                             East.TransportArea1,
-                            access_rule=lambda state, player: state.has(ItemName.Hatchling, player),
+                            access_rule=Has(ItemName.Hatchling),
                         ),
                     ],
                     pickups=[
@@ -572,8 +571,7 @@ surface_east_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=lambda state, player: state.has(ItemName.MorphBall, player)
-                            and can_climb_shaft(state, player)
+                            access_rule=Has(ItemName.MorphBall) & can_climb_shaft,
                         )
                     ],
                 ),
@@ -596,7 +594,9 @@ surface_east_data = AreaData(
                         ),
                     ],
                     pickups=[
-                        PickupData(access_rule=lambda state, player: state.has(ItemName.MorphBall, player)),
+                        PickupData(
+                            access_rule=Has(ItemName.MorphBall),
+                        ),
                     ],
                 ),
                 RegionData(

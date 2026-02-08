@@ -1,3 +1,5 @@
+from rule_builder.rules import And, Has, HasAll, HasAny, Or
+
 from ...items import ItemName
 from ...logic import (
     can_any_missile,
@@ -83,9 +85,11 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Exterior.DamExterior.subregion("Alpha Ledge"),
-                            access_rule=lambda state, player: state.has(ItemName.SpaceJump, player)
-                            or can_spider_boost(state, player)
-                            or can_ibj(state, player, IBJ.option_diagonal),
+                            access_rule=Or(
+                                Has(ItemName.SpaceJump),
+                                can_spider_boost,
+                                can_ibj(IBJ.option_diagonal),
+                            ),
                         ),
                     ],
                 ),
@@ -119,14 +123,15 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Exterior.DamExterior.subregion("Alpha Ledge"),
-                            access_rule=lambda state, player: can_fly_straight_up(state, player)
-                            or (state.has(ItemName.LightningArmor, player) and can_spider(state, player)),
+                            access_rule=Or(
+                                can_fly_straight_up,
+                                Has(ItemName.LightningArmor) & can_spider,
+                            ),
                         ),
                         ExitData(
                             Door.Open,
                             Exterior.DamExterior.subregion("Bottom"),
-                            access_rule=lambda state, player: state.has(ItemName.Hatchling, player)
-                            or can_bomb_block(state, player),
+                            access_rule=Has(ItemName.Hatchling) | can_bomb_block,
                         ),
                         ExitData(
                             Door.Normal,
@@ -148,13 +153,12 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Exterior.DamExterior.subregion("West"),
-                            access_rule=lambda state, player: can_bomb_block(state, player)
-                            or (
-                                state.has(ItemName.Hatchling, player)
-                                and (
-                                    can_climb_wall(state, player)
-                                    or can_wall_jump(state, player, WallJump.option_enable)
-                                )
+                            access_rule=Or(
+                                can_bomb_block,
+                                And(
+                                    Has(ItemName.Hatchling),
+                                    can_climb_wall | can_wall_jump(WallJump.option_enable),
+                                ),
                             ),
                         ),
                         # ExitData(
@@ -164,11 +168,11 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Exterior.DamExterior.subregion("Top"),
-                            access_rule=lambda state, player: state.has(ItemName.SpaceJump, player)
-                            or can_spider_boost(state, player)
-                            or can_ibj(state, player, IBJ.option_diagonal)
-                            or (
-                                can_spider(state, player) and can_damage_boost(state, player, DamageBoost.option_enable)
+                            access_rule=Or(
+                                Has(ItemName.SpaceJump),
+                                can_spider_boost,
+                                can_ibj(IBJ.option_diagonal),
+                                can_spider & can_damage_boost(DamageBoost.option_enable),
                             ),
                         ),
                     ],
@@ -183,11 +187,11 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Exterior.DamExterior.subregion("Top"),
-                            access_rule=lambda state, player: state.has(ItemName.SpaceJump, player)
-                            or can_spider_boost(state, player)
-                            or can_ibj(state, player, IBJ.option_diagonal)
-                            or (
-                                can_spider(state, player) and can_damage_boost(state, player, DamageBoost.option_enable)
+                            access_rule=Or(
+                                Has(ItemName.SpaceJump),
+                                can_spider_boost,
+                                can_ibj(IBJ.option_diagonal),
+                                can_spider & can_damage_boost(DamageBoost.option_enable),
                             ),
                         ),
                         ExitData(
@@ -234,10 +238,7 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Exterior.MaintenanceTunnel,
-                            access_rule=lambda state, player: state.has_all(
-                                (ItemName.SpringBall, ItemName.Bomb), player
-                            )
-                            or state.has(ItemName.PowerBomb, player),
+                            access_rule=HasAll(ItemName.SpringBall, ItemName.Bomb) | Has(ItemName.PowerBomb),
                         ),
                     ],
                 )
@@ -275,8 +276,7 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Exterior.CritterPlayground.subregion("Pickup"),
-                            access_rule=lambda state, player: state.has(ItemName.Hatchling, player)
-                            and can_climb_wall(state, player),
+                            access_rule=Has(ItemName.Hatchling) & can_climb_wall,
                         ),
                     ],
                 ),
@@ -303,8 +303,7 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Exterior.CritterPlayground.subregion("Pickup"),
-                            access_rule=lambda state, player: can_climb_wall(state, player)
-                            and can_bomb_block(state, player),
+                            access_rule=can_climb_wall & can_bomb_block,
                         ),
                     ],
                 ),
@@ -319,7 +318,7 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Exterior.CritterPlayground.subregion("Middle"),
-                            access_rule=lambda state, player: state.has(ItemName.Hatchling, player),
+                            access_rule=Has(ItemName.Hatchling),
                         ),
                     ],
                     pickups=[
@@ -363,12 +362,13 @@ area_2_exterior_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=lambda state, player: (
-                                can_spider(state, player) or state.has(ItemName.SpaceJump, player)
-                            )
-                            and (
-                                state.has(ItemName.Hatchling, player)
-                                or (state.has(ItemName.SuperMissile, player) or can_bomb_block(state, player))
+                            access_rule=And(
+                                can_spider | Has(ItemName.SpaceJump),
+                                Or(
+                                    Has(ItemName.Hatchling),
+                                    Has(ItemName.SuperMissile),
+                                    can_bomb_block,
+                                ),
                             )
                         )
                     ],
@@ -394,9 +394,7 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Exterior.SpikeRavine.subregion("Pickup"),
-                            access_rule=lambda state, player: (
-                                state.has(ItemName.GrappleBeam, player) or can_spider_boost(state, player)
-                            ),
+                            access_rule=Has(ItemName.GrappleBeam) | can_spider_boost,
                         ),
                     ],
                 ),
@@ -434,7 +432,9 @@ area_2_exterior_data = AreaData(
                         ),
                     ],
                     pickups=[
-                        PickupData(access_rule=lambda state, player: state.has(ItemName.MorphBall, player)),
+                        PickupData(
+                            access_rule=Has(ItemName.MorphBall),
+                        ),
                     ],
                 ),
             ],
@@ -536,17 +536,17 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Charge,
                             Exterior.CavernsAlphaNw,
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player),
+                            access_rule=Has(ItemName.VariaSuit),
                         ),
                         ExitData(
                             Door.Taramarga,
                             Exterior.CavernsAlphaSw,
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player),
+                            access_rule=Has(ItemName.VariaSuit),
                         ),
                         ExitData(
                             Door.Normal,
                             Exterior.CavernsTeleporter.subregion("Left"),
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player),
+                            access_rule=Has(ItemName.VariaSuit),
                         ),
                     ],
                 )
@@ -561,13 +561,12 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Exterior.CavernsLobby,
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player),
+                            access_rule=Has(ItemName.VariaSuit),
                         ),
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player)
-                            and can_damage_metroid(state, player)
+                            access_rule=Has(ItemName.VariaSuit) & can_damage_metroid,
                         )
                     ],
                 )
@@ -587,8 +586,10 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Exterior.CavernsAlphaEAccess.subregion("Right"),
-                            access_rule=lambda state, player: can_power_bomb(state, player)
-                            or (state.has(ItemName.SpringBall, player) and can_bomb(state, player)),
+                            access_rule=Or(
+                                can_power_bomb,
+                                Has(ItemName.SpringBall) & can_bomb,
+                            ),
                         ),
                     ],
                 ),
@@ -624,20 +625,18 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Exterior.CavernsTeleporter.subregion("Right"),
-                            # Missile block
-                            access_rule=lambda state, player: can_any_missile(state, player)
-                            and state.has_any((ItemName.HighJumpBoots, ItemName.SpaceJump), player)
-                            # Magma pool
-                            and (
-                                state.has_any((ItemName.IceBeam, ItemName.SpaceJump), player)
-                                or can_spider(state, player)
+                            access_rule=And(
+                                # Missile block
+                                can_any_missile,
+                                HasAny(ItemName.HighJumpBoots, ItemName.SpaceJump),
+                                # Magma pool
+                                HasAny(ItemName.IceBeam, ItemName.SpaceJump) | can_spider,
                             ),
                         ),
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=lambda state, player: can_blobthrower(state, player)
-                            and can_bomb_block(state, player)
+                            access_rule=can_blobthrower & can_bomb_block,
                         )
                     ],
                 ),
@@ -647,12 +646,12 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Exterior.CavernsTeleporter.subregion("Left"),
-                            # Magma pool
-                            access_rule=lambda state, player: (
-                                state.has_any((ItemName.IceBeam, ItemName.SpaceJump, ItemName.MorphBall), player)
-                            )
-                            # Missile block
-                            and can_any_missile(state, player),
+                            access_rule=And(
+                                # Magma pool
+                                HasAny(ItemName.IceBeam, ItemName.SpaceJump, ItemName.MorphBall),
+                                # Missile block
+                                can_any_missile,
+                            ),
                         ),
                         ExitData(
                             Door.Normal,
@@ -697,14 +696,13 @@ area_2_exterior_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=lambda state, player: can_climb_shaft(state, player)
-                            and (
-                                can_bomb(state, player)
-                                or (
+                            access_rule=And(
+                                can_climb_shaft,
+                                Or(
+                                    can_bomb,
                                     # Time an unmorph to grab the ledge
-                                    can_movement(state, player, Movement.option_enable)
-                                    and can_power_bomb(state, player)
-                                )
+                                    can_movement(Movement.option_enable) & can_power_bomb,
+                                ),
                             )
                         ),
                     ],
@@ -808,12 +806,13 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Exterior.CavernsAlphaEAccess.subregion("Right"),
-                            access_rule=lambda state, player: can_high_ledge(state, player)
-                            and can_bomb_block(state, player),
+                            access_rule=can_high_ledge & can_bomb_block,
                         )
                     ],
                     pickups=[
-                        PickupData(access_rule=can_damage_metroid),
+                        PickupData(
+                            access_rule=can_damage_metroid,
+                        ),
                     ],
                 )
             ],
@@ -862,10 +861,10 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.WaveBeam.subregion("Northeast"),
-                            access_rule=lambda state, player: (
-                                state.has(ItemName.LightningArmor, player) or can_damage_tough_enemy(state, player)
-                            )
-                            and can_climb_wall(state, player),
+                            access_rule=And(
+                                Has(ItemName.LightningArmor) | can_damage_tough_enemy,
+                                can_climb_wall,
+                            ),
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -950,7 +949,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Interior.InteriorIntersection.subregion("South tunnel"),
-                            access_rule=lambda state, player: state.has(ItemName.ScrewAttack, player),
+                            access_rule=Has(ItemName.ScrewAttack),
                         ),
                     ],
                 ),
@@ -992,12 +991,12 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Interior.InteriorIntersection.subregion("South chamber"),
-                            access_rule=lambda state, player: state.has(ItemName.ScrewAttack, player),
+                            access_rule=Has(ItemName.ScrewAttack),
                         ),
                         ExitData(
                             Door.Open,
                             Interior.InteriorIntersection.subregion("Side tunnel"),
-                            access_rule=lambda state, player: state.has(ItemName.ScrewAttack, player),
+                            access_rule=Has(ItemName.ScrewAttack),
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1011,7 +1010,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Interior.InteriorIntersection.subregion("South tunnel"),
-                            access_rule=lambda state, player: state.has(ItemName.ScrewAttack, player),
+                            access_rule=Has(ItemName.ScrewAttack),
                         ),
                         ExitData(
                             Door.Charge,
@@ -1026,7 +1025,7 @@ area_2_interior_data = AreaData(
                         PickupData("Statue"),
                         PickupData(
                             "Tunnel",
-                            access_rule=lambda state, player: state.has(ItemName.ScrewAttack, player),
+                            access_rule=Has(ItemName.ScrewAttack),
                         ),
                     ],
                 ),
@@ -1036,9 +1035,11 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.InteriorIntersection.subregion("South tunnel"),
-                            access_rule=lambda state, player: state.has(ItemName.MissileLauncher, player)
-                            and can_bomb_block(state, player)
-                            and can_spider(state, player),
+                            access_rule=And(
+                                Has(ItemName.MissileLauncher),
+                                can_bomb_block,
+                                can_spider,
+                            ),
                         ),
                         ExitData(
                             Door.Normal,
@@ -1075,43 +1076,42 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.Charge,
                             Interior.WaveBeam.subregion("South"),
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player),
+                            access_rule=Has(ItemName.VariaSuit),
                         ),
                         ExitData(
                             Door.Normal,
                             Interior.GeneratorAccess.subregion("Lower"),
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player),
+                            access_rule=Has(ItemName.VariaSuit),
                         ),
                         ExitData(
                             Door.PowerBomb,
                             Interior.CrumbleCavern,
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player),
+                            access_rule=Has(ItemName.VariaSuit),
                         ),
                         ExitData(
                             Door.Charge,
                             Interior.Gamma,
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player),
+                            access_rule=Has(ItemName.VariaSuit),
                         ),
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player)
-                            and (
-                                (can_spider(state, player) and can_bomb_block(state, player))
-                                or (
-                                    can_damage_tough_enemy(state, player)
-                                    and (
-                                        can_power_bomb(state, player)
-                                        or can_ibj(state, player, IBJ.option_double)
-                                        or (
-                                            can_movement(state, player, Movement.option_enable)
-                                            and (
-                                                can_wall_jump(state, player, WallJump.option_enable)
-                                                or can_high_jump(state, player)
-                                            )
-                                        )
-                                    )
-                                )
+                            access_rule=And(
+                                Has(ItemName.VariaSuit),
+                                Or(
+                                    can_spider & can_bomb_block,
+                                    And(
+                                        can_damage_tough_enemy,
+                                        Or(
+                                            can_power_bomb,
+                                            can_ibj(IBJ.option_double),
+                                            And(
+                                                can_movement(Movement.option_enable),
+                                                can_wall_jump(WallJump.option_enable) | can_high_jump,
+                                            ),
+                                        ),
+                                    ),
+                                ),
                             )
                         ),
                     ],
@@ -1127,21 +1127,18 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.PowerBomb,
                             Interior.LavaGenerator,
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player),
+                            access_rule=Has(ItemName.VariaSuit),
                         )
                     ],
                     pickups=[
                         PickupData(
                             # TODO: You can probably also do this with spider boost shenanigans but I can't be bothered
-                            access_rule=lambda state, player: state.has_all(
-                                (
-                                    ItemName.VariaSuit,
-                                    ItemName.GrappleBeam,
-                                    ItemName.PhaseDrift,
-                                    ItemName.ScrewAttack,
-                                    ItemName.MorphBall,
-                                ),
-                                player,
+                            access_rule=HasAll(
+                                ItemName.VariaSuit,
+                                ItemName.GrappleBeam,
+                                ItemName.PhaseDrift,
+                                ItemName.ScrewAttack,
+                                ItemName.MorphBall,
                             )
                         )
                     ],
@@ -1224,7 +1221,7 @@ area_2_interior_data = AreaData(
                             Door.MorphTunnel,
                             Interior.FleechFireContainment.subregion("Lower"),
                             # FIXME: Dangerous action
-                            access_rule=lambda state, player: state.has(ItemName.LightningArmor, player),
+                            access_rule=Has(ItemName.LightningArmor),
                         ),
                     ],
                 ),
@@ -1234,8 +1231,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.FleechFireContainment.subregion("Upper"),
-                            access_rule=lambda state, player: state.has(ItemName.LightningArmor, player)
-                            and can_climb_shaft(state, player),
+                            access_rule=Has(ItemName.LightningArmor) & can_climb_shaft,
                         ),
                         ExitData(
                             Door.Normal,
@@ -1383,8 +1379,7 @@ area_2_interior_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=lambda state, player: state.has(ItemName.MissileLauncher, player)
-                            and can_bomb_block(state, player)
+                            access_rule=Has(ItemName.MissileLauncher) & can_bomb_block,
                         )
                     ],
                 )
@@ -1426,19 +1421,17 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.Charge,
                             Interior.WaveBeam.subregion("South"),
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player),
+                            access_rule=Has(ItemName.VariaSuit),
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Interior.GeneratorAccess.subregion("Lower"),
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player),
+                            access_rule=Has(ItemName.VariaSuit),
                         ),
                         ExitData(
                             Door.Open,
                             Interior.GeneratorAccess.subregion("Northeast"),
-                            access_rule=lambda state, player: state.has_all(
-                                (ItemName.VariaSuit, ItemName.ScrewAttack), player
-                            ),
+                            access_rule=HasAll(ItemName.VariaSuit, ItemName.ScrewAttack),
                         ),
                     ],
                 ),
@@ -1448,12 +1441,12 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.GeneratorAccess.subregion("Upper"),
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player),
+                            access_rule=Has(ItemName.VariaSuit),
                         ),
                         ExitData(
                             Door.Charge,
                             Interior.LavaGenerator,
-                            access_rule=lambda state, player: state.has(ItemName.VariaSuit, player),
+                            access_rule=Has(ItemName.VariaSuit),
                         ),
                     ],
                 ),
@@ -1463,16 +1456,12 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Interior.GeneratorAccess.subregion("Upper"),
-                            access_rule=lambda state, player: state.has_all(
-                                (ItemName.VariaSuit, ItemName.ScrewAttack), player
-                            ),
+                            access_rule=HasAll(ItemName.VariaSuit, ItemName.ScrewAttack),
                         ),
                         ExitData(
                             Door.Charge,
                             Interior.InteriorIntersection.subregion("South chamber"),
-                            access_rule=lambda state, player: state.has_all(
-                                (ItemName.VariaSuit, ItemName.ScrewAttack), player
-                            ),
+                            access_rule=HasAll(ItemName.VariaSuit, ItemName.ScrewAttack),
                         ),
                     ],
                 ),
@@ -1527,13 +1516,11 @@ area_2_entryway_data = AreaData(
                     pickups=[
                         PickupData(
                             "Plants",
-                            access_rule=lambda state, player: state.has(ItemName.MorphBall, player)
-                            and state.has_any((ItemName.Hatchling, ItemName.PowerBomb), player),
+                            access_rule=Has(ItemName.MorphBall) & HasAny(ItemName.Hatchling, ItemName.PowerBomb),
                         ),
                         PickupData(
                             "Tunnel",
-                            access_rule=lambda state, player: state.has(ItemName.MorphBall, player)
-                            and can_bomb_block(state, player),
+                            access_rule=can_bomb_block,
                         ),
                     ],
                 ),
@@ -1582,7 +1569,7 @@ area_2_entryway_data = AreaData(
                         # ExitData(
                         #     Door.Normal,
                         #     Entryway.TransportAreas1And3.subregion("Upper"),
-                        #     access_rule=lambda state, player: state.has(ItemName.MorphBall, player),
+                        #     access_rule=Has(ItemName.MorphBall),
                         # ),
                         ExitData(
                             Door.Normal,
@@ -1590,7 +1577,7 @@ area_2_entryway_data = AreaData(
                         ),
                     ],
                     pickups=[
-                        PickupData(access_rule=lambda state, player: state.has(ItemName.MorphBall, player)),
+                        PickupData(access_rule=Has(ItemName.MorphBall)),
                     ],
                 ),
             ],
@@ -1609,13 +1596,13 @@ area_2_entryway_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Entryway.LightningArmor.subregion("Tutorial"),
-                            access_rule=lambda state, player: state.has(ItemName.LightningArmor, player),
+                            access_rule=Has(ItemName.LightningArmor),
                         ),
                     ],
                     pickups=[
                         PickupData(
                             "Artifact",
-                            access_rule=lambda state, player: state.has(ItemName.MorphBall, player),
+                            access_rule=Has(ItemName.MorphBall),
                         ),
                     ],
                 ),
@@ -1630,7 +1617,7 @@ area_2_entryway_data = AreaData(
                     pickups=[
                         PickupData(
                             "Tutorial",
-                            access_rule=lambda state, player: state.has(ItemName.LightningArmor, player),
+                            access_rule=Has(ItemName.LightningArmor),
                         ),
                     ],
                     events=[
@@ -1669,19 +1656,16 @@ area_2_entryway_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Entryway.LightningArmor.subregion("Upper"),
-                            access_rule=lambda state, player: state.has_any(
-                                (
-                                    Entryway.LightningArmor.location("Opened door (from top)"),
-                                    Entryway.LightningArmor.location("Opened door (from bottom)"),
-                                ),
-                                player,
+                            access_rule=HasAny(
+                                Entryway.LightningArmor.location("Opened door (from top)"),
+                                Entryway.LightningArmor.location("Opened door (from bottom)"),
                             ),
                         ),
                         ExitData(
                             Door.Open,
                             Entryway.TransportAccess.subregion("Lower"),
-                            access_rule=lambda state, player: state.has(ItemName.LightningArmor, player)
-                            or can_spider(state, player),  # TODO: SJ across?; FIXME: Dangerous action
+                            # TODO: SJ across?; FIXME: Dangerous action
+                            access_rule=Has(ItemName.LightningArmor) | can_spider,
                         ),
                     ],
                 ),
@@ -1691,8 +1675,10 @@ area_2_entryway_data = AreaData(
                         ExitData(
                             Door.Open,
                             Entryway.TransportAccess.subregion("Upper"),
-                            access_rule=lambda state, player: can_high_ledge(state, player)
-                            and (state.has(ItemName.LightningArmor, player) or can_spider(state, player)),
+                            access_rule=And(
+                                can_high_ledge,
+                                Has(ItemName.LightningArmor) | can_spider,
+                            ),
                         ),
                         ExitData(
                             Door.Open,
@@ -1719,7 +1705,7 @@ area_2_entryway_data = AreaData(
                         )
                     ],
                     pickups=[
-                        PickupData(access_rule=lambda state, player: state.has(ItemName.LightningArmor, player)),
+                        PickupData(access_rule=Has(ItemName.LightningArmor)),
                     ],
                 )
             ],

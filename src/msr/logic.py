@@ -1,157 +1,87 @@
-from enum import StrEnum
-from typing import assert_never
+from __future__ import annotations
 
-from BaseClasses import CollectionState
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
+from rule_builder.options import OptionFilter
+from rule_builder.rules import Has, HasAll, HasAny, Or, Rule, True_
+from typing_extensions import override
+
+from .data.constants import GAME_NAME
 from .data.region_data import Door
 from .items import ItemName
-from .options import IBJ, Movement, WallJump
+from .options import IBJ, DamageBoost, LogicTrick, Movement, WallJump
+
+if TYPE_CHECKING:
+    from . import SamusReturnsWorld
 
 # TODO: Ammo logic
 
 
-class Trick(StrEnum):
-    WallJump = "wall_jump"
-    IBJ = "infinite_bomb_jump"
-    DamageBoost = "damage_boost"
-    Movement = "movement"
+@dataclass
+class HasDna(Rule["SamusReturnsWorld"], game=GAME_NAME):
+    @override
+    def _instantiate(self, world: SamusReturnsWorld) -> Rule.Resolved:
+        return Has(ItemName.MetroidDna, world.options.dna_required.value).resolve(world)
 
 
-def get_option(state: CollectionState, player: int, option: str):
-    world = state.multiworld.worlds[player]
-    return getattr(world.options, option)
+def can_trick(trick: type[LogicTrick], difficulty: int):
+    return True_(options=[OptionFilter(trick, difficulty, "ge")])
 
 
-def can_trick(state: CollectionState, player: int, trick: Trick, difficulty: int) -> bool:
-    return get_option(state, player, trick) >= difficulty
+def can_damage_boost(damage_boost: int):
+    return can_trick(DamageBoost, damage_boost)
 
 
-def can_damage_boost(state: CollectionState, player: int, damage_boost: int):
-    return can_trick(state, player, Trick.DamageBoost, damage_boost)
+def can_movement(movement: int):
+    return can_trick(Movement, movement)
 
 
-def can_movement(state: CollectionState, player: int, movement: int):
-    return can_trick(state, player, Trick.Movement, movement)
+def can_wall_jump(wall_jump: int):
+    return can_trick(WallJump, wall_jump)
 
 
-def can_beam_block_through_tunnel(state: CollectionState, player: int):
-    return (
-        state.has(ItemName.WaveBeam, player)
-        or can_bomb_block(state, player)
-        or can_movement(state, player, Movement.option_enable)
-    )
+can_bomb = HasAll(ItemName.MorphBall, ItemName.Bomb)
+can_power_bomb = HasAll(ItemName.MorphBall, ItemName.PowerBomb)
+can_bomb_block = can_bomb | can_power_bomb
 
 
-def can_beam_block_through_fan_tunnel(state: CollectionState, player: int):
-    return (
-        state.has(ItemName.WaveBeam, player)
-        or can_power_bomb(state, player)
-        or can_movement(state, player, Movement.option_enable)
-    )
+def can_ibj(ibj: int):
+    return can_trick(IBJ, ibj) & can_bomb
 
 
-def can_bomb(state: CollectionState, player: int):
-    return state.has_all((ItemName.MorphBall, ItemName.Bomb), player)
+can_beam_block_through_tunnel = Or(Has(ItemName.WaveBeam), can_bomb_block, can_movement(Movement.option_enable))
+can_beam_block_through_fan_tunnel = Or(Has(ItemName.WaveBeam), can_power_bomb, can_movement(Movement.option_enable))
 
+can_spider = HasAll(ItemName.MorphBall, ItemName.SpiderBall)
+can_spider_boost = HasAll(ItemName.MorphBall, ItemName.SpiderBall, ItemName.PowerBomb)
+can_fly_straight_up = Or(Has(ItemName.SpaceJump), can_spider_boost, can_ibj(IBJ.option_vertical))
+can_climb_wall = can_spider | can_fly_straight_up
 
-def can_power_bomb(state: CollectionState, player: int):
-    return state.has_all((ItemName.MorphBall, ItemName.PowerBomb), player)
+can_high_jump = Or(Has(ItemName.HighJumpBoots), can_ibj(IBJ.option_double), can_fly_straight_up)
+can_high_ledge = can_climb_wall | can_high_jump
 
+can_short_shaft = can_high_ledge | can_wall_jump(WallJump.option_enable)
+can_climb_shaft = can_wall_jump(WallJump.option_enable) | can_climb_wall
 
-def can_bomb_block(state: CollectionState, player: int):
-    return can_bomb(state, player) or can_power_bomb(state, player)
+can_any_missile = HasAny(ItemName.MissileLauncher, ItemName.SuperMissile)
+can_damage_tough_enemy = Or(
+    HasAny(ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst, ItemName.ScrewAttack),
+    can_power_bomb,
+)
+can_damage_metroid = HasAny(ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst, ItemName.IceBeam)
+can_blobthrower = Has(ItemName.BeamBurst) | can_power_bomb
 
-
-def can_spider(state: CollectionState, player: int):
-    return state.has_all((ItemName.MorphBall, ItemName.SpiderBall), player)
-
-
-def can_wall_jump(state: CollectionState, player: int, wall_jump: int):
-    return can_trick(state, player, Trick.WallJump, wall_jump)
-
-
-def can_ibj(state: CollectionState, player: int, ibj: int):
-    return can_trick(state, player, Trick.IBJ, ibj) and can_bomb(state, player)
-
-
-def can_spider_boost(state: CollectionState, player: int):
-    return state.has_all((ItemName.MorphBall, ItemName.SpiderBall, ItemName.PowerBomb), player)
-
-
-def can_fly_straight_up(state: CollectionState, player: int):
-    return (
-        state.has(ItemName.SpaceJump, player)
-        or can_spider_boost(state, player)
-        or can_ibj(state, player, IBJ.option_vertical)
-    )
-
-
-def can_climb_wall(state: CollectionState, player: int):
-    return can_spider(state, player) or can_fly_straight_up(state, player)
-
-
-def can_high_jump(state: CollectionState, player: int):
-    return (
-        state.has(ItemName.HighJumpBoots, player)
-        or can_ibj(state, player, IBJ.option_double)
-        or can_fly_straight_up(state, player)
-    )
-
-
-def can_high_ledge(state: CollectionState, player: int):
-    return can_climb_wall(state, player) or can_high_jump(state, player)
-
-
-def can_short_shaft(state: CollectionState, player: int):
-    return can_high_ledge(state, player) or can_wall_jump(state, player, WallJump.option_enable)
-
-
-def can_climb_shaft(state: CollectionState, player: int):
-    return can_wall_jump(state, player, WallJump.option_enable) or can_climb_wall(state, player)
-
-
-def can_any_missile(state: CollectionState, player: int):
-    return state.has_any((ItemName.MissileLauncher, ItemName.SuperMissile), player)
-
-
-def can_damage_tough_enemy(state: CollectionState, player: int):
-    return state.has_any(
-        (ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst, ItemName.ScrewAttack), player
-    ) or can_power_bomb(state, player)
-
-
-def can_damage_metroid(state: CollectionState, player: int):
-    return state.has_any(
-        (ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst, ItemName.IceBeam), player
-    )
-
-
-def can_blobthrower(state: CollectionState, player: int):
-    return state.has(ItemName.BeamBurst, player) or can_power_bomb(state, player)
-
-
-def can_open_door(state: CollectionState, player: int, door: Door):
-    match door:
-        case Door.Open:
-            return True
-        case Door.Normal:
-            return True  # Player always has a weapon to open this with (power beam can't be randomized)
-        case Door.Charge:
-            return state.has(ItemName.ChargeBeam, player)
-        case Door.Missile:
-            return can_any_missile(state, player)
-        case Door.Super:
-            return state.has(ItemName.SuperMissile, player)
-        case Door.PowerBomb:
-            return can_power_bomb(state, player)
-        case Door.MorphTunnel:
-            return state.has(ItemName.MorphBall, player)
-        case Door.Gigadora:
-            return state.has(ItemName.SpazerBeam, player)
-        case Door.Gryncore:
-            return state.has(ItemName.PlasmaBeam, player)
-        case Door.Taramarga:
-            return state.has(ItemName.WaveBeam, player)
-        case Door.Elevator:
-            return True
-    assert_never(door)
+door_rules = {
+    Door.Open: True_(),
+    Door.Normal: True_(),  # Player always has a weapon to open this with (power beam can't be randomized)
+    Door.Charge: Has(ItemName.ChargeBeam),
+    Door.Missile: can_any_missile,
+    Door.Super: Has(ItemName.SuperMissile),
+    Door.PowerBomb: can_power_bomb,
+    Door.MorphTunnel: Has(ItemName.MorphBall),
+    Door.Gigadora: Has(ItemName.SpazerBeam),
+    Door.Gryncore: Has(ItemName.PlasmaBeam),
+    Door.Taramarga: Has(ItemName.WaveBeam),
+    Door.Elevator: True_(),
+}

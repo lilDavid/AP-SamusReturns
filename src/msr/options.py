@@ -102,6 +102,38 @@ class RoomNames(DefaultOnToggle):
     display_name = "Display Room Names"
 
 
+class PickupModels(Choice):
+    """
+    How to display pickups.
+
+    Full: Pickups for other Metroid games appear as the matching item
+    Native: Pickups for other Metroid: Samus Returns players appear as themselves
+    Local: Pickups for other players appear as AP items; pickups for yourself appear as usual
+    Hidden: All pickups (including your own!) look the same
+    """
+
+    display_name = "Pickup Models"
+    option_full = 0
+    option_native = 1
+    option_local = 2
+    option_hidden = 3
+    default = option_full
+
+
+class ApItemModels(Choice):
+    """
+    How to display external "AP Items."
+
+    Progression: Progression items are RDV logos, and non-progression items look like Nothing items
+    Generic: All AP items are RDV logos
+    """
+
+    display_name = "AP Item Models"
+    option_progression = 1
+    option_generic = 2
+    default = option_progression
+
+
 msr_option_groups = [
     OptionGroup(
         "Item Pool",
@@ -128,6 +160,8 @@ msr_option_groups = [
         "Cosmetic",
         [
             RoomNames,
+            PickupModels,
+            ApItemModels,
         ],
     ),
 ]
@@ -154,6 +188,8 @@ class SamusReturnsOptions(PerGameCommonOptions):
 
     # Cosmetic
     display_room_names: RoomNames
+    pickup_models: PickupModels
+    ap_item_models: ApItemModels
 
     # Item & location options
     start_inventory_from_pool: StartInventoryPool

@@ -17,6 +17,7 @@ from .data.internal_names import RANDO_DNA_TEMPLATE, AreaId, ItemId, ItemModel, 
 from .data.remote_items import REMOTE_ITEM_MAPPING
 from .items import ItemName, OtherItemData, TankData, UniqueItemData, item_data_table, launcher_to_ammo
 from .locations import location_table
+from .options import ApItemModels, PickupModels
 from .regions import all_areas_data
 
 if TYPE_CHECKING:
@@ -167,7 +168,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
 
             self.placed_dna = 0
             pickup = location_table[location.name].to_pickup()
-            pickup["model"] = [self.get_pickup_model(location.item)]
+            pickup["model"] = [self.get_pickup_model(world, location.item)]
             if location.item.player == world.player:
                 item_data = item_data_table[location.item.name]
                 pickup["resources"] = self.create_resources(world, ItemName(location.item.name))
@@ -183,22 +184,34 @@ class SamusReturnsPatch(APAutoPatchInterface):
         return pickups
 
     @staticmethod
-    def get_pickup_model(item: Item):
-        # Native item
-        if item.game == GAME_NAME:
-            return item_data_table[item.name].model
+    def get_pickup_model(world: SamusReturnsWorld, item: Item):
+        # Try to display a Metroid item
+        match world.options.pickup_models.value:
+            case PickupModels.option_hidden:
+                return ItemModel.ItemSphere
 
-        # From Metroid game
-        game_lookup = REMOTE_ITEM_MAPPING.get(item.game)
-        if game_lookup is not None:
-            model = game_lookup.get(item.name)
-            if model is not None:
-                return model
+            case PickupModels.option_local if item.player == world.player:
+                return item_data_table[item.name].model
 
-        # AP item
-        if item.advancement or item.trap:
-            return ItemModel.OffworldGeneric
-        return ItemModel.ItemSphere
+            case PickupModels.option_native | PickupModels.option_full if item.game == GAME_NAME:
+                return item_data_table[item.name].model
+
+            case PickupModels.option_full:
+                game_lookup = REMOTE_ITEM_MAPPING.get(item.game)
+                if game_lookup is not None:
+                    model = game_lookup.get(item.name)
+                    if model is not None:
+                        return model
+
+        # Display an AP item
+        match world.options.ap_item_models.value:
+            case ApItemModels.option_generic:
+                return ItemModel.OffworldGeneric
+
+            case ApItemModels.option_progression:
+                if item.advancement or item.trap:
+                    return ItemModel.OffworldGeneric
+                return ItemModel.ItemSphere
 
     def create_resources(self, world: SamusReturnsWorld, item: ItemName):
         data = item_data_table[item]

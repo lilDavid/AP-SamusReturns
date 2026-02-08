@@ -180,7 +180,7 @@ class SamusReturnsOptions(PerGameCommonOptions):
     # Logic
     wall_jump: WallJump
     infinite_bomb_jump: IBJ
-    damabe_boost: DamageBoost
+    damage_boost: DamageBoost
     movement: Movement
 
     # Game Patches

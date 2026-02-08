@@ -152,6 +152,8 @@ class SamusReturnsWorld(World):
                 "dna_required",
                 "wall_jump",
                 "infinite_bomb_jump",
+                "damage_boost",
+                "movement",
                 toggles_as_bools=True,
             ),
         }

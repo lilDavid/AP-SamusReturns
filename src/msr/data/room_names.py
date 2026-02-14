@@ -15,7 +15,7 @@ class AreaName(StrEnum):
     Area3Interior = "Area 3"
     Area4Caves = "Area 4"
     Area4Mines = "Area 4"
-    Area5Lobby = "Area 4"
+    Area5Lobby = "Area 5"
     Area5Exterior = "Area 5"
     Area5Interior = "Area 5"
     Area6 = "Area 6"

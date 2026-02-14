@@ -9,8 +9,8 @@ from worlds.AutoWorld import WebWorld, World
 
 from . import lib as lib  # Set up module importer for open-samus-returns-rando
 from .data.constants import GAME_NAME
-from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, major_items, reserve_tanks
-from .locations import SamusReturnsLocation, location_table
+from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, item_groups, major_items, reserve_tanks
+from .locations import SamusReturnsLocation, location_groups, location_table
 from .options import SamusReturnsOptions, msr_option_groups
 from .patch import SamusReturnsPatch
 from .regions import connect_entrances, create_regions
@@ -37,6 +37,9 @@ class SamusReturnsWorld(World):
 
     item_name_to_id: ClassVar[dict[str, int]] = {str(name): data.ap_id for name, data in item_data_table.items()}
     location_name_to_id: ClassVar[dict[str, int]] = {str(name): data.ap_id for name, data in location_table.items()}
+    item_name_groups = item_groups
+    location_name_groups = location_groups
+
     topology_present = not Utils.is_frozen()
 
     ammo_amounts: dict[str, int]
@@ -159,9 +162,10 @@ class SamusReturnsWorld(World):
         return ItemName.Nothing
 
     def create_item(self, name: str):
-        item_name = ItemName(name)
-        data = item_data_table[item_name]
-        return SamusReturnsItem(item_name, data.classification(), data.ap_id, self.player)
+        # Convert to ItemName to check validity, then to string to prevent subclassing shenanigans
+        # (Both are acceptable to pass in and fortunately one of these conversions will be a no-op)
+        data = item_data_table[ItemName(name)]
+        return SamusReturnsItem(name, data.classification(), data.ap_id, self.player)
 
 
 def launch_client(*args):

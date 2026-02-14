@@ -68,8 +68,7 @@ class MetroidLocationData(NamedTuple):
 LocationData = ActorLocationData | MetroidLocationData
 
 
-location_table: dict[str, LocationData] = {
-    # Surface - east
+surface_location_table: dict[str, LocationData] = {
     SurfaceEast.TwistyTunnel.location(): ActorLocationData(1, AreaId.SURFACE_EAST, "LE_Item_006"),
     SurfaceEast.MorphBall.location(): ActorLocationData(2, AreaId.SURFACE_EAST, "LE_PowerUP_Morphball"),
     SurfaceEast.ChozoSeal.location(): ActorLocationData(3, AreaId.SURFACE_EAST, "LE_Item_005"),
@@ -86,10 +85,11 @@ location_table: dict[str, LocationData] = {
     SurfaceEast.TransportCache.location(): ActorLocationData(14, AreaId.SURFACE_EAST, "LE_Item_012"),
     SurfaceEast.CavernAlcove.location(): ActorLocationData(15, AreaId.SURFACE_EAST, "LE_Item_011"),
     SurfaceEast.EnergyRechargeShaft.location(): ActorLocationData(16, AreaId.SURFACE_EAST, "HiddenPowerup001"),
-    # Surface - west
     SurfaceWest.TransportArea8.location("Left"): ActorLocationData(17, AreaId.SURFACE_WEST, "LE_Item_013"),
     SurfaceWest.TransportArea8.location("Right"): ActorLocationData(18, AreaId.SURFACE_WEST, "HiddenPowerup002"),
-    # Area 1
+}
+
+area_1_location_table: dict[str, LocationData] = {
     Area1.Bomb.location("Missile"): ActorLocationData(101, AreaId.AREA_1, "LE_Item_005"),
     Area1.Bomb.location("Statue"): ActorLocationData(102, AreaId.AREA_1, "LE_PowerUp_Bomb"),
     Area1.DestroyedArmory.location(): ActorLocationData(103, AreaId.AREA_1, "LE_Item_011"),
@@ -111,7 +111,9 @@ location_table: dict[str, LocationData] = {
     Area1.InnerTempleVentShaft.location(): ActorLocationData(119, AreaId.AREA_1, "LE_Item_016"),
     Area1.TransportCache.location(): ActorLocationData(120, AreaId.AREA_1, "LE_Item_003"),
     Area1.CavernsAlphaSw.location(): MetroidLocationData(121, AreaId.AREA_1, "SG_Alpha_001"),
-    # Area 2 - dam exterior
+}
+
+area_2_exterior_location_table: dict[str, LocationData] = {
     Area2Exterior.DamExterior.location(): ActorLocationData(201, AreaId.AREA_2_EXTERIOR, "LE_Item_004"),
     Area2Exterior.Arachnus.location(): ActorLocationData(202, AreaId.AREA_2_EXTERIOR, "LE_PowerUp_Springball"),
     Area2Exterior.CritterPlayground.location(): ActorLocationData(203, AreaId.AREA_2_EXTERIOR, "LE_Item_005"),
@@ -126,7 +128,9 @@ location_table: dict[str, LocationData] = {
     Area2Exterior.CavernsAlpha2.location(): MetroidLocationData(212, AreaId.AREA_2_EXTERIOR, "SG_Alpha_005"),
     Area2Exterior.InnerAlpha.location(): MetroidLocationData(213, AreaId.AREA_2_EXTERIOR, "SG_Alpha_006"),
     Area2Exterior.CavernsAlphaE.location(): MetroidLocationData(214, AreaId.AREA_2_EXTERIOR, "SG_Alpha_007"),
-    # Area 2 - dam interior
+}
+
+area_2_interior_location_table: dict[str, LocationData] = {
     Area2Interior.WaveBeam.location(): ActorLocationData(215, AreaId.AREA_2_INTERIOR, "LE_PowerUp_WaveBeam"),
     Area2Interior.LavaGenerator.location(): ActorLocationData(216, AreaId.AREA_2_INTERIOR, "HP_Item_001"),
     Area2Interior.CrumbleCavern.location(): ActorLocationData(217, AreaId.AREA_2_INTERIOR, "LE_Item_006"),
@@ -141,7 +145,9 @@ location_table: dict[str, LocationData] = {
     Area2Interior.InteriorIntersection.location("Tunnel"): ActorLocationData(
         224, AreaId.AREA_2_INTERIOR, "HP_Item_002"
     ),
-    # Area 2 - dam entryway
+}
+
+area_2_entryway_location_table: dict[str, LocationData] = {
     Area2Entryway.TransportAreas1And3.location("Plants"): ActorLocationData(225, AreaId.AREA_2_ENTRYWAY, "LE_Item_005"),
     Area2Entryway.TransportAreas1And3.location("Tunnel"): ActorLocationData(
         226, AreaId.AREA_2_ENTRYWAY, "HiddenPowerup001"
@@ -153,7 +159,9 @@ location_table: dict[str, LocationData] = {
     ),
     Area2Entryway.FleechSwarmFloodway.location(): ActorLocationData(230, AreaId.AREA_2_ENTRYWAY, "LE_Item_001"),
     Area2Entryway.Alpha2.location(): MetroidLocationData(231, AreaId.AREA_2_ENTRYWAY, "SG_Alpha_002"),
-    # Area 3 - factory exterior
+}
+
+area_3_exterior_location_table: dict[str, LocationData] = {
     Area3Exterior.ExteriorMaze.location(): ActorLocationData(301, AreaId.AREA_3_EXTERIOR, "LE_Item_004"),
     Area3Exterior.GrappleBeam.location(): ActorLocationData(302, AreaId.AREA_3_EXTERIOR, "LE_PowerUp_GrappleBeam"),
     Area3Exterior.FactoryExt.location("Ceiling"): ActorLocationData(303, AreaId.AREA_3_EXTERIOR, "LE_Item_003"),
@@ -165,7 +173,9 @@ location_table: dict[str, LocationData] = {
     Area3Exterior.HalzynHangout.location("Top"): ActorLocationData(309, AreaId.AREA_3_EXTERIOR, "HiddenPowerup001"),
     Area3Exterior.HalzynHangout.location("Bottom"): ActorLocationData(310, AreaId.AREA_3_EXTERIOR, "HiddenPowerup002"),
     Area3Exterior.Gamma.location("Bottom"): MetroidLocationData(311, AreaId.AREA_3_EXTERIOR, "SG_Gamma_005_C"),
-    # Area 3 - Metroid caverns
+}
+
+area_3_caverns_location_table: dict[str, LocationData] = {
     Area3Caverns.TransportFactoryExtN.location(): ActorLocationData(312, AreaId.AREA_3_CAVERNS, "HiddenPowerup001"),
     Area3Caverns.Alpha2W.location(): MetroidLocationData(313, AreaId.AREA_3_CAVERNS, "SG_Alpha_002"),
     Area3Caverns.GammaC.location(): MetroidLocationData(314, AreaId.AREA_3_CAVERNS, "SG_Gamma_001"),
@@ -180,7 +190,9 @@ location_table: dict[str, LocationData] = {
     Area3Caverns.Gamma2S.location(): MetroidLocationData(323, AreaId.AREA_3_CAVERNS, "SG_Gamma_004_B"),
     Area3Caverns.Gamma2N.location(): MetroidLocationData(324, AreaId.AREA_3_CAVERNS, "SG_Gamma_003"),
     Area3Caverns.Alpha2N.location(): MetroidLocationData(325, AreaId.AREA_3_CAVERNS, "SG_Alpha_003"),
-    # Area 3 - factory interior
+}
+
+area_3_interior_location_table: dict[str, LocationData] = {
     Area3Interior.SecuritySite.location(): ActorLocationData(326, AreaId.AREA_3_INTERIOR, "LE_Item_006"),
     Area3Interior.ParabyPeriphery.location(): ActorLocationData(327, AreaId.AREA_3_INTERIOR, "LE_Item_004"),
     Area3Interior.FanControl.location(): ActorLocationData(328, AreaId.AREA_3_INTERIOR, "LE_Item_002"),
@@ -189,7 +201,9 @@ location_table: dict[str, LocationData] = {
     Area3Interior.Alpha.location("Lava"): ActorLocationData(331, AreaId.AREA_3_INTERIOR, "HiddenPowerup001"),
     Area3Interior.Alpha.location("Alpha Metroid"): MetroidLocationData(332, AreaId.AREA_3_INTERIOR, "SG_Alpha_001"),
     Area3Interior.GammaS.location(): MetroidLocationData(333, AreaId.AREA_3_INTERIOR, "SG_Gamma_007_A"),
-    # Area 4 - caves
+}
+
+area_4_caves_location_table: dict[str, LocationData] = {
     Area4Caves.CavesIntersectionTerminal.location(): ActorLocationData(401, AreaId.AREA_4_CAVES, "LE_Item_007"),
     Area4Caves.SpazerBeam.location(): ActorLocationData(402, AreaId.AREA_4_CAVES, "LE_PowerUp_SpazerBeam"),
     Area4Caves.CrumbleCatwalk.location(): ActorLocationData(403, AreaId.AREA_4_CAVES, "LE_Item_006"),
@@ -203,7 +217,9 @@ location_table: dict[str, LocationData] = {
     Area4Caves.GammaAccessS.location(): ActorLocationData(411, AreaId.AREA_4_CAVES, "LE_Item_008"),
     Area4Caves.AmethystAltars.location(): ActorLocationData(412, AreaId.AREA_4_CAVES, "HiddenPowerup001"),
     Area4Caves.TransportArea5.location(): ActorLocationData(413, AreaId.AREA_4_CAVES, "HiddenPowerup003"),
-    # Area 4 - crystal mines
+}
+
+area_4_mines_location_table: dict[str, LocationData] = {
     Area4Mines.MinesIntersectionTunnel.location("Top"): ActorLocationData(414, AreaId.AREA_4_MINES, "LE_Item_009"),
     Area4Mines.MinesIntersectionTunnel.location("Bottom"): ActorLocationData(
         415, AreaId.AREA_4_MINES, "HiddenPowerup002"
@@ -229,7 +245,9 @@ location_table: dict[str, LocationData] = {
     Area4Mines.DiggernautExcavationTunnels.location("Floor"): ActorLocationData(
         428, AreaId.AREA_4_MINES, "LE_Item_010"
     ),
-    # Area 5 - tower lobby
+}
+
+area_5_lobby_location_table: dict[str, LocationData] = {
     Area5Lobby.TransportAreas4And6.location("Left"): ActorLocationData(501, AreaId.AREA_5_LOBBY, "LE_Item_002"),
     Area5Lobby.TransportAreas4And6.location("Right"): ActorLocationData(502, AreaId.AREA_5_LOBBY, "HiddenPowerup002"),
     Area5Lobby.LobbyTeleporterW.location("Lower"): ActorLocationData(503, AreaId.AREA_5_LOBBY, "LE_Item_006"),
@@ -242,7 +260,9 @@ location_table: dict[str, LocationData] = {
     Area5Lobby.PhaseDrift.location("Pitfall Blocks"): ActorLocationData(508, AreaId.AREA_5_LOBBY, "HiddenPowerup001"),
     Area5Lobby.MeboidMillpond.location(): ActorLocationData(509, AreaId.AREA_5_LOBBY, "LE_Item_004"),
     Area5Lobby.Gamma2.location(): MetroidLocationData(510, AreaId.AREA_5_LOBBY, "SG_Gamma_004"),
-    # Area 5 - tower exterior
+}
+
+area_5_exterior_location_table: dict[str, LocationData] = {
     Area5Exterior.TowerExt.location("Alcove"): ActorLocationData(511, AreaId.AREA_5_EXTERIOR, "LE_Item_006"),
     Area5Exterior.TowerExt.location("Crevice"): ActorLocationData(512, AreaId.AREA_5_EXTERIOR, "HiddenPowerup001"),
     Area5Exterior.TowerExt.location("Puzzle"): ActorLocationData(513, AreaId.AREA_5_EXTERIOR, "LE_Item_005"),
@@ -255,7 +275,9 @@ location_table: dict[str, LocationData] = {
     Area5Exterior.Gamma2.location(): MetroidLocationData(520, AreaId.AREA_5_EXTERIOR, "SG_Gamma_002"),
     Area5Exterior.Gamma.location("Gamma Metroid"): MetroidLocationData(521, AreaId.AREA_5_EXTERIOR, "SG_Gamma_003"),
     Area5Exterior.Gamma.location("Maze"): ActorLocationData(522, AreaId.AREA_5_EXTERIOR, "LE_Item_004"),
-    # Area 5 - tower interior
+}
+
+area_5_interior_location_table: dict[str, LocationData] = {
     Area5Interior.InteriorSaveStation.location(): ActorLocationData(523, AreaId.AREA_5_INTERIOR, "LE_Item_004"),
     Area5Interior.PlasmaBeam.location(): ActorLocationData(524, AreaId.AREA_5_INTERIOR, "LE_PowerUp_PlasmaBeam"),
     Area5Interior.GrappleShuffler.location(): ActorLocationData(525, AreaId.AREA_5_INTERIOR, "HiddenPowerup002"),
@@ -270,7 +292,9 @@ location_table: dict[str, LocationData] = {
     Area5Interior.Gamma2.location(): MetroidLocationData(532, AreaId.AREA_5_INTERIOR, "SG_Gamma_001"),
     Area5Interior.InteriorTeleporter.location(): ActorLocationData(533, AreaId.AREA_5_INTERIOR, "LE_Item_003"),
     Area5Interior.Zeta2.location(): MetroidLocationData(534, AreaId.AREA_5_INTERIOR, "SG_Zeta_002"),
-    # Area 6
+}
+
+area_6_location_table: dict[str, LocationData] = {
     Area6.TransportArea7.location(): ActorLocationData(601, AreaId.AREA_6, "LE_Item_014"),
     Area6.Omega.location(): MetroidLocationData(602, AreaId.AREA_6, "SG_Omega_001"),
     Area6.HideoutSprawl.location("Right"): ActorLocationData(603, AreaId.AREA_6, "LE_Item_008"),
@@ -286,7 +310,9 @@ location_table: dict[str, LocationData] = {
     Area6.ChozoSealW.location("Ceiling"): ActorLocationData(613, AreaId.AREA_6, "LE_Item_002"),
     Area6.ChozoSealW.location("Tunnel"): ActorLocationData(614, AreaId.AREA_6, "LE_Item_007"),
     Area6.ChozoSealW.location("Bottom"): ActorLocationData(615, AreaId.AREA_6, "LE_Item_013"),
-    # Area 7
+}
+
+area_7_location_table: dict[str, LocationData] = {
     Area7.LabTeleporterW.location(): ActorLocationData(701, AreaId.AREA_7, "LE_Item_008"),
     Area7.SpiderBoostTunnelS.location(): ActorLocationData(702, AreaId.AREA_7, "LE_Item_003"),
     Area7.Omega2.location(): MetroidLocationData(703, AreaId.AREA_7, "SG_Omega_002"),
@@ -303,7 +329,9 @@ location_table: dict[str, LocationData] = {
     Area7.WallfireWorkstation.location(): ActorLocationData(714, AreaId.AREA_7, "HiddenPowerup002"),
     Area7.GrapplePuzzleFoyer.location(): ActorLocationData(715, AreaId.AREA_7, "LE_Item_011"),
     Area7.SpiderBoostTunnelN.location(): ActorLocationData(716, AreaId.AREA_7, "LE_Item_012"),
-    # Area 8
+}
+
+area_8_location_table: dict[str, LocationData] = {
     Area8.TransportSurface.location("Left"): ActorLocationData(801, AreaId.AREA_8, "LE_Item_013"),
     Area8.TransportSurface.location("Right"): ActorLocationData(802, AreaId.AREA_8, "LE_Item_014"),
     Area8.Amphitheater.location("Spikes"): ActorLocationData(803, AreaId.AREA_8, "HiddenPowerup001"),
@@ -319,4 +347,88 @@ location_table: dict[str, LocationData] = {
     Area8.NestShaftW.location(): ActorLocationData(813, AreaId.AREA_8, "HiddenPowerup002"),
     Area8.Hatchling.location(): ActorLocationData(814, AreaId.AREA_8, "LE_Baby_Hatchling"),
     Area8.NestVestibule.location(): ActorLocationData(815, AreaId.AREA_8, "LE_Item_007"),
+}
+
+location_table = {
+    **surface_location_table,
+    **area_1_location_table,
+    **area_2_exterior_location_table,
+    **area_2_interior_location_table,
+    **area_2_entryway_location_table,
+    **area_3_exterior_location_table,
+    **area_3_caverns_location_table,
+    **area_3_interior_location_table,
+    **area_4_caves_location_table,
+    **area_4_mines_location_table,
+    **area_5_lobby_location_table,
+    **area_5_exterior_location_table,
+    **area_5_interior_location_table,
+    **area_6_location_table,
+    **area_7_location_table,
+    **area_8_location_table,
+}
+
+location_groups: dict[str, set[str]] = {
+    "Surface": set(surface_location_table.keys()),
+    "Area 1": set(area_1_location_table.keys()),
+    "Area 2 - Dam Exterior": set(area_2_exterior_location_table.keys()),
+    "Area 2 - Dam Interior": set(area_2_interior_location_table.keys()),
+    "Area 2 - Dam Entryway": set(area_2_entryway_location_table.keys()),
+    "Area 2": {
+        *area_2_exterior_location_table.keys(),
+        *area_2_interior_location_table.keys(),
+        *area_2_entryway_location_table.keys(),
+    },
+    "Area 3 - Factory Exterior": set(area_3_exterior_location_table.keys()),
+    "Area 3 - Metroid Caverns": set(area_3_caverns_location_table.keys()),
+    "Area 3 - Factory Interior": set(area_3_interior_location_table.keys()),
+    "Area 3": {
+        *area_3_exterior_location_table.keys(),
+        *area_3_caverns_location_table.keys(),
+        *area_3_interior_location_table.keys(),
+    },
+    "Area 4 - Caves": set(area_4_caves_location_table.keys()),
+    "Area 4 - Crystal Mines": set(area_4_mines_location_table.keys()),
+    "Area 4": {
+        *area_4_caves_location_table.keys(),
+        *area_4_mines_location_table.keys(),
+    },
+    "Area 5 - Tower Lobby": set(area_5_lobby_location_table.keys()),
+    "Area 5 - Tower Exterior": set(area_5_exterior_location_table.keys()),
+    "Area 5 - Tower Interior": set(area_5_interior_location_table.keys()),
+    "Area 5": {
+        *area_5_lobby_location_table.keys(),
+        *area_5_exterior_location_table.keys(),
+        *area_5_interior_location_table.keys(),
+    },
+    "Area 6": set(area_6_location_table.keys()),
+    "Area 7": set(area_7_location_table.keys()),
+    "Area 8": set(area_8_location_table.keys()),
+    "Metroids": {name for name, data in location_table.items() if type(data) is MetroidLocationData},
+    "Bosses": {
+        Area2Exterior.Arachnus.location(),
+        Area6.Diggernaut.location(),
+    },
+    "Chozo Statues": {
+        SurfaceEast.MorphBall.location(),
+        SurfaceEast.ChargeBeam.location(),
+        Area1.Bomb.location("Statue"),
+        Area1.SpiderBall.location("Buried Item"),
+        Area1.IceBeam.location("Statue"),
+        Area2Interior.WaveBeam.location(),
+        Area2Interior.HighJumpBoots.location(),
+        Area2Interior.InteriorIntersection.location("Statue"),
+        Area3Exterior.GrappleBeam.location(),
+        Area4Caves.SpazerBeam.location(),
+        Area4Mines.SuperMissile.location(),
+        Area5Exterior.ScrewAttack.location(),
+        Area5Interior.PlasmaBeam.location(),
+        Area5Interior.GravitySuit.location(),
+    },
+    "Aeion Ability Artifacts": {
+        SurfaceEast.ScanPulse.location(),
+        Area2Entryway.LightningArmor.location("Artifact"),
+        Area3Exterior.BeamBurst.location(),
+        Area5Lobby.PhaseDrift.location("Artifact"),
+    },
 }

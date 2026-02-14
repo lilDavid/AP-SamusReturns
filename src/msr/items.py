@@ -179,3 +179,66 @@ launcher_to_ammo: dict[str, ItemId] = {
     ItemName.BeamBurst: ItemId.MAX_AEION,
     ItemName.PhaseDrift: ItemId.MAX_AEION,
 }
+
+
+def item_group(*items: ItemName):
+    return {item.value for item in items}
+
+
+item_groups = {
+    "Major Items": {item.value for item in major_items.keys()},
+    "Reserve Tanks": {item.value for item in reserve_tanks.keys()},
+    "Tanks": {item.value for item in tanks.keys()},
+    "Missile Launchers": item_group(
+        ItemName.MissileLauncher,
+        ItemName.SuperMissile,
+    ),
+    "Beams": item_group(
+        ItemName.ChargeBeam,
+        ItemName.IceBeam,
+        ItemName.WaveBeam,
+        ItemName.SpazerBeam,
+        ItemName.PlasmaBeam,
+    ),
+    "Suits": item_group(
+        ItemName.VariaSuit,
+        ItemName.GravitySuit,
+    ),
+    "Aeion Abilities": item_group(
+        ItemName.ScanPulse,
+        ItemName.LightningArmor,
+        ItemName.BeamBurst,
+        ItemName.PhaseDrift,
+    ),
+    "Weapons": item_group(
+        ItemName.MissileLauncher,
+        ItemName.SuperMissile,
+        ItemName.ChargeBeam,
+        ItemName.IceBeam,
+        ItemName.WaveBeam,
+        ItemName.SpazerBeam,
+        ItemName.PlasmaBeam,
+        ItemName.ScrewAttack,
+        ItemName.BeamBurst,
+    ),
+    "Morph Ball Upgrades": item_group(
+        ItemName.MorphBall,
+        ItemName.SpiderBall,
+        ItemName.SpringBall,
+        ItemName.Bomb,
+        ItemName.PowerBomb,
+    ),
+    "Movement Systems": item_group(
+        ItemName.GrappleBeam,
+        ItemName.HighJumpBoots,
+        ItemName.SpaceJump,
+        ItemName.GravitySuit,
+        ItemName.PhaseDrift,
+    ),
+    "Life Support Upgrades": item_group(
+        ItemName.EnergyTank,
+        ItemName.VariaSuit,
+        ItemName.GravitySuit,
+        ItemName.LightningArmor,
+    ),
+}

@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import ClassVar
 
 import Utils
-from BaseClasses import Item
 from rule_builder.rules import Has
 from worlds import LauncherComponents as Launcher
 from worlds.AutoWorld import WebWorld, World
@@ -39,18 +38,15 @@ class SamusReturnsWorld(World):
     location_name_to_id: ClassVar[dict[str, int]] = {str(name): data.ap_id for name, data in location_table.items()}
     topology_present = not Utils.is_frozen()
 
-    starting_items: Counter[ItemName]
     ammo_amounts: dict[str, int]
+    starting_items: Counter[ItemName]
+
+    displaced_filler: list[ItemName]
 
     def generate_early(self):
-        self.starting_items = Counter(
-            {
-                ItemName.MissileLauncher: 1,
-            }
-        )
-
         if self.options.dna_available.value < self.options.dna_required.value:
             self.options.dna_available.value = self.options.dna_required.value
+
         self.ammo_amounts = {
             ItemName.EnergyTank: 100,
             ItemName.MissileLauncher: 24,
@@ -66,11 +62,18 @@ class SamusReturnsWorld(World):
             ItemName.PhaseDrift: 150,
         }
 
+        self.starting_items = Counter(
+            {
+                ItemName.MissileLauncher: 1,
+            }
+        )
         if self.options.starting_scan_pulse.value:
             self.starting_items[ItemName.ScanPulse] = 1
 
         for item in self.starting_items.elements():
             self.push_precollected(self.create_item(item))
+
+        self.displaced_filler = []
 
     def create_regions(self):
         set_starting_room(self)
@@ -96,25 +99,35 @@ class SamusReturnsWorld(World):
         self.set_completion_rule(Has(VICTORY))
 
     def create_items(self):
-        item_pool: list[Item] = []
+        major_item_pool: Counter[ItemName] = Counter()
+        minor_item_pool: Counter[ItemName] = Counter()
 
         # Major items
-        item_pool += [self.create_item(name) for name in major_items if self.starting_items[name] <= 0]
-
-        # DNA
-        item_pool += [self.create_item(ItemName.MetroidDna) for _ in range(self.options.dna_available.value)]
+        major_item_pool.update({name: 1 for name in major_items if self.starting_items[name] <= 0})
+        major_item_pool[ItemName.MetroidDna] = self.options.dna_available.value
 
         # Tanks
-        item_pool += [self.create_item(ItemName.EnergyTank) for _ in range(10)]
-        item_pool += [self.create_item(ItemName.MissileTank) for _ in range(80)]
-        item_pool += [self.create_item(ItemName.SuperMissileTank) for _ in range(30)]
-        item_pool += [self.create_item(ItemName.PowerBombTank) for _ in range(15)]
-        item_pool += [self.create_item(ItemName.AeionTank) for _ in range(15)]
+        major_item_pool[ItemName.EnergyTank] = 10  # E-tanks should be immune to tank displacement
+        minor_item_pool[ItemName.MissileTank] = 80
+        minor_item_pool[ItemName.SuperMissileTank] = 30
+        minor_item_pool[ItemName.PowerBombTank] = 15
+        minor_item_pool[ItemName.AeionTank] = 15
 
         # Filler
-        item_pool += [self.create_filler() for _ in range(LOCATION_COUNT - len(item_pool))]
+        item_count = sum(major_item_pool.values()) + sum(minor_item_pool.values())
+        if item_count < LOCATION_COUNT:
+            minor_item_pool[self.get_filler_item_name()] = LOCATION_COUNT - item_count
+        elif item_count > LOCATION_COUNT:
+            # This is so overengineered lol
+            # We actually store items removed from the pool to make space so they can be returned if a vacancy opens up
+            # And these are randomly selected from the tank items (instead of like, just missiles)
+            self.displaced_filler = self.random.sample(
+                list(minor_item_pool.keys()), item_count - LOCATION_COUNT, counts=minor_item_pool.values()
+            )
+            minor_item_pool -= Counter(self.displaced_filler)
 
-        self.multiworld.itempool += item_pool
+        self.multiworld.itempool += [self.create_item(name) for name in major_item_pool.elements()]
+        self.multiworld.itempool += [self.create_item(name) for name in minor_item_pool.elements()]
 
     def generate_output(self, output_directory: str):
         patch = SamusReturnsPatch(player=self.player, player_name=self.player_name)
@@ -136,6 +149,8 @@ class SamusReturnsWorld(World):
         }
 
     def get_filler_item_name(self):
+        if self.displaced_filler:
+            return self.displaced_filler.pop()
         return ItemName.Nothing
 
     def create_item(self, name: str):

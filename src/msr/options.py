@@ -28,6 +28,14 @@ class MetroidDnaRequired(Range):
 
 
 # Item pool
+class ReserveTankShuffle(Toggle):
+    """
+    Include the Energy, Missile, and Aeion Reserve Tanks in the item pool.
+    """
+
+    display_name = "Shuffle Reserve Tanks"
+
+
 class ScanPulseStart(DefaultOnToggle):
     """Start with Scan Pulse."""
 
@@ -96,8 +104,9 @@ class RoomNames(DefaultOnToggle):
 
 msr_option_groups = [
     OptionGroup(
-        "ItemPool",
+        "Item Pool",
         [
+            ReserveTankShuffle,
             ScanPulseStart,
         ],
     ),
@@ -131,6 +140,7 @@ class SamusReturnsOptions(PerGameCommonOptions):
     dna_required: MetroidDnaRequired
 
     # Item pool
+    shuffle_reserve_tanks: ReserveTankShuffle
     starting_scan_pulse: ScanPulseStart
 
     # Logic

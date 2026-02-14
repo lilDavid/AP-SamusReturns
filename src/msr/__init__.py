@@ -9,7 +9,7 @@ from worlds.AutoWorld import WebWorld, World
 
 from . import lib as lib  # Set up module importer for open-samus-returns-rando
 from .data.constants import GAME_NAME
-from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, major_items
+from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, major_items, reserve_tanks
 from .locations import SamusReturnsLocation, location_table
 from .options import SamusReturnsOptions, msr_option_groups
 from .patch import SamusReturnsPatch
@@ -105,6 +105,8 @@ class SamusReturnsWorld(World):
         # Major items
         major_item_pool.update({name: 1 for name in major_items if self.starting_items[name] <= 0})
         major_item_pool[ItemName.MetroidDna] = self.options.dna_available.value
+        if self.options.shuffle_reserve_tanks:
+            major_item_pool.update({name: 1 for name in reserve_tanks if self.starting_items[name] <= 0})
 
         # Tanks
         major_item_pool[ItemName.EnergyTank] = 10  # E-tanks should be immune to tank displacement

@@ -139,9 +139,13 @@ major_items = {
 }
 
 reserve_tanks = {
-    ItemName.EnergyReserve: UniqueItemData(71, ItemId.ENERGY_RESERVE_TANK, ItemModel.EnergyReserve),
-    ItemName.MissileReserve: UniqueItemData(72, ItemId.MISSILE_RESERVE_TANK, ItemModel.MissileReserve),
-    ItemName.AeionReserve: UniqueItemData(73, ItemId.ENERGY_RESERVE_TANK, ItemModel.AeionReserve),
+    ItemName.EnergyReserve: UniqueItemData(
+        71, ItemId.ENERGY_RESERVE_TANK, ItemModel.EnergyReserve, is_progression=False
+    ),
+    ItemName.MissileReserve: UniqueItemData(
+        72, ItemId.MISSILE_RESERVE_TANK, ItemModel.MissileReserve, is_progression=False
+    ),
+    ItemName.AeionReserve: UniqueItemData(73, ItemId.ENERGY_RESERVE_TANK, ItemModel.AeionReserve, is_progression=False),
 }
 
 other_items: dict[ItemName, OtherItemData] = {

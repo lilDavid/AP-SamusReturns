@@ -15,7 +15,7 @@ from .data.region_data.area_6 import area_6_data
 from .data.region_data.area_7 import area_7_data
 from .data.region_data.area_8 import area_8_data
 from .data.region_data.surface import surface_east_data, surface_west_data
-from .data.room_names import RoomName, SurfaceWest
+from .data.room_names import RoomName
 from .items import SamusReturnsItem
 from .locations import SamusReturnsLocation, location_table
 from .logic import door_rules
@@ -53,10 +53,6 @@ def can_leave_area(subregion: RegionData):
     for exit in subregion.exits:
         rule |= can_take_exit(exit)
     return rule
-
-
-def set_starting_room(world: SamusReturnsWorld):
-    world.origin_region_name = SurfaceWest.LandingSite.subregion("East")
 
 
 def create_regions(world: SamusReturnsWorld):

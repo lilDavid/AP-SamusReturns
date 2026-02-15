@@ -13,8 +13,9 @@ from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, major_i
 from .locations import SamusReturnsLocation, location_table
 from .options import SamusReturnsOptions, msr_option_groups
 from .patch import SamusReturnsPatch
-from .regions import connect_entrances, create_regions, set_starting_room
+from .regions import connect_entrances, create_regions
 from .settings import SamusReturnsSettings
+from .starting_room import set_starting_room
 
 LOCATION_COUNT = 211
 
@@ -39,7 +40,8 @@ class SamusReturnsWorld(World):
     topology_present = not Utils.is_frozen()
 
     ammo_amounts: dict[str, int]
-    starting_items: Counter[ItemName]
+    skipped_items: Counter[ItemName]
+    prefilled_locations: int
 
     displaced_filler: list[ItemName]
 
@@ -62,23 +64,21 @@ class SamusReturnsWorld(World):
             ItemName.PhaseDrift: 150,
         }
 
-        self.starting_items = Counter(
-            {
-                ItemName.MissileLauncher: 1,
-            }
-        )
+        starting_items = Counter([ItemName.MissileLauncher])
         if self.options.starting_scan_pulse.value:
-            self.starting_items[ItemName.ScanPulse] = 1
+            starting_items[ItemName.ScanPulse] = 1
 
-        for item in self.starting_items.elements():
+        for item in starting_items.elements():
             self.push_precollected(self.create_item(item))
 
+        self.skipped_items = starting_items
+        self.prefilled_locations = 0
         self.displaced_filler = []
 
     def create_regions(self):
-        set_starting_room(self)
         create_regions(self)
         connect_entrances(self)
+        set_starting_room(self)
 
         # TODO: Temporary fix so the locations can all be present
         from BaseClasses import Region
@@ -103,10 +103,10 @@ class SamusReturnsWorld(World):
         minor_item_pool: Counter[ItemName] = Counter()
 
         # Major items
-        major_item_pool.update({name: 1 for name in major_items if self.starting_items[name] <= 0})
+        major_item_pool.update(major_items.keys())
         major_item_pool[ItemName.MetroidDna] = self.options.dna_available.value
         if self.options.shuffle_reserve_tanks:
-            major_item_pool.update({name: 1 for name in reserve_tanks if self.starting_items[name] <= 0})
+            major_item_pool.update(reserve_tanks.keys())
 
         # Tanks
         major_item_pool[ItemName.EnergyTank] = 10  # E-tanks should be immune to tank displacement
@@ -115,16 +115,19 @@ class SamusReturnsWorld(World):
         minor_item_pool[ItemName.PowerBombTank] = 15
         minor_item_pool[ItemName.AeionTank] = 15
 
-        # Filler
-        item_count = sum(major_item_pool.values()) + sum(minor_item_pool.values())
-        if item_count < LOCATION_COUNT:
-            minor_item_pool[self.get_filler_item_name()] = LOCATION_COUNT - item_count
-        elif item_count > LOCATION_COUNT:
-            # This is so overengineered lol
-            # We actually store items removed from the pool to make space so they can be returned if a vacancy opens up
-            # And these are randomly selected from the tank items (instead of like, just missiles)
+        # Adjustments
+        major_item_pool.subtract(self.skipped_items)
+        assert all(count >= 0 for count in major_item_pool.values()), major_item_pool
+
+        item_count = major_item_pool.total() + minor_item_pool.total()
+        location_count = LOCATION_COUNT - self.prefilled_locations
+        if item_count < location_count:
+            minor_item_pool[self.get_filler_item_name()] = location_count - item_count
+        elif item_count > location_count:
+            # Store items removed from the pool to make space so they can be returned if a vacancy opens up
+            # Items to remove are randomly selected from the tanks (for a tiny bit of silly random fun)
             self.displaced_filler = self.random.sample(
-                list(minor_item_pool.keys()), item_count - LOCATION_COUNT, counts=minor_item_pool.values()
+                list(minor_item_pool.keys()), item_count - location_count, counts=minor_item_pool.values()
             )
             minor_item_pool -= Counter(self.displaced_filler)
 

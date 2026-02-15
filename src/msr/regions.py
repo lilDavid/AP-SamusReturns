@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import itertools
 from typing import TYPE_CHECKING
 
 from BaseClasses import ItemClassification, Region
@@ -44,6 +45,13 @@ all_areas_data = (
 )
 
 
+def walk_region_graph():
+    for area in all_areas_data:
+        for room in area.rooms:
+            for subregion in room.regions:
+                yield room, subregion
+
+
 def can_take_exit(exit: ExitData):
     return door_rules[exit.door] & exit.access_rule
 
@@ -57,56 +65,52 @@ def can_leave_area(subregion: RegionData):
 
 def create_regions(world: SamusReturnsWorld):
     regions: list[Region] = []
-    for area in all_areas_data:
-        for room in area.rooms:
-            for subregion in room.regions:
-                name = room.name.subregion(subregion.name)
-                region = Region(name, world.player, multiworld=world.multiworld)  # TODO: Hint text
+    for room, subregion in walk_region_graph():
+        name = room.name.subregion(subregion.name)
+        region = Region(name, world.player, multiworld=world.multiworld)  # TODO: Hint text
 
-                for pickup in subregion.pickups:
-                    pickup_name = room.name.location(pickup.name)
-                    location = SamusReturnsLocation(
-                        world.player, pickup_name, location_table[pickup_name].ap_id, region
-                    )
-                    access_rule = pickup.access_rule
-                    if subregion.require_exit_access:
-                        access_rule &= can_leave_area(subregion)
-                    world.set_rule(location, access_rule)
-                    region.locations.append(location)
+        for pickup in subregion.pickups:
+            pickup_name = room.name.location(pickup.name)
+            location = SamusReturnsLocation(world.player, pickup_name, location_table[pickup_name].ap_id, region)
+            region.locations.append(location)
 
-                for event in subregion.events:
-                    event_name = room.name.location(event.name)
-                    location = SamusReturnsLocation(world.player, event_name, None, region)
-                    access_rule = event.access_rule
-                    if subregion.require_exit_access:
-                        access_rule &= can_leave_area(subregion)
-                    world.set_rule(location, access_rule)
-                    location.place_locked_item(
-                        SamusReturnsItem(
-                            event_name if event.item_name is None else event.item_name,
-                            ItemClassification.progression,
-                            None,
-                            world.player,
-                        )
-                    )
-                    location.show_in_spoiler = event.show_in_spoiler
-                    region.locations.append(location)
-                regions.append(region)
+        for event in subregion.events:
+            event_name = room.name.location(event.name)
+            location = SamusReturnsLocation(world.player, event_name, None, region)
+            location.place_locked_item(
+                SamusReturnsItem(
+                    event_name if event.item_name is None else event.item_name,
+                    ItemClassification.progression,
+                    None,
+                    world.player,
+                )
+            )
+            location.show_in_spoiler = event.show_in_spoiler
+            region.locations.append(location)
+        regions.append(region)
     world.multiworld.regions += regions
 
 
+def set_location_rules(world: SamusReturnsWorld):
+    for room, subregion in walk_region_graph():
+        for action in itertools.chain(subregion.pickups, subregion.events):
+            location = world.get_location(room.name.location(action.name))
+            access_rule = action.access_rule
+            if subregion.require_exit_access:
+                access_rule &= can_leave_area(subregion)
+            world.set_rule(location, access_rule)
+
+
 def connect_entrances(world: SamusReturnsWorld):
-    for area in all_areas_data:
-        for room in area.rooms:
-            for subregion in room.regions:
-                region_name = room.name.subregion(subregion.name) if subregion.name else room.name.with_area()
-                region = world.get_region(region_name)
-                for exit in subregion.exits:
-                    world.create_entrance(
-                        region,
-                        world.get_region(
-                            exit.destination.with_area() if isinstance(exit.destination, RoomName) else exit.destination
-                        ),
-                        can_take_exit(exit),
-                        f"{region_name} - {exit.door.value} to {exit.destination}",
-                    )
+    for room, subregion in walk_region_graph():
+        region_name = room.name.subregion(subregion.name) if subregion.name else room.name.with_area()
+        region = world.get_region(region_name)
+        for exit in subregion.exits:
+            world.create_entrance(
+                region,
+                world.get_region(
+                    exit.destination.with_area() if isinstance(exit.destination, RoomName) else exit.destination
+                ),
+                can_take_exit(exit),
+                f"{region_name} - {exit.door.value} to {exit.destination}",
+            )

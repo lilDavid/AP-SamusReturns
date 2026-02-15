@@ -13,7 +13,7 @@ from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, item_gr
 from .locations import SamusReturnsLocation, location_groups, location_table
 from .options import SamusReturnsOptions, msr_option_groups
 from .patch import SamusReturnsPatch
-from .regions import connect_entrances, create_regions
+from .regions import connect_entrances, create_regions, set_location_rules
 from .settings import SamusReturnsSettings
 from .starting_room import set_starting_room
 
@@ -80,6 +80,7 @@ class SamusReturnsWorld(World):
 
     def create_regions(self):
         create_regions(self)
+        set_location_rules(self)
         connect_entrances(self)
         set_starting_room(self)
 

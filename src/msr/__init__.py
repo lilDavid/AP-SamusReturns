@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any, ClassVar
 
 import Utils
+from BaseClasses import ItemClassification
 from Options import Option
 from rule_builder.rules import Has
 from worlds import LauncherComponents as Launcher
@@ -183,6 +184,9 @@ class SamusReturnsWorld(World):
         return ItemName.Nothing
 
     def create_item(self, name: str):
+        if self.is_universal_tracker() and name == self.glitches_item_name:
+            return SamusReturnsItem(name, ItemClassification.progression, None, self.player)
+
         # Convert to ItemName to check validity, then to string to prevent subclassing shenanigans
         # (Both are acceptable to pass in and fortunately one of these conversions will be a no-op)
         data = item_data_table[ItemName(name)]
@@ -191,6 +195,7 @@ class SamusReturnsWorld(World):
     # UT integration
 
     ut_can_gen_without_yaml = True
+    glitches_item_name = "SEQUENCE BREAKS"
 
     def is_universal_tracker(self):
         return hasattr(self.multiworld, "generation_is_fake")

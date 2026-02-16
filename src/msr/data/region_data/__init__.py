@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from enum import Enum
-from typing import NamedTuple
+from typing import TYPE_CHECKING, NamedTuple
 
 from rule_builder.rules import Rule, True_
 
 from ..internal_names import AreaId
 from ..room_names import RoomName
+
+if TYPE_CHECKING:
+    from ... import SamusReturnsWorld
 
 
 class Door(Enum):
@@ -47,16 +50,16 @@ class RegionData(NamedTuple):
 class ExitData(NamedTuple):
     door: Door
     destination: str
-    access_rule: Rule = True_()
+    access_rule: Rule[SamusReturnsWorld] = True_()
 
 
 class PickupData(NamedTuple):
     name: str | None = None
-    access_rule: Rule = True_()
+    access_rule: Rule[SamusReturnsWorld] = True_()
 
 
 class EventData(NamedTuple):
     name: str
     item_name: str | None = None
-    access_rule: Rule = True_()
+    access_rule: Rule[SamusReturnsWorld] = True_()
     show_in_spoiler: bool = False

@@ -25,24 +25,38 @@ class HasDna(Rule["SamusReturnsWorld"], game=GAME_NAME):
         return Has(ItemName.MetroidDna, world.options.dna_required.value).resolve(world)
 
 
-def can_trick(trick: type[LogicTrick], difficulty: int):
-    return True_(options=[OptionFilter(trick, difficulty, "ge")])
+@dataclass
+class Trick(Rule["SamusReturnsWorld"], game=GAME_NAME):
+    trick: type[LogicTrick]
+    difficulty: int
+
+    @override
+    def _instantiate(self, world: SamusReturnsWorld) -> Rule.Resolved:
+        normal_rule = True_(options=[OptionFilter(self.trick, self.difficulty, "ge")])
+        if not world.is_universal_tracker():
+            return normal_rule.resolve(world)
+
+        sequence_break_rule = Has(
+            world.glitches_item_name,
+            options=[OptionFilter(self.trick, self.difficulty - 1, "ge")],
+        )
+        return (normal_rule | sequence_break_rule).resolve(world)
 
 
 def can_damage_boost(damage_boost: int):
-    return can_trick(DamageBoost, damage_boost)
+    return Trick(DamageBoost, damage_boost)
 
 
 def has_knowledge(knowledge: int):
-    return can_trick(Knowledge, knowledge)
+    return Trick(Knowledge, knowledge)
 
 
 def can_movement(movement: int):
-    return can_trick(Movement, movement)
+    return Trick(Movement, movement)
 
 
 def can_wall_jump(wall_jump: int):
-    return can_trick(WallJump, wall_jump)
+    return Trick(WallJump, wall_jump)
 
 
 can_bomb = HasAll(ItemName.MorphBall, ItemName.Bomb)
@@ -51,7 +65,7 @@ can_bomb_block = can_bomb | can_power_bomb
 
 
 def can_ibj(ibj: int):
-    return can_trick(IBJ, ibj) & can_bomb
+    return Trick(IBJ, ibj) & can_bomb
 
 
 can_beam_block_through_tunnel = Or(Has(ItemName.WaveBeam), can_bomb_block, can_movement(Movement.option_enable))

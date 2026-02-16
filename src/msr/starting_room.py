@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from BaseClasses import CollectionState, Item
 from Fill import fill_restrictive
 
-from .data.constants import GAME_NAME
+from .data import GAME_NAME
 from .data.room_names import SurfaceWest
 from .items import ItemName
 

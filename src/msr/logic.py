@@ -7,7 +7,7 @@ from rule_builder.options import OptionFilter
 from rule_builder.rules import And, CanReachLocation, Has, HasAll, HasAny, Or, Rule, True_
 from typing_extensions import override
 
-from .data.constants import GAME_NAME
+from .data import GAME_NAME
 from .data.region_data import Door
 from .items import ItemName
 from .options import IBJ, DamageBoost, Knowledge, LogicTrick, Movement, WallJump

@@ -8,7 +8,7 @@ from worlds import LauncherComponents as Launcher
 from worlds.AutoWorld import WebWorld, World
 
 from . import lib as lib  # Set up module importer for open-samus-returns-rando
-from .data.constants import GAME_NAME
+from .data import GAME_NAME
 from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, item_groups, major_items, reserve_tanks
 from .locations import SamusReturnsLocation, location_groups, location_table
 from .options import SamusReturnsOptions, msr_option_groups

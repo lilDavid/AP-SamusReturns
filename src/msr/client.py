@@ -13,7 +13,7 @@ from kvui import GameManager
 from NetUtils import NetworkItem
 from worlds._bizhawk.context import AuthStatus
 
-from .data.constants import GAME_NAME
+from .data import GAME_NAME
 from .data.internal_names import ItemId
 from .game_interface import LuaError, SamusReturnsInterface
 from .items import ItemName, item_data_table, launcher_to_ammo, tanks, unique_items

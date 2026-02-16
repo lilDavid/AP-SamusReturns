@@ -3,7 +3,7 @@ from typing import NamedTuple
 
 from BaseClasses import Item, ItemClassification
 
-from .data.constants import GAME_NAME
+from .data import GAME_NAME
 from .data.internal_names import ItemId, ItemModel, PickupSound
 
 

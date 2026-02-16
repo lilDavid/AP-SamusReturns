@@ -2,7 +2,7 @@ from typing import NamedTuple
 
 from BaseClasses import Location
 
-from .data.constants import GAME_NAME
+from .data import GAME_NAME
 from .data.internal_names import AreaId
 from .data.room_names import (
     Area1,

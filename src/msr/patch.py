@@ -12,7 +12,7 @@ import Utils
 from BaseClasses import Item
 from worlds.Files import APAutoPatchInterface
 
-from .data.constants import GAME_NAME
+from .data import GAME_NAME
 from .data.internal_names import RANDO_DNA_TEMPLATE, AreaId, ItemId, ItemModel, PickupSound
 from .data.remote_items import REMOTE_ITEM_MAPPING
 from .items import ItemName, OtherItemData, TankData, UniqueItemData, item_data_table, launcher_to_ammo

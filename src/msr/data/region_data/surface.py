@@ -59,7 +59,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.Open,
                             East.SurfaceCrumbleChallenge,
-                            access_rule=can_climb_wall | can_power_bomb,
+                            access_rule=can_climb_wall & can_power_bomb,
                         ),
                         # TODO
                         # ExitData(

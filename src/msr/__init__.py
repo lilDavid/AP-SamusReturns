@@ -149,7 +149,7 @@ class SamusReturnsWorld(World):
     def fill_slot_data(self):
         return {
             "ammo_amounts": self.ammo_amounts,
-            **self.options.as_dict(
+            "options": self.options.as_dict(
                 "dna_required",
                 "wall_jump",
                 "infinite_bomb_jump",

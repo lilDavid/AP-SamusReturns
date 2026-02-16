@@ -11,7 +11,7 @@ from . import lib as lib  # Set up module importer for open-samus-returns-rando
 from .data import GAME_NAME
 from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, item_groups, major_items, reserve_tanks
 from .locations import SamusReturnsLocation, location_groups, location_table
-from .options import SamusReturnsOptions, msr_option_groups
+from .options import MetroidDnaRequired, SamusReturnsOptions, msr_option_groups
 from .patch import SamusReturnsPatch
 from .regions import connect_entrances, create_regions, set_location_rules
 from .settings import SamusReturnsSettings
@@ -147,16 +147,32 @@ class SamusReturnsWorld(World):
         patch.write(str(output_path))
 
     def fill_slot_data(self):
+        def get_name(option: type[Option]):
+            for name, ty in type(self.options).type_hints.items():
+                if ty is option:
+                    return name
+            raise KeyError(option)
+
+        def resolve_group(name: str):
+            for group in self.web.option_groups:
+                if group.name == name:
+                    return (get_name(opt) for opt in group.options)
+            raise KeyError(name)
+
+        def get_options(*types_or_groups: type[Option] | str):
+            options: list[str] = []
+            for type_or_group in types_or_groups:
+                if isinstance(type_or_group, type):
+                    options.append(get_name(type_or_group))
+                else:
+                    options.extend(resolve_group(type_or_group))
+            return self.options.as_dict(*options)
+
         return {
             "ammo_amounts": self.ammo_amounts,
-            "options": self.options.as_dict(
-                "dna_required",
-                "wall_jump",
-                "infinite_bomb_jump",
-                "damage_boost",
-                "knowledge",
-                "movement",
-                toggles_as_bools=True,
+            "options": get_options(
+                MetroidDnaRequired,
+                "Logic",
             ),
         }
 

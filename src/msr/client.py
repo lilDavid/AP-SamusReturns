@@ -387,10 +387,9 @@ def install_rando_patch(patch_dir: str):
         output_path.mkdir(exist_ok=True)
         output_path /= "mods"
     output_path.mkdir(exist_ok=True)
-    output_path /= GAME_ID_US
-    SamusReturnsPatch.verify_file_structure(output_path)
+    SamusReturnsPatch.verify_file_structure(output_path / GAME_ID_US)
 
-    shutil.copytree(patch_dir, output_path)
+    shutil.copytree(patch_dir, output_path, dirs_exist_ok=True)
     logger.info(f"Wrote randomizer patch to {output_path}")
 
 

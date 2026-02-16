@@ -1,8 +1,9 @@
 from collections import Counter
 from pathlib import Path
-from typing import ClassVar
+from typing import Any, ClassVar
 
 import Utils
+from Options import Option
 from rule_builder.rules import Has
 from worlds import LauncherComponents as Launcher
 from worlds.AutoWorld import WebWorld, World
@@ -186,6 +187,22 @@ class SamusReturnsWorld(World):
         # (Both are acceptable to pass in and fortunately one of these conversions will be a no-op)
         data = item_data_table[ItemName(name)]
         return SamusReturnsItem(name, data.classification(), data.ap_id, self.player)
+
+    # UT integration
+
+    ut_can_gen_without_yaml = True
+
+    def is_universal_tracker(self):
+        return hasattr(self.multiworld, "generation_is_fake")
+
+    def interpret_slot_data(self, slot_data: dict[str, Any]):
+        options: dict = slot_data["options"]
+        for key, value in options.items():
+            option: Option | None = getattr(self.options, key, None)
+            if option is not None:
+                setattr(self.options, key, option.from_any(value))
+
+        return slot_data
 
 
 def launch_client(*args):

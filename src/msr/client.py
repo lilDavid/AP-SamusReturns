@@ -5,11 +5,11 @@ import logging
 import shutil
 import traceback
 from collections import Counter
+from typing import TYPE_CHECKING
 
 import Patch
 import Utils
-from CommonClient import ClientCommandProcessor, CommonContext, get_base_parser, gui_enabled, logger, server_loop
-from kvui import GameManager
+from CommonClient import ClientCommandProcessor, get_base_parser, gui_enabled, logger, server_loop
 from NetUtils import NetworkItem
 from worlds._bizhawk.context import AuthStatus
 
@@ -20,16 +20,27 @@ from .items import ItemName, item_data_table, launcher_to_ammo, tanks, unique_it
 from .patch import GAME_ID_US, SamusReturnsPatch
 from .settings import SamusReturnsSettings, TargetSystem
 
+if TYPE_CHECKING:
+    from CommonClient import CommonContext as BaseContext
+
+    tracker_loaded = False
+else:
+    try:
+        from worlds.tracker.TrackerClient import TrackerGameContext as BaseContext
+
+        tracker_loaded = True
+    except ModuleNotFoundError:
+        from CommonClient import CommonContext as BaseContext
+
+        tracker_loaded = False
+
+
 ALL_ITEMS = 0b111
 
 
 BACKOFF_LONG = 3.0
 BACKOFF_SHORT = 1.0
 POLL_COOLDOWN = 0.5
-
-
-class SamusReturnsManager(GameManager):
-    base_title = "Archipelago Metroid: Samus Returns Client"
 
 
 class SamusReturnsFilter(logging.Filter):
@@ -92,7 +103,7 @@ class SamusReturnsDebugCommandProcessor(SamusReturnsCommandProcessor):
         self._set_item(ItemId.GRAVITY_SUIT, enable)
 
 
-class SamusReturnsContext(CommonContext):
+class SamusReturnsContext(BaseContext):
     game = GAME_NAME
     command_processor = SamusReturnsCommandProcessor if Utils.is_frozen() else SamusReturnsDebugCommandProcessor
     items_handling = ALL_ITEMS
@@ -118,6 +129,7 @@ class SamusReturnsContext(CommonContext):
 
     def __init__(self, server_address: str | None, password: str | None):
         super().__init__(server_address, password)
+        self.tags = {"AP"}
 
         self.log_filter = SamusReturnsFilter()
         logger.addFilter(self.log_filter)
@@ -142,10 +154,10 @@ class SamusReturnsContext(CommonContext):
             return "localhost"
         return settings.console_settings.ip_address or ""
 
-    def run_gui(self):
-        ui = SamusReturnsManager(self)
-        self.ui = ui
-        self.ui_task = asyncio.create_task(ui.async_run(), name="UI")
+    def make_gui(self):
+        ui = super().make_gui()
+        ui.base_title = "Metroid: Samus Returns Client"
+        return ui
 
     async def server_auth(self, password_requested: bool = False):
         self.password_requested = password_requested
@@ -157,6 +169,7 @@ class SamusReturnsContext(CommonContext):
         self.auth_status = AuthStatus.PENDING
 
     def on_package(self, cmd: str, args: dict):
+        super().on_package(cmd, args)
         if cmd == "Connected":
             slot_data = args["slot_data"]
             try:
@@ -409,6 +422,8 @@ def launch(*launch_args: str):
         ctx = SamusReturnsContext(args.connect, args.password)
         ctx.server_task = asyncio.create_task(server_loop(ctx), name="server loop")
 
+        if tracker_loaded:
+            ctx.run_generator()  # pyright: ignore[reportAttributeAccessIssue]
         if gui_enabled:
             ctx.run_gui()
         ctx.run_cli()

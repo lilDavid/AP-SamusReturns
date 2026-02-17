@@ -36,10 +36,11 @@ class Trick(Rule["SamusReturnsWorld"], game=GAME_NAME):
         if not world.is_universal_tracker():
             return normal_rule.resolve(world)
 
-        sequence_break_rule = Has(
-            world.glitches_item_name,
-            options=[OptionFilter(self.trick, self.difficulty - 1, "ge")],
-        )
+        from .settings import TrackerTrickLogic
+
+        sequence_break_rule = Has(world.glitches_item_name)
+        if world.settings.universal_tracker_settings.show_tricks == TrackerTrickLogic.NEXT_LEVEL:
+            sequence_break_rule.options = [OptionFilter(self.trick, self.difficulty - 1, "ge")]
         return (normal_rule | sequence_break_rule).resolve(world)
 
 

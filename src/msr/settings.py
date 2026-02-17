@@ -20,6 +20,17 @@ class RomFile(settings.UserFilePath):
         return super().browse(filetypes, **kwargs)
 
 
+class TargetSystem(StrEnum):
+    """
+    Set this to "console" or "emulator" to automatically place randomizer files
+    in the matching path and start the emulator if appropriate. This setting
+    also determines what IP address the client will try to look for by default.
+    """
+
+    CONSOLE = "console"
+    EMULATOR = "emulator"
+
+
 class ConsoleSdPath(settings.UserFolderPath):
     """
     3DS SD card root. If set, the patcher can automatically place randomizer
@@ -53,15 +64,16 @@ class EmulatorRomStart(str):
     """
 
 
-class TargetSystem(StrEnum):
+class TrackerTrickLogic(StrEnum):
     """
-    Set this to "console" or "emulator" to automatically place randomizer files
-    in the matching path and start the emulator if appropriate. This setting
-    also determines what IP address the client will try to look for by default.
+    Controls what tricks will show as Glitched accessible in Universal Tracker.
+    Set this to "next_level" to show locations reachable with tricks set one
+    level above the selected difficulty. Set it to "all" to show locations
+    reachable with any tricks that aren't already in logic.
     """
 
-    CONSOLE = "console"
-    EMULATOR = "emulator"
+    NEXT_LEVEL = "next_level"
+    ALL = "all"
 
 
 class ConsoleSettings(settings.Group):
@@ -74,8 +86,13 @@ class EmulatorSettings(settings.Group):
     rom_start: EmulatorRomStart | bool = True
 
 
+class TrackerSettings(settings.Group):
+    show_tricks: TrackerTrickLogic = TrackerTrickLogic.NEXT_LEVEL
+
+
 class SamusReturnsSettings(settings.Group):
     rom_file: RomFile = RomFile(RomFile.copy_to)
+    target_system: TargetSystem = TargetSystem.EMULATOR
     console_settings: ConsoleSettings = ConsoleSettings()
     emulator_settings: EmulatorSettings = EmulatorSettings()
-    target_system: TargetSystem = TargetSystem.EMULATOR
+    universal_tracker_settings: TrackerSettings = TrackerSettings()

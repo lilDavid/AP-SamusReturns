@@ -58,7 +58,8 @@ class SamusReturnsPatch(APAutoPatchInterface):
         self.verify_file_structure(output_path)
         output_path.mkdir(exist_ok=True)
 
-        samus_returns_patcher.patch_extracted(rom_path, output_path, self.config)
+        # Patcher creates a duplicate file tree if supplied a relative path
+        samus_returns_patcher.patch_extracted(rom_path, output_path.absolute(), self.config)
 
     @staticmethod
     def get_path(path: str):

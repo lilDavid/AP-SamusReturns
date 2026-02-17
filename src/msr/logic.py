@@ -113,7 +113,7 @@ can_tunnel_steel_orb = Or(
 door_rules = {
     Door.Open: True_(),
     Door.Normal: True_(),  # Player always has a weapon to open this with (power beam can't be randomized)
-    Door.Charge: Has(ItemName.ChargeBeam),
+    Door.Charge: Or(Has(ItemName.ChargeBeam), has_knowledge(Knowledge.option_enable) & Has(ItemName.BeamBurst)),
     Door.Missile: can_any_missile,
     Door.Super: Has(ItemName.SuperMissile),
     Door.PowerBomb: can_power_bomb,

@@ -1291,7 +1291,7 @@ area_2_interior_data = AreaData(
         ),
         RoomData(
             Interior.HighJumpBoots,
-            id="collision_camera_021",
+            id="collision_camera021",
             regions=[
                 RegionData(
                     "Upper",

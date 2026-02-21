@@ -266,7 +266,7 @@ class Area4Caves(_RoomNameMixin, StrEnum):
 
 
 class Area4Mines(_RoomNameMixin, StrEnum):
-    MinesIntersectionTunnel = "Mines Intersection Terminal"
+    MinesIntersectionTerminal = "Mines Intersection Terminal"
     SuperMissile = "Super Missile Chamber"
     PinkCrystalPreserve = "Pink Crystal Preserve"
     TransportCentralCaves = "Transport to Central Caves"

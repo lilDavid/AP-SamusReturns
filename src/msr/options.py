@@ -75,10 +75,14 @@ class IBJ(LogicTrick):
 class DamageBoost(LogicTrick):
     """
     Taking damage and knockback to gain distance, or otherwise deliberately as part of navigation.
+
+    Static: Hitting spikes, or brief contact with thorns and purple liquid.
     """
 
+    # TODO: Look at thorns also
+
     display_name = "Damage Boost"
-    option_enable = 1
+    option_static = 1
 
 
 class Knowledge(LogicTrick):

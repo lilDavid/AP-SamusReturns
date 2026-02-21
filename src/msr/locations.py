@@ -220,8 +220,8 @@ area_4_caves_location_table: dict[str, LocationData] = {
 }
 
 area_4_mines_location_table: dict[str, LocationData] = {
-    Area4Mines.MinesIntersectionTunnel.location("Top"): ActorLocationData(414, AreaId.AREA_4_MINES, "LE_Item_009"),
-    Area4Mines.MinesIntersectionTunnel.location("Bottom"): ActorLocationData(
+    Area4Mines.MinesIntersectionTerminal.location("Top"): ActorLocationData(414, AreaId.AREA_4_MINES, "LE_Item_009"),
+    Area4Mines.MinesIntersectionTerminal.location("Bottom"): ActorLocationData(
         415, AreaId.AREA_4_MINES, "HiddenPowerup002"
     ),
     Area4Mines.SuperMissile.location(): ActorLocationData(416, AreaId.AREA_4_MINES, "LE_PoweUp_SuperMissile"),

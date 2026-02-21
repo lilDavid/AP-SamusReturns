@@ -84,7 +84,7 @@ can_high_ledge = can_climb_wall | can_high_jump
 can_underwater_high_jump = Or(Has(ItemName.GravitySuit) & can_high_jump, can_spider_boost_underwater)
 
 # Needs ~hi-jump height to break but not to access the tunnel
-can_medium_bomb_block = Or(can_high_ledge & can_bomb, can_power_bomb)
+can_high_bomb_block = Or(can_high_ledge & can_bomb, can_power_bomb)
 
 can_short_shaft = can_high_ledge | can_wall_jump(WallJump.option_simple)
 can_climb_shaft = can_wall_jump(WallJump.option_simple) | can_climb_wall

@@ -14,9 +14,9 @@ from ...logic import (
     can_damage_tough_enemy,
     can_fly,
     can_fly_vertical,
+    can_high_bomb_block,
     can_high_ledge,
     can_ibj,
-    can_medium_bomb_block,
     can_movement,
     can_power_bomb,
     can_short_shaft,
@@ -34,6 +34,7 @@ from ..room_names import Area2Entryway as Area2
 from ..room_names import Area3Caverns as Caverns
 from ..room_names import Area3Exterior as Exterior
 from ..room_names import Area3Interior as Interior
+from ..room_names import Area4Caves as Area4
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData
 
 can_climb_ascending_alleyway = And(
@@ -412,10 +413,10 @@ area_3_exterior_data = AreaData(
                             Door.Normal,
                             Exterior.TransportArea2.subregion("Lower"),
                         ),
-                        # ExitData(
-                        #     Door.Elevator,
-                        #     # TODO: Area 4
-                        # ),
+                        ExitData(
+                            Door.Elevator,
+                            Area4.TransportArea3Mines.subregion("Top"),
+                        ),
                     ],
                 ),
             ],
@@ -474,7 +475,7 @@ area_3_exterior_data = AreaData(
                                         HasAll(ItemName.WaveBeam, ItemName.BeamBurst),
                                         can_spider,
                                         can_power_bomb,
-                                        can_damage_boost(DamageBoost.option_enable),
+                                        can_damage_boost(DamageBoost.option_static),
                                     ),
                                 ),
                             ),
@@ -1425,7 +1426,7 @@ area_3_caverns_data = AreaData(
                             access_rule=can_damage_metroid,
                         )
                     ],
-                )
+                ),
             ],
         ),
         RoomData(
@@ -1537,7 +1538,7 @@ area_3_caverns_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Caverns.Alpha2N.subregion("Exit"),
-                            access_rule=can_medium_bomb_block,  # FIXME: Dangerous action
+                            access_rule=can_high_bomb_block,  # FIXME: Dangerous action
                         ),
                     ],
                     pickups=[

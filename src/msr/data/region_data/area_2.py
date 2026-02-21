@@ -170,7 +170,7 @@ area_2_exterior_data = AreaData(
                                 Has(ItemName.SpaceJump),
                                 can_spider_boost,
                                 can_ibj(IBJ.option_diagonal),
-                                can_spider & can_damage_boost(DamageBoost.option_enable),
+                                can_spider & can_damage_boost(DamageBoost.option_static),
                             ),
                         ),
                     ],
@@ -189,7 +189,7 @@ area_2_exterior_data = AreaData(
                                 Has(ItemName.SpaceJump),
                                 can_spider_boost,
                                 can_ibj(IBJ.option_diagonal),
-                                can_spider & can_damage_boost(DamageBoost.option_enable),
+                                can_spider & can_damage_boost(DamageBoost.option_static),
                             ),
                         ),
                         ExitData(

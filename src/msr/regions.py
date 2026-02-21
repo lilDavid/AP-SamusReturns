@@ -3,7 +3,7 @@ from __future__ import annotations
 import itertools
 from typing import TYPE_CHECKING
 
-from BaseClasses import ItemClassification, Region
+from BaseClasses import Region
 from rule_builder.rules import False_
 
 from .data.region_data import ExitData, RegionData
@@ -75,18 +75,13 @@ def create_regions(world: SamusReturnsWorld):
             region.locations.append(location)
 
         for event in subregion.events:
-            event_name = room.name.location(event.name)
-            location = SamusReturnsLocation(world.player, event_name, None, region)
-            location.place_locked_item(
-                SamusReturnsItem(
-                    event_name if event.item_name is None else event.item_name,
-                    ItemClassification.progression,
-                    None,
-                    world.player,
-                )
+            region.add_event(
+                room.name.location(event.name),
+                event.item_name,
+                show_in_spoiler=event.show_in_spoiler,
+                location_type=SamusReturnsLocation,
+                item_type=SamusReturnsItem,
             )
-            location.show_in_spoiler = event.show_in_spoiler
-            region.locations.append(location)
         regions.append(region)
     world.multiworld.regions += regions
 

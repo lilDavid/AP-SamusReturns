@@ -213,13 +213,13 @@ class SamusReturnsWorld(World):
 def launch_client(*args):
     from . import client
 
-    client.launch(*args)
+    Launcher.launch_subprocess(client.launch, name="MetroidSamusReturnsClient", args=args)
 
 
 Launcher.components.append(
     Launcher.Component(
         "Metroid: Samus Returns Client",
-        func=lambda *args: Launcher.launch_subprocess(launch_client, name="MetroidSamusReturnsClient", args=args),
+        func=launch_client,
         component_type=Launcher.Type.CLIENT,
         file_identifier=Launcher.SuffixIdentifier(SamusReturnsPatch.patch_file_ending),
     )

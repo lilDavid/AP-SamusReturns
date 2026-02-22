@@ -145,7 +145,7 @@ reserve_tanks = {
     ItemName.MissileReserve: UniqueItemData(
         72, ItemId.MISSILE_RESERVE_TANK, ItemModel.MissileReserve, is_progression=False
     ),
-    ItemName.AeionReserve: UniqueItemData(73, ItemId.ENERGY_RESERVE_TANK, ItemModel.AeionReserve, is_progression=False),
+    ItemName.AeionReserve: UniqueItemData(73, ItemId.AEION_RESERVE_TANK, ItemModel.AeionReserve, is_progression=False),
 }
 
 other_items: dict[ItemName, OtherItemData] = {

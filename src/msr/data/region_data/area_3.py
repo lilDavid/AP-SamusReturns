@@ -14,7 +14,6 @@ from ...logic import (
     can_damage_tough_enemy,
     can_fly,
     can_fly_vertical,
-    can_gamma_metroid,
     can_high_ledge,
     can_ibj,
     can_medium_bomb_block,
@@ -651,49 +650,10 @@ area_3_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.NooksCranny,
-                            access_rule=can_bomb_block,
-                        ),
-                        ExitData(
-                            Door.MorphTunnel,
-                            Exterior.Gamma.subregion("Middle arena"),
-                            access_rule=can_bomb_block,
-                        ),
-                        ExitData(
-                            Door.MorphTunnel,
                             Exterior.Gamma.subregion("Upper arena"),
                             access_rule=can_high_ledge & can_bomb,
                         ),
                     ],
-                    pickups=[
-                        PickupData(
-                            access_rule=can_gamma_metroid(
-                                Exterior.Gamma.location("Upper arena"),
-                                Exterior.Gamma.location("Middle arena"),
-                                Exterior.NooksCranny.location("Lower arena"),
-                            )
-                        )
-                    ],
-                ),
-                RegionData(
-                    "Middle arena",
-                    exits=[
-                        ExitData(
-                            Door.MorphTunnel,
-                            Exterior.Gamma.subregion("Entrance"),
-                            access_rule=Or(
-                                can_power_bomb,
-                                And(
-                                    can_bomb,
-                                    can_spider | Has(ItemName.GravitySuit),
-                                ),
-                            ),
-                        ),
-                    ],
-                    events=[
-                        EventData("Middle arena"),
-                    ],
-                    require_exit_access=True,
                 ),
                 RegionData(
                     "Upper arena",
@@ -704,8 +664,10 @@ area_3_exterior_data = AreaData(
                             access_rule=can_bomb_block & can_beam_block_through_tunnel,
                         ),
                     ],
-                    events=[
-                        EventData("Upper arena"),
+                    pickups=[
+                        PickupData(
+                            access_rule=can_damage_metroid,
+                        )
                     ],
                     require_exit_access=True,
                 ),
@@ -714,24 +676,7 @@ area_3_exterior_data = AreaData(
         RoomData(
             Exterior.NooksCranny,
             id="collision_camera_039",
-            regions=[
-                RegionData(
-                    exits=[
-                        ExitData(
-                            Door.MorphTunnel,
-                            Exterior.Gamma.subregion("Entrance"),
-                            access_rule=Or(
-                                can_power_bomb,
-                                can_bomb & can_spider,
-                            ),
-                        )
-                    ],
-                    events=[
-                        EventData("Lower arena"),
-                    ],
-                    require_exit_access=True,
-                )
-            ],
+            regions=[],  # Gamma doesn't escape
         ),
         RoomData(
             Exterior.FactoryExtAccess,
@@ -1468,53 +1413,19 @@ area_3_caverns_data = AreaData(
             id="collision_camera_033",
             regions=[
                 RegionData(
-                    # "Fake" region to cover both arenas
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Caverns.Gamma2SAccess.subregion("Hub"),
+                            access_rule=can_bomb_block,
+                        ),
+                    ],
                     pickups=[
                         PickupData(
-                            access_rule=can_gamma_metroid(
-                                Caverns.Gamma2S.location("Northwest arena"),
-                                Caverns.Gamma2S.location("Southwest arena"),
-                                Caverns.Gamma2SAccess.location("Southeast arena"),
-                            )
+                            access_rule=can_damage_metroid,
                         )
-                    ]
-                ),
-                RegionData(
-                    "Upper",
-                    exits=[
-                        ExitData(
-                            Door.MorphTunnel,
-                            Caverns.Gamma2SAccess.subregion("Hub"),
-                            access_rule=can_medium_bomb_block,
-                        ),
-                        ExitData(
-                            Door.MorphTunnel,
-                            Caverns.Gamma2S.subregion("Lower"),
-                            access_rule=can_bomb_block,
-                        ),
                     ],
-                    events=[
-                        EventData("Northwest arena"),
-                    ],
-                ),
-                RegionData(
-                    "Lower",
-                    exits=[
-                        ExitData(
-                            Door.MorphTunnel,
-                            Caverns.Gamma2SAccess.subregion("Hub"),
-                            access_rule=can_bomb_block,
-                        ),
-                        ExitData(
-                            Door.MorphTunnel,
-                            Caverns.Gamma2S.subregion("Upper"),
-                            access_rule=can_medium_bomb_block & can_climb_shaft,
-                        ),
-                    ],
-                    events=[
-                        EventData("Southwest arena"),
-                    ],
-                ),
+                )
             ],
         ),
         RoomData(
@@ -1525,17 +1436,8 @@ area_3_caverns_data = AreaData(
                     "Hub",
                     exits=[
                         ExitData(
-                            Door.Open,
+                            Door.MorphTunnel,
                             Caverns.Gamma2S,
-                        ),
-                        ExitData(
-                            Door.MorphTunnel,
-                            Caverns.Gamma2S.subregion("Upper"),
-                            access_rule=can_bomb_block,
-                        ),
-                        ExitData(
-                            Door.MorphTunnel,
-                            Caverns.Gamma2S.subregion("Lower"),
                             access_rule=can_bomb_block,
                         ),
                         ExitData(
@@ -1638,6 +1540,11 @@ area_3_caverns_data = AreaData(
                             access_rule=can_medium_bomb_block,  # FIXME: Dangerous action
                         ),
                     ],
+                    pickups=[
+                        PickupData(
+                            access_rule=can_damage_metroid,
+                        )
+                    ],
                 ),
                 RegionData(
                     "Exit",
@@ -1738,9 +1645,6 @@ area_3_interior_data = AreaData(
                             Interior.GammaS,
                             access_rule=can_grapple_tunnel,
                         ),
-                    ],
-                    events=[
-                        EventData("Right arena"),
                     ],
                 )
             ],
@@ -2155,7 +2059,7 @@ area_3_interior_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_gamma_metroid(Interior.GammaSAccess.location("Right arena")),
+                            access_rule=can_damage_metroid,
                         )
                     ],
                 )

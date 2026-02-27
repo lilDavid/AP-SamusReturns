@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from rule_builder.options import OptionFilter
-from rule_builder.rules import And, CanReachLocation, Has, HasAll, HasAny, Or, Rule, True_
+from rule_builder.rules import And, Has, HasAll, HasAny, Or, Rule, True_
 from typing_extensions import override
 
 from .data import GAME_NAME
@@ -95,15 +95,6 @@ can_damage_tough_enemy = Or(
     can_power_bomb,
 )
 can_damage_metroid = HasAny(ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst, ItemName.IceBeam)
-
-
-def can_gamma_metroid(*arenas: str):
-    return And(
-        *(CanReachLocation(arena) for arena in arenas),
-        can_damage_metroid,
-    )
-
-
 can_blobthrower = Has(ItemName.BeamBurst) | can_power_bomb
 can_tunnel_steel_orb = Or(
     Has(ItemName.BeamBurst) & can_beam_block_through_tunnel,

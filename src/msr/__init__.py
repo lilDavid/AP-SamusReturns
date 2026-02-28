@@ -2,7 +2,6 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, ClassVar
 
-import Utils
 from BaseClasses import ItemClassification
 from Options import Option
 from rule_builder.rules import Has
@@ -42,15 +41,19 @@ class SamusReturnsWorld(World):
     item_name_groups = item_groups
     location_name_groups = location_groups
 
-    topology_present = not Utils.is_frozen()
-
     ammo_amounts: dict[str, int]
     skipped_items: Counter[ItemName]
     prefilled_locations: int
 
     displaced_filler: list[ItemName]
 
+    @classmethod
+    def is_debug(cls):
+        return cls.zip_path is None
+
     def generate_early(self):
+        self.topology_present = self.is_debug()
+
         if self.options.dna_available.value < self.options.dna_required.value:
             self.options.dna_available.value = self.options.dna_required.value
 

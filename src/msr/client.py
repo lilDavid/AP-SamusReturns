@@ -105,7 +105,6 @@ class SamusReturnsDebugCommandProcessor(SamusReturnsCommandProcessor):
 
 class SamusReturnsContext(BaseContext):
     game = GAME_NAME
-    command_processor = SamusReturnsCommandProcessor if Utils.is_frozen() else SamusReturnsDebugCommandProcessor
     items_handling = ALL_ITEMS
     want_slot_data = True
 
@@ -128,8 +127,14 @@ class SamusReturnsContext(BaseContext):
     local_locations: set[int]
 
     def __init__(self, server_address: str | None, password: str | None):
+        from . import SamusReturnsWorld
+
         super().__init__(server_address, password)
         self.tags = {"AP"}
+        if SamusReturnsWorld.is_debug():
+            self.command_processor = SamusReturnsDebugCommandProcessor
+        else:
+            self.command_processor = SamusReturnsCommandProcessor
 
         self.log_filter = SamusReturnsFilter()
         logger.addFilter(self.log_filter)
@@ -238,12 +243,14 @@ class SamusReturnsContext(BaseContext):
         await self.handle_received_items()
 
     async def handle_locations(self):
+        from . import SamusReturnsWorld
+
         locations = await self.game_interface.get_locations()
         if locations is None:
             return
         locations.difference_update(self.local_locations)
-        if not Utils.is_frozen():
-            self.local_locations.update(locations)
+        self.local_locations.update(locations)
+        if SamusReturnsWorld.is_debug():
             for location in locations:
                 logger.info(f"New location: {self.location_names.lookup_in_slot(location)}")
         await self.check_locations(locations)

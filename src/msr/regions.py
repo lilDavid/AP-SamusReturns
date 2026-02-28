@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from BaseClasses import Region
 from rule_builder.rules import False_
 
-from .data.region_data import ExitData, RegionData
+from .data.region_data import ExitData, RegionData, Subregion
 from .data.region_data.area_1 import area_1_data
 from .data.region_data.area_2 import area_2_entryway_data, area_2_exterior_data, area_2_interior_data
 from .data.region_data.area_3 import area_3_caverns_data, area_3_exterior_data, area_3_interior_data
@@ -98,14 +98,20 @@ def set_location_rules(world: SamusReturnsWorld):
 
 def connect_entrances(world: SamusReturnsWorld):
     for room, subregion in walk_region_graph():
+
+        def resolve_region_name(name: str | RoomName | Subregion, room: RoomName = room.name):
+            if isinstance(name, RoomName):
+                return name.with_area()
+            if isinstance(name, Subregion):
+                return room.subregion(name)
+            return name
+
         region_name = room.name.subregion(subregion.name) if subregion.name else room.name.with_area()
         region = world.get_region(region_name)
         for exit in subregion.exits:
             world.create_entrance(
                 region,
-                world.get_region(
-                    exit.destination.with_area() if isinstance(exit.destination, RoomName) else exit.destination
-                ),
+                world.get_region(resolve_region_name(exit.destination)),
                 can_take_exit(exit),
                 f"{region_name} - {exit.door.value} to {exit.destination}",
             )

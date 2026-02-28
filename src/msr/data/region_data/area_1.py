@@ -22,7 +22,7 @@ from ..internal_names import AreaId
 from ..room_names import Area1
 from ..room_names import Area2Entryway as Area2
 from ..room_names import SurfaceEast as Surface
-from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData
+from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
 area_1_data = AreaData(
     name="Area 1",
@@ -45,7 +45,7 @@ area_1_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Area1.TransportSurfaceArea2.subregion("Area 2"),
+                            Subregion("Area 2"),
                             access_rule=And(
                                 Has(ItemName.MorphBall),
                                 HasAny(ItemName.MissileLauncher, ItemName.PowerBomb, ItemName.ScrewAttack),
@@ -58,7 +58,7 @@ area_1_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Area1.TransportSurfaceArea2.subregion("Surface"),
+                            Subregion("Surface"),
                             access_rule=And(
                                 Has(ItemName.MorphBall),
                                 Or(
@@ -162,7 +162,7 @@ area_1_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Area1.Bomb.subregion("Tunnel"),
+                            Subregion("Tunnel"),
                             access_rule=can_bomb_block,
                         ),
                     ],
@@ -180,7 +180,7 @@ area_1_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Area1.Bomb.subregion("Chamber"),
+                            Subregion("Chamber"),
                             access_rule=can_bomb_block,
                         ),
                     ],
@@ -214,7 +214,7 @@ area_1_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Area1.InnerTempleEHall.subregion("Lower"),
+                            Subregion("Lower"),
                             # FIXME: Dangerous action
                         ),
                     ],
@@ -224,7 +224,7 @@ area_1_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Area1.InnerTempleEHall.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=Has(ItemName.IceBeam) | can_climb_wall,
                         ),
                         ExitData(
@@ -277,7 +277,7 @@ area_1_data = AreaData(
                         ),
                         ExitData(
                             Door.Normal,
-                            Area1.SpiderBall.subregion("Chamber access"),
+                            Subregion("Chamber access"),
                         ),
                     ],
                 ),
@@ -286,7 +286,7 @@ area_1_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Area1.SpiderBall.subregion("Chamber"),
+                            Subregion("Chamber"),
                             # FIXME: Dangerous action
                         ),
                         ExitData(
@@ -300,7 +300,7 @@ area_1_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Area1.SpiderBall.subregion("Chamber access"),
+                            Subregion("Chamber access"),
                             access_rule=Or(Has(ItemName.SpaceJump), can_spider, can_ibj(IBJ.option_vertical)),
                         ),
                     ],
@@ -376,7 +376,7 @@ area_1_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Area1.TempleExterior.subregion("Center"),
+                            Subregion("Center"),
                             access_rule=can_climb_wall,
                         ),
                     ],
@@ -392,16 +392,16 @@ area_1_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Area1.TempleExterior.subregion("Southeast"),
+                            Subregion("Southeast"),
                         ),
                         ExitData(
                             Door.Open,
-                            Area1.TempleExterior.subregion("Top"),
+                            Subregion("Top"),
                             access_rule=can_climb_wall,
                         ),
                         ExitData(
                             Door.Open,
-                            Area1.TempleExterior.subregion("Southwest"),
+                            Subregion("Southwest"),
                         ),
                     ],
                     pickups=[
@@ -416,7 +416,7 @@ area_1_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Area1.TempleExterior.subregion("Center"),
+                            Subregion("Center"),
                             access_rule=can_climb_wall,
                         ),
                         ExitData(
@@ -439,7 +439,7 @@ area_1_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Area1.TempleExterior.subregion("Center"),
+                            Subregion("Center"),
                         ),
                     ],
                     pickups=[
@@ -573,7 +573,7 @@ area_1_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Area1.WaterMaze.subregion("Pickup"),
+                            Subregion("Pickup"),
                             access_rule=And(
                                 can_any_missile,
                                 Has(ItemName.MorphBall),
@@ -593,7 +593,7 @@ area_1_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Area1.WaterMaze.subregion("Maze"),
+                            Subregion("Maze"),
                             access_rule=Has(ItemName.MissileLauncher),
                         ),
                         ExitData(
@@ -658,7 +658,7 @@ area_1_data = AreaData(
                         ),
                         ExitData(
                             Door.Charge,
-                            Area1.MagmaPool.subregion("Right"),
+                            Subregion("Right"),
                             access_rule=And(
                                 Has(ItemName.VariaSuit),
                                 Has(ItemName.GravitySuit) | can_spider,
@@ -708,7 +708,7 @@ area_1_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Charge,
-                            Area1.MagmaPool.subregion("Left"),
+                            Subregion("Left"),
                             access_rule=And(
                                 Has(ItemName.VariaSuit),
                                 Has(ItemName.GravitySuit) | can_spider,
@@ -745,7 +745,7 @@ area_1_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Area1.InnerTempleWHall.subregion("Lower"),
+                            Subregion("Lower"),
                         ),
                     ],
                 ),
@@ -754,7 +754,7 @@ area_1_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Area1.InnerTempleWHall.subregion("Upper"),
+                            Subregion("Upper"),
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -787,7 +787,7 @@ area_1_data = AreaData(
                         # ),
                         ExitData(
                             Door.MorphTunnel,
-                            Area1.CavernsSaveStation.subregion("Pickup tunnel"),
+                            Subregion("Pickup tunnel"),
                             access_rule=can_power_bomb,
                         ),
                     ],
@@ -802,7 +802,7 @@ area_1_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Area1.CavernsSaveStation.subregion("Main"),
+                            Subregion("Main"),
                             access_rule=can_bomb_block,
                         ),
                     ],

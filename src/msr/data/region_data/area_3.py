@@ -35,7 +35,7 @@ from ..room_names import Area3Caverns as Caverns
 from ..room_names import Area3Exterior as Exterior
 from ..room_names import Area3Interior as Interior
 from ..room_names import Area4Caves as Area4
-from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData
+from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
 
 can_climb_ascending_alleyway = And(
     can_any_missile,
@@ -62,7 +62,7 @@ area_3_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.TransportArea2.subregion("Middle left"),
+                            Subregion("Middle left"),
                         ),
                         ExitData(
                             Door.Normal,
@@ -79,12 +79,12 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.TransportArea2.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=can_short_shaft,
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.TransportArea2.subregion("Middle right"),
+                            Subregion("Middle right"),
                             access_rule=can_bomb_block,
                         ),
                         ExitData(
@@ -98,12 +98,12 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.TransportArea2.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=can_bomb_block,
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.TransportArea2.subregion("Lower"),
+                            Subregion("Lower"),
                             access_rule=can_beam_block_through_tunnel & can_any_missile,
                         ),
                         ExitData(
@@ -117,7 +117,7 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.TransportArea2.subregion("Middle right"),
+                            Subregion("Middle right"),
                             access_rule=can_any_missile,
                         ),
                         ExitData(
@@ -209,7 +209,7 @@ area_3_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.FactoryExt.subregion("Platform"),
+                            Subregion("Platform"),
                             access_rule=can_high_ledge,
                         ),
                         # ExitData(
@@ -235,15 +235,15 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.FactoryExt.subregion("Entrance"),
+                            Subregion("Entrance"),
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.FactoryExt.subregion("Crevice"),
+                            Subregion("Crevice"),
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.FactoryExt.subregion("Top"),
+                            Subregion("Top"),
                             access_rule=Or(
                                 Has(ItemName.SpaceJump),
                                 can_ibj(IBJ.option_vertical),
@@ -260,7 +260,7 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.FactoryExt.subregion("Platform"),
+                            Subregion("Platform"),
                             access_rule=can_climb_wall,
                         ),
                         ExitData(
@@ -269,7 +269,7 @@ area_3_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.FactoryExt.subregion("Top"),
+                            Subregion("Top"),
                             access_rule=And(
                                 # Grapple point is offscreen without high jump
                                 has_knowledge(Knowledge.option_enable) | can_high_ledge,
@@ -284,11 +284,11 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.FactoryExt.subregion("Platform"),
+                            Subregion("Platform"),
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.FactoryExt.subregion("Shaft middle"),
+                            Subregion("Shaft middle"),
                         ),
                         ExitData(Door.Elevator, Interior.TransportFactoryExtE),
                     ],
@@ -298,7 +298,7 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.FactoryExt.subregion("Top"),
+                            Subregion("Top"),
                             access_rule=can_high_ledge,
                         ),
                         ExitData(
@@ -307,7 +307,7 @@ area_3_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.FactoryExt.subregion("Shaft bottom"),
+                            Subregion("Shaft bottom"),
                         ),
                     ],
                     pickups=[
@@ -319,7 +319,7 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.FactoryExt.subregion("Shaft middle"),
+                            Subregion("Shaft middle"),
                             access_rule=can_high_ledge | can_climb_shaft,
                         ),
                         ExitData(
@@ -366,7 +366,7 @@ area_3_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.TransportArea4.subregion("Middle"),
+                            Subregion("Middle"),
                         ),
                     ],
                 ),
@@ -379,11 +379,11 @@ area_3_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.TransportArea4.subregion("Upper"),
+                            Subregion("Upper"),
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.TransportArea4.subregion("Lower"),
+                            Subregion("Lower"),
                         ),
                     ],
                     pickups=[
@@ -402,7 +402,7 @@ area_3_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.TransportArea4.subregion("Middle"),
+                            Subregion("Middle"),
                         ),
                     ],
                 ),
@@ -465,7 +465,7 @@ area_3_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.TransportCavernsN.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=Or(
                                 can_tunnel_steel_orb,
                                 And(
@@ -491,7 +491,7 @@ area_3_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.TransportCavernsN.subregion("Transport"),
+                            Subregion("Transport"),
                             access_rule=Or(
                                 can_tunnel_steel_orb,
                                 And(
@@ -521,12 +521,12 @@ area_3_exterior_data = AreaData(
                         # ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.BeamBurst.subregion("Pickup"),
+                            Subregion("Pickup"),
                             access_rule=Has(ItemName.LightningArmor) | can_spider,
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.BeamBurst.subregion("Intersection"),
+                            Subregion("Intersection"),
                             access_rule=can_blobthrower,
                         ),
                     ],
@@ -536,12 +536,12 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.BeamBurst.subregion("Main"),
+                            Subregion("Main"),
                             access_rule=Has(ItemName.LightningArmor) | can_spider,
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.BeamBurst.subregion("Intersection"),
+                            Subregion("Intersection"),
                             access_rule=can_bomb_block,
                         ),
                         # ExitData(
@@ -561,17 +561,17 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.BeamBurst.subregion("Pickup"),
+                            Subregion("Pickup"),
                             access_rule=can_bomb_block,
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.BeamBurst.subregion("Main"),
+                            Subregion("Main"),
                             access_rule=can_blobthrower,
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.BeamBurst.subregion("Transport access"),
+                            Subregion("Transport access"),
                             access_rule=can_blobthrower,
                         ),
                     ],
@@ -581,7 +581,7 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.BeamBurst.subregion("Intersection"),
+                            Subregion("Intersection"),
                             access_rule=can_blobthrower,
                         ),
                         ExitData(
@@ -605,7 +605,7 @@ area_3_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.HalzynHangout.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=Has(ItemName.GrappleBeam) & can_climb_wall,
                         ),
                     ],
@@ -621,7 +621,7 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.HalzynHangout.subregion("Lower"),
+                            Subregion("Lower"),
                         ),
                         ExitData(
                             Door.Normal,
@@ -651,7 +651,7 @@ area_3_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.Gamma.subregion("Upper arena"),
+                            Subregion("Upper arena"),
                             access_rule=can_high_ledge & can_bomb,
                         ),
                     ],
@@ -661,7 +661,7 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.Gamma.subregion("Entrance"),
+                            Subregion("Entrance"),
                             access_rule=can_bomb_block & can_beam_block_through_tunnel,
                         ),
                     ],
@@ -697,7 +697,7 @@ area_3_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.FactoryExtAccess.subregion("Upper"),
+                            Subregion("Upper"),
                             # FIXME: Dangerous action
                             access_rule=Or(
                                 can_climb_wall,
@@ -714,12 +714,12 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.FactoryExtAccess.subregion("Exit"),
+                            Subregion("Exit"),
                             access_rule=Or(can_blobthrower, can_spider, can_fly),
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.FactoryExtAccess.subregion("Lower"),
+                            Subregion("Lower"),
                             access_rule=Has(ItemName.GrappleBeam),
                         ),
                     ],
@@ -729,7 +729,7 @@ area_3_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.FactoryExtAccess.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=Or(can_blobthrower, can_spider, can_fly),
                         ),
                         ExitData(
@@ -760,7 +760,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Caverns.TransportFactoryExtN.subregion("Upper"),
+                            Subregion("Upper"),
                         ),
                     ],
                 ),
@@ -769,7 +769,7 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Caverns.TransportFactoryExtN.subregion("Transport"),
+                            Subregion("Transport"),
                             access_rule=can_climb_shaft,
                         ),
                         ExitData(
@@ -778,7 +778,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Caverns.TransportFactoryExtN.subregion("Lower"),
+                            Subregion("Lower"),
                         ),
                     ],
                 ),
@@ -787,7 +787,7 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Caverns.TransportFactoryExtN.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=can_short_shaft | Has(ItemName.MorphBall),
                         ),
                         ExitData(
@@ -800,7 +800,7 @@ area_3_caverns_data = AreaData(
                         # ),
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.TransportFactoryExtN.subregion("Bottom"),
+                            Subregion("Bottom"),
                             access_rule=can_underwater_high_jump,
                         ),
                     ],
@@ -815,7 +815,7 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.TransportFactoryExtN.subregion("Lower"),
+                            Subregion("Lower"),
                             access_rule=Has(ItemName.GravitySuit) | can_spider,
                         ),
                         ExitData(
@@ -863,7 +863,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.GammaC.subregion("Exit"),
+                            Subregion("Exit"),
                             access_rule=can_blobthrower,
                         ),
                     ],
@@ -878,7 +878,7 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.GammaC.subregion("Arena"),
+                            Subregion("Arena"),
                             access_rule=can_blobthrower,
                         ),
                         ExitData(
@@ -903,7 +903,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.GammaS.subregion("Maze Junction Access"),
+                            Subregion("Maze Junction Access"),
                             access_rule=can_underwater_high_jump,
                         ),
                     ],
@@ -913,11 +913,11 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.GammaS.subregion("Maze Entrance"),
+                            Subregion("Maze Entrance"),
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.GammaS.subregion("Maze Junction"),
+                            Subregion("Maze Junction"),
                             access_rule=can_bomb_block,
                         ),
                     ],
@@ -942,21 +942,21 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.GammaS.subregion("Maze Junction Access"),
+                            Subregion("Maze Junction Access"),
                             access_rule=can_power_bomb,
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.GammaS.subregion("West"),
+                            Subregion("West"),
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.GammaS.subregion("Arena"),
+                            Subregion("Arena"),
                             access_rule=can_bomb_block,
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.GammaS.subregion("East"),
+                            Subregion("East"),
                             access_rule=Has(ItemName.GravitySuit) | can_climb_shaft,
                         ),
                     ],
@@ -966,7 +966,7 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.GammaS.subregion("Maze Junction"),
+                            Subregion("Maze Junction"),
                         ),
                         ExitData(
                             Door.Normal,
@@ -979,12 +979,12 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.GammaS.subregion("Maze Junction"),
+                            Subregion("Maze Junction"),
                             access_rule=can_power_bomb,
                         ),
                         ExitData(
                             Door.Normal,
-                            Caverns.GammaS.subregion("East"),
+                            Subregion("East"),
                             access_rule=can_bomb_block,
                         ),
                     ],
@@ -1000,7 +1000,7 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.GammaS.subregion("Maze Junction"),
+                            Subregion("Maze Junction"),
                         ),
                         ExitData(
                             Door.Taramarga,
@@ -1042,7 +1042,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Caverns.GravittGarden.subregion("Middle"),
+                            Subregion("Middle"),
                             access_rule=Has(ItemName.GrappleBeam) | can_fly_vertical,
                         ),
                     ],
@@ -1055,7 +1055,7 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Caverns.GravittGarden.subregion("Lower"),
+                            Subregion("Lower"),
                         ),
                         ExitData(
                             Door.Open,
@@ -1063,7 +1063,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Caverns.GravittGarden.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=can_climb_shaft,
                         ),
                     ],
@@ -1073,7 +1073,7 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Caverns.GravittGarden.subregion("Middle"),
+                            Subregion("Middle"),
                         ),
                         ExitData(
                             Door.Open,
@@ -1127,7 +1127,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Caverns.RamulkenRollway.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=Or(
                                 can_fly_vertical,
                                 And(
@@ -1152,7 +1152,7 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Caverns.RamulkenRollway.subregion("Lower"),
+                            Subregion("Lower"),
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1180,7 +1180,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Caverns.CavernsTeleporterE.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=can_climb_wall,
                         ),
                     ],
@@ -1194,7 +1194,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Caverns.CavernsTeleporterE.subregion("Lower"),
+                            Subregion("Lower"),
                         ),
                     ],
                     pickups=[
@@ -1222,7 +1222,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Caverns.QuarryShaft.subregion("Lower"),
+                            Subregion("Lower"),
                             access_rule=Has(ItemName.MorphBall) | can_climb_shaft,
                         ),
                     ],
@@ -1232,11 +1232,11 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Caverns.QuarryShaft.subregion("Bottom"),
+                            Subregion("Bottom"),
                         ),
                         ExitData(
                             Door.Open,
-                            Caverns.QuarryShaft.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=can_short_shaft,
                         ),
                         ExitData(
@@ -1251,15 +1251,15 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Caverns.QuarryShaft.subregion("Lower"),
+                            Subregion("Lower"),
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.QuarryShaft.subregion("Top"),
+                            Subregion("Top"),
                         ),
                         # ExitData(
                         #     Door.Open,
-                        #     Caverns.QuarryShaft.subregion("Grapple Block"),
+                        #     Subregion("Grapple Block"),
                         # ),
                     ],
                 ),
@@ -1268,7 +1268,7 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.QuarryShaft.subregion("Upper"),
+                            Subregion("Upper"),
                         ),
                         ExitData(
                             Door.Normal,
@@ -1281,7 +1281,7 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.QuarryShaft.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=can_climb_shaft,
                         ),
                     ],
@@ -1313,7 +1313,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.LonelyLoop.subregion("Top"),
+                            Subregion("Top"),
                             access_rule=HasAny(ItemName.GrappleBeam, ItemName.SpaceJump),
                         ),
                     ],
@@ -1327,7 +1327,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.LonelyLoop.subregion("Bottom"),
+                            Subregion("Bottom"),
                         ),
                     ],
                 ),
@@ -1379,7 +1379,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Caverns.TransportFactoryIntS.subregion("Right"),
+                            Subregion("Right"),
                             access_rule=can_spider_boost | Has(ItemName.PhaseDrift),
                         ),
                     ],
@@ -1393,7 +1393,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Caverns.TransportFactoryIntS.subregion("Left"),
+                            Subregion("Left"),
                             access_rule=Or(
                                 can_spider_boost,
                                 Has(ItemName.PhaseDrift),
@@ -1443,7 +1443,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.Gamma2SAccess.subregion("Arena"),
+                            Subregion("Arena"),
                             access_rule=can_bomb_block,
                         ),
                     ],
@@ -1453,7 +1453,7 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.Gamma2SAccess.subregion("Hub"),
+                            Subregion("Hub"),
                             access_rule=can_high_ledge & can_bomb_block,
                         ),
                     ],
@@ -1537,7 +1537,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.Alpha2N.subregion("Exit"),
+                            Subregion("Exit"),
                             access_rule=can_high_bomb_block,  # FIXME: Dangerous action
                         ),
                     ],
@@ -1556,7 +1556,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.Alpha2N.subregion("Arena"),
+                            Subregion("Arena"),
                             access_rule=can_climb_wall & can_bomb_block,
                         ),
                     ],
@@ -1663,7 +1663,7 @@ area_3_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Interior.ParabyPeriphery.subregion("Right"),
+                            Subregion("Right"),
                             # FIXME: Dangerous action
                         ),
                     ],
@@ -1677,7 +1677,7 @@ area_3_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Interior.ParabyPeriphery.subregion("Left"),
+                            Subregion("Left"),
                             access_rule=can_climb_wall,
                         ),
                     ],
@@ -1765,7 +1765,7 @@ area_3_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Interior.FactoryIntersection.subregion("Bottom"),
+                            Subregion("Bottom"),
                             # FIXME: Dangerous action
                         ),
                     ],
@@ -1834,7 +1834,7 @@ area_3_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.AlphaAccess.subregion("Top"),
+                            Subregion("Top"),
                             access_rule=And(
                                 Has(ItemName.VariaSuit),
                                 HasAny(ItemName.GrappleBeam, ItemName.GravitySuit) | can_spider_boost,
@@ -1854,7 +1854,7 @@ area_3_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.AlphaAccess.subregion("Bottom"),
+                            Subregion("Bottom"),
                             access_rule=And(
                                 Has(ItemName.VariaSuit),
                                 can_climb_wall,
@@ -1880,7 +1880,7 @@ area_3_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.GammaTransportCavernsE.subregion("Center"),
+                            Subregion("Center"),
                             access_rule=can_grapple_tunnel,
                             # FIXME: Dangerous action
                         ),
@@ -1896,7 +1896,7 @@ area_3_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.GammaTransportCavernsE.subregion("Arena"),
+                            Subregion("Arena"),
                             access_rule=can_climb_wall,
                             # FIXME: Dangerous action
                         ),
@@ -1907,7 +1907,7 @@ area_3_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.GammaTransportCavernsE.subregion("Southwest"),
+                            Subregion("Southwest"),
                         ),
                     ],
                 ),
@@ -1920,7 +1920,7 @@ area_3_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Interior.GammaTransportCavernsE.subregion("Southeast"),
+                            Subregion("Southeast"),
                             access_rule=can_spider_boost | HasAny(ItemName.GravitySuit, ItemName.GrappleBeam),
                         ),
                         ExitData(
@@ -1939,7 +1939,7 @@ area_3_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Interior.GammaTransportCavernsE.subregion("Southwest"),
+                            Subregion("Southwest"),
                             # FIXME: Dangerous action
                         ),
                     ],
@@ -1953,7 +1953,7 @@ area_3_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.GammaTransportCavernsE.subregion("Southwest"),
+                            Subregion("Southwest"),
                             access_rule=Has(ItemName.GrappleBeam),
                         ),
                     ],
@@ -1996,7 +1996,7 @@ area_3_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.WallfireWatch.subregion("Top"),
+                            Subregion("Top"),
                             access_rule=can_fly_vertical,
                         ),
                     ],
@@ -2010,7 +2010,7 @@ area_3_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.WallfireWatch.subregion("Main"),
+                            Subregion("Main"),
                         ),
                     ],
                 ),
@@ -2094,7 +2094,7 @@ area_3_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.GammaCAccess.subregion("Hiding Spot"),
+                            Subregion("Hiding Spot"),
                             access_rule=can_power_bomb,
                         ),
                     ],
@@ -2108,7 +2108,7 @@ area_3_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.GammaCAccess.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=can_bomb_block,
                         ),
                     ],
@@ -2121,7 +2121,7 @@ area_3_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.GammaCAccess.subregion("Hiding Spot"),
+                            Subregion("Hiding Spot"),
                             access_rule=Has(ItemName.LightningArmor) & can_bomb_block,  # To escape from the hiding spot
                         ),
                         ExitData(

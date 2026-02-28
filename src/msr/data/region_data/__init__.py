@@ -63,3 +63,8 @@ class EventData(NamedTuple):
     item_name: str | None = None
     access_rule: Rule[SamusReturnsWorld] = True_()
     show_in_spoiler: bool = False
+
+
+# Contextually links to a subregion in the same room
+class Subregion(str):
+    pass

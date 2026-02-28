@@ -31,7 +31,7 @@ from ..room_names import Area2Entryway as Entryway
 from ..room_names import Area2Exterior as Exterior
 from ..room_names import Area2Interior as Interior
 from ..room_names import Area3Exterior as Area3
-from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData
+from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
 
 area_2_exterior_data = AreaData(
     name="Area 2 Dam Exterior",
@@ -58,7 +58,7 @@ area_2_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.DamExterior.subregion("Top"),
+                            Subregion("Top"),
                             access_rule=can_fly_vertical,
                         ),
                     ],
@@ -72,20 +72,20 @@ area_2_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.DamExterior.subregion("East"),
+                            Subregion("East"),
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.DamExterior.subregion("West"),
+                            Subregion("West"),
                         ),
                         # FIXME: Dangerous action
                         ExitData(
                             Door.Open,
-                            Exterior.DamExterior.subregion("Inner"),
+                            Subregion("Inner"),
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.DamExterior.subregion("Alpha Ledge"),
+                            Subregion("Alpha Ledge"),
                             access_rule=Or(
                                 Has(ItemName.SpaceJump),
                                 can_spider_boost,
@@ -99,7 +99,7 @@ area_2_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.DamExterior.subregion("Top"),
+                            Subregion("Top"),
                             access_rule=can_climb_wall,
                         ),
                         # FIXME: Dangrous action
@@ -118,12 +118,12 @@ area_2_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.DamExterior.subregion("Top"),
+                            Subregion("Top"),
                             access_rule=can_climb_wall,
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.DamExterior.subregion("Alpha Ledge"),
+                            Subregion("Alpha Ledge"),
                             access_rule=Or(
                                 can_fly_vertical,
                                 Has(ItemName.LightningArmor) & can_spider,
@@ -131,7 +131,7 @@ area_2_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.DamExterior.subregion("Bottom"),
+                            Subregion("Bottom"),
                             access_rule=Has(ItemName.Hatchling) | can_bomb_block,
                         ),
                         ExitData(
@@ -153,7 +153,7 @@ area_2_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.DamExterior.subregion("West"),
+                            Subregion("West"),
                             access_rule=Or(
                                 can_bomb_block,
                                 Has(ItemName.Hatchling) & can_climb_shaft,
@@ -165,7 +165,7 @@ area_2_exterior_data = AreaData(
                         # ),
                         ExitData(
                             Door.Open,
-                            Exterior.DamExterior.subregion("Top"),
+                            Subregion("Top"),
                             access_rule=Or(
                                 Has(ItemName.SpaceJump),
                                 can_spider_boost,
@@ -180,11 +180,11 @@ area_2_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.DamExterior.subregion("West"),
+                            Subregion("West"),
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.DamExterior.subregion("Top"),
+                            Subregion("Top"),
                             access_rule=Or(
                                 Has(ItemName.SpaceJump),
                                 can_spider_boost,
@@ -259,7 +259,7 @@ area_2_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.CritterPlayground.subregion("Middle"),
+                            Subregion("Middle"),
                         ),
                     ],
                 ),
@@ -268,12 +268,12 @@ area_2_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.CritterPlayground.subregion("Top"),
+                            Subregion("Top"),
                             access_rule=can_climb_wall,
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.CritterPlayground.subregion("Pickup"),
+                            Subregion("Pickup"),
                             access_rule=Has(ItemName.Hatchling) & can_climb_wall,
                         ),
                     ],
@@ -283,7 +283,7 @@ area_2_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.CritterPlayground.subregion("Middle"),
+                            Subregion("Middle"),
                         ),
                         ExitData(
                             Door.Normal,
@@ -300,7 +300,7 @@ area_2_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.CritterPlayground.subregion("Pickup"),
+                            Subregion("Pickup"),
                             access_rule=can_climb_wall & can_bomb_block,
                         ),
                     ],
@@ -310,12 +310,12 @@ area_2_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.CritterPlayground.subregion("Tunnel"),
+                            Subregion("Tunnel"),
                             access_rule=can_bomb_block,
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.CritterPlayground.subregion("Middle"),
+                            Subregion("Middle"),
                             access_rule=Has(ItemName.Hatchling),
                         ),
                     ],
@@ -387,11 +387,11 @@ area_2_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.SpikeRavine.subregion("Lower"),
+                            Subregion("Lower"),
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.SpikeRavine.subregion("Pickup"),
+                            Subregion("Pickup"),
                             access_rule=Has(ItemName.GrappleBeam) | can_spider_boost,
                         ),
                     ],
@@ -406,12 +406,12 @@ area_2_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.SpikeRavine.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=can_climb_wall,
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.SpikeRavine.subregion("Pickup"),
+                            Subregion("Pickup"),
                             access_rule=can_spider_boost,
                         ),
                     ],
@@ -421,12 +421,12 @@ area_2_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.SpikeRavine.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=can_spider_boost,
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.SpikeRavine.subregion("Lower"),
+                            Subregion("Lower"),
                         ),
                     ],
                     pickups=[
@@ -583,7 +583,7 @@ area_2_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.CavernsAlphaEAccess.subregion("Right"),
+                            Subregion("Right"),
                             access_rule=Or(
                                 can_power_bomb,
                                 Has(ItemName.SpringBall) & can_bomb,
@@ -596,7 +596,7 @@ area_2_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Exterior.CavernsAlphaEAccess.subregion("Left"),
+                            Subregion("Left"),
                             access_rule=can_bomb_block,
                         ),
                         ExitData(
@@ -622,7 +622,7 @@ area_2_exterior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Exterior.CavernsTeleporter.subregion("Right"),
+                            Subregion("Right"),
                             access_rule=And(
                                 # Missile block
                                 can_any_missile,
@@ -643,7 +643,7 @@ area_2_exterior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Exterior.CavernsTeleporter.subregion("Left"),
+                            Subregion("Left"),
                             access_rule=And(
                                 # Magma pool
                                 HasAny(ItemName.IceBeam, ItemName.SpaceJump, ItemName.MorphBall),
@@ -835,7 +835,7 @@ area_2_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Interior.WaveBeam.subregion("South"),
+                            Subregion("South"),
                             # FIXME: Dangerous action
                         ),
                     ],
@@ -845,7 +845,7 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Interior.WaveBeam.subregion("Northwest"),
+                            Subregion("Northwest"),
                             access_rule=can_high_jump,
                         ),
                         ExitData(
@@ -858,7 +858,7 @@ area_2_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.WaveBeam.subregion("Northeast"),
+                            Subregion("Northeast"),
                             access_rule=And(
                                 Has(ItemName.LightningArmor) | can_damage_tough_enemy,
                                 can_climb_wall,
@@ -866,11 +866,11 @@ area_2_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.WaveBeam.subregion("East"),
+                            Subregion("East"),
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.WaveBeam.subregion("Southeast"),
+                            Subregion("Southeast"),
                             # TODO: Dangerous action?
                         ),
                     ],
@@ -880,7 +880,7 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.WaveBeam.subregion("South"),
+                            Subregion("South"),
                             access_rule=can_beam_block_through_tunnel,
                         ),
                         ExitData(
@@ -894,7 +894,7 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.WaveBeam.subregion("South"),
+                            Subregion("South"),
                         ),
                         ExitData(
                             Door.Taramarga,
@@ -907,7 +907,7 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.WaveBeam.subregion("South"),
+                            Subregion("South"),
                         ),
                         ExitData(
                             Door.Taramarga,
@@ -938,7 +938,7 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Interior.InteriorIntersection.subregion("Southeast"),
+                            Subregion("Southeast"),
                         ),
                         ExitData(
                             Door.Taramarga,
@@ -946,7 +946,7 @@ area_2_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Interior.InteriorIntersection.subregion("South tunnel"),
+                            Subregion("South tunnel"),
                             access_rule=Has(ItemName.ScrewAttack),
                         ),
                     ],
@@ -956,7 +956,7 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Interior.InteriorIntersection.subregion("Side tunnel"),
+                            Subregion("Side tunnel"),
                             access_rule=can_high_ledge,
                         ),
                         ExitData(
@@ -970,11 +970,11 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.InteriorIntersection.subregion("South"),
+                            Subregion("South"),
                         ),
                         ExitData(
                             Door.Open,
-                            Interior.InteriorIntersection.subregion("North tunnel"),
+                            Subregion("North tunnel"),
                             access_rule=can_climb_wall,
                         ),
                     ],
@@ -984,21 +984,21 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Interior.InteriorIntersection.subregion("South tunnel"),
+                            Subregion("South tunnel"),
                         ),
                         ExitData(
                             Door.Open,
-                            Interior.InteriorIntersection.subregion("South chamber"),
+                            Subregion("South chamber"),
                             access_rule=Has(ItemName.ScrewAttack),
                         ),
                         ExitData(
                             Door.Open,
-                            Interior.InteriorIntersection.subregion("Side tunnel"),
+                            Subregion("Side tunnel"),
                             access_rule=Has(ItemName.ScrewAttack),
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.InteriorIntersection.subregion("North chamber"),
+                            Subregion("North chamber"),
                         ),
                     ],
                 ),
@@ -1007,7 +1007,7 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Interior.InteriorIntersection.subregion("South tunnel"),
+                            Subregion("South tunnel"),
                             access_rule=Has(ItemName.ScrewAttack),
                         ),
                         ExitData(
@@ -1032,7 +1032,7 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.InteriorIntersection.subregion("South tunnel"),
+                            Subregion("South tunnel"),
                             access_rule=And(
                                 Has(ItemName.MissileLauncher),
                                 can_bomb_block,
@@ -1050,7 +1050,7 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.InteriorIntersection.subregion("North tunnel"),
+                            Subregion("North tunnel"),
                             access_rule=can_beam_block_through_fan_tunnel,
                         ),
                         ExitData(
@@ -1174,7 +1174,7 @@ area_2_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Interior.InteriorTeleporter.subregion("Lower"),
+                            Subregion("Lower"),
                             # FIXME: Dangerous action?
                         ),
                     ],
@@ -1184,7 +1184,7 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Interior.InteriorTeleporter.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=can_short_shaft,
                         ),
                         ExitData(
@@ -1217,7 +1217,7 @@ area_2_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.FleechFireContainment.subregion("Lower"),
+                            Subregion("Lower"),
                             # FIXME: Dangerous action
                             access_rule=Has(ItemName.LightningArmor),
                         ),
@@ -1228,7 +1228,7 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.FleechFireContainment.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=Has(ItemName.LightningArmor) & can_climb_shaft,
                         ),
                         ExitData(
@@ -1302,7 +1302,7 @@ area_2_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Interior.HighJumpBoots.subregion("Lower"),
+                            Subregion("Lower"),
                             access_rule=can_bomb_block,
                         ),
                     ],
@@ -1315,7 +1315,7 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Interior.HighJumpBoots.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=can_bomb_block,
                         ),
                         ExitData(
@@ -1423,12 +1423,12 @@ area_2_interior_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.GeneratorAccess.subregion("Lower"),
+                            Subregion("Lower"),
                             access_rule=Has(ItemName.VariaSuit),
                         ),
                         ExitData(
                             Door.Open,
-                            Interior.GeneratorAccess.subregion("Northeast"),
+                            Subregion("Northeast"),
                             access_rule=HasAll(ItemName.VariaSuit, ItemName.ScrewAttack),
                         ),
                     ],
@@ -1438,7 +1438,7 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Interior.GeneratorAccess.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=Has(ItemName.VariaSuit),
                         ),
                         ExitData(
@@ -1453,7 +1453,7 @@ area_2_interior_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Interior.GeneratorAccess.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=HasAll(ItemName.VariaSuit, ItemName.ScrewAttack),
                         ),
                         ExitData(
@@ -1489,7 +1489,7 @@ area_2_entryway_data = AreaData(
                         # ),
                         ExitData(
                             Door.MorphTunnel,
-                            Entryway.TransportAreas1And3.subregion("Seal"),
+                            Subregion("Seal"),
                         ),
                     ],
                 ),
@@ -1498,7 +1498,7 @@ area_2_entryway_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Entryway.TransportAreas1And3.subregion("Area 1"),
+                            Subregion("Area 1"),
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1506,7 +1506,7 @@ area_2_entryway_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Entryway.TransportAreas1And3.subregion("Area 3"),
+                            Subregion("Area 3"),
                             # Shoot out the top and free aim down for the bottom
                             access_rule=can_beam_block_through_tunnel,
                         ),
@@ -1528,7 +1528,7 @@ area_2_entryway_data = AreaData(
                         # Grapple block has no effect
                         ExitData(
                             Door.MorphTunnel,
-                            Entryway.TransportAreas1And3.subregion("Seal"),
+                            Subregion("Seal"),
                         ),
                         ExitData(
                             Door.Elevator,
@@ -1551,7 +1551,7 @@ area_2_entryway_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Entryway.EntrywayTeleporter.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=can_high_ledge,
                         ),
                     ],
@@ -1561,7 +1561,7 @@ area_2_entryway_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Entryway.EntrywayTeleporter.subregion("Lower"),
+                            Subregion("Lower"),
                         ),
                         # No logical effect
                         # ExitData(
@@ -1593,7 +1593,7 @@ area_2_entryway_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Entryway.LightningArmor.subregion("Tutorial"),
+                            Subregion("Tutorial"),
                             access_rule=Has(ItemName.LightningArmor),
                         ),
                     ],
@@ -1609,7 +1609,7 @@ area_2_entryway_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Entryway.LightningArmor.subregion("Lower"),
+                            Subregion("Lower"),
                         ),
                     ],
                     pickups=[
@@ -1661,7 +1661,7 @@ area_2_entryway_data = AreaData(
                         ),
                         ExitData(
                             Door.Open,
-                            Entryway.TransportAccess.subregion("Lower"),
+                            Subregion("Lower"),
                             # TODO: SJ across?; FIXME: Dangerous action
                             access_rule=Has(ItemName.LightningArmor) | can_spider,
                         ),
@@ -1672,7 +1672,7 @@ area_2_entryway_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Open,
-                            Entryway.TransportAccess.subregion("Upper"),
+                            Subregion("Upper"),
                             access_rule=And(
                                 can_high_ledge,
                                 Has(ItemName.LightningArmor) | can_spider,
@@ -1721,7 +1721,7 @@ area_2_entryway_data = AreaData(
                         ),
                         ExitData(
                             Door.MorphTunnel,
-                            Entryway.Alpha2.subregion("Exit"),
+                            Subregion("Exit"),
                             access_rule=can_any_missile,
                         ),
                     ],
@@ -1734,7 +1734,7 @@ area_2_entryway_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Entryway.Alpha2.subregion("Arena"),
+                            Subregion("Arena"),
                             access_rule=can_any_missile,
                         ),
                         ExitData(

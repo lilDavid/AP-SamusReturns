@@ -870,7 +870,7 @@ area_4_mines_data = AreaData(
                             "Bottom",
                             access_rule=And(
                                 can_bomb_block,
-                                Has(ItemName.WaveBeam),
+                                Has(ItemName.WaveBeam) | can_power_bomb,
                                 HasAny(ItemName.PhaseDrift, ItemName.Hatchling),
                             ),
                         )

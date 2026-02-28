@@ -574,8 +574,17 @@ area_1_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Area1.WaterMaze.subregion("Pickup"),
-                            # TODO: Trick for no hatchling?
-                            access_rule=HasAll(ItemName.MissileLauncher, ItemName.Hatchling, ItemName.GravitySuit),
+                            access_rule=And(
+                                can_any_missile,
+                                Has(ItemName.MorphBall),
+                                Or(
+                                    And(
+                                        Has(ItemName.PhaseDrift),
+                                        Has(ItemName.GravitySuit) | can_spider,
+                                    ),
+                                    HasAll(ItemName.Hatchling, ItemName.GravitySuit),
+                                ),
+                            ),
                         ),
                     ],
                 ),

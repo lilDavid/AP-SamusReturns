@@ -2,6 +2,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, ClassVar
 
+import Utils
 from BaseClasses import ItemClassification
 from Options import Option
 from rule_builder.rules import Has
@@ -194,6 +195,9 @@ class SamusReturnsWorld(World):
         # (Both are acceptable to pass in and fortunately one of these conversions will be a no-op)
         data = item_data_table[ItemName(name)]
         return SamusReturnsItem(name, data.classification(), data.ap_id, self.player)
+
+    def visualize_regions(self):
+        Utils.visualize_regions(self.get_region(self.origin_region_name), Utils.output_path("msr.puml"))
 
     # UT integration
 

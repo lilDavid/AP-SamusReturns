@@ -75,12 +75,17 @@ can_beam_block_through_fan_tunnel = Or(Has(ItemName.WaveBeam), can_power_bomb, c
 can_spider = HasAll(ItemName.MorphBall, ItemName.SpiderBall)
 can_spider_boost = HasAll(ItemName.MorphBall, ItemName.SpiderBall, ItemName.PowerBomb)
 can_spider_boost_underwater = And(can_spider_boost, has_knowledge(Knowledge.option_enable), Has(ItemName.GravitySuit))
+can_cross_pitfall_bridge = Or(Has(ItemName.PhaseDrift), has_knowledge(Knowledge.option_enable) & can_spider_boost)
+
 can_fly_vertical = Or(Has(ItemName.SpaceJump), can_spider_boost, can_ibj(IBJ.option_vertical))
+can_fly_vertical_underwater = Or(Has(ItemName.GravitySuit) & can_fly_vertical, can_spider_boost_underwater)
 can_fly = Or(Has(ItemName.SpaceJump), can_ibj(IBJ.option_diagonal))
 can_climb_wall = can_spider | can_fly_vertical
+can_climb_wall_underwater = Or(can_spider, Has(ItemName.GravitySuit) & can_fly_vertical)
 
 can_high_jump = Or(Has(ItemName.HighJumpBoots), can_ibj(IBJ.option_double), can_fly_vertical)
-can_high_ledge = can_climb_wall | can_high_jump
+can_high_ledge = can_spider | can_high_jump
+can_high_underwater_ledge = Or(can_spider, Has(ItemName.GravitySuit) & can_high_jump)
 can_underwater_high_jump = Or(Has(ItemName.GravitySuit) & can_high_jump, can_spider_boost_underwater)
 
 # Needs ~hi-jump height to break but not to access the tunnel

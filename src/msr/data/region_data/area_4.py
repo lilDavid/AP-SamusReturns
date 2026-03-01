@@ -28,6 +28,7 @@ from ..internal_names import AreaId
 from ..room_names import Area3Exterior as Area3
 from ..room_names import Area4Caves as Caves
 from ..room_names import Area4Mines as Mines
+from ..room_names import Area5Lobby as Area5
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
 
 can_cross_purple_puddle = Or(
@@ -813,11 +814,11 @@ area_4_caves_data = AreaData(
                             Door.Normal,
                             Caves.VenomousPond.subregion("Left"),
                         ),
-                        # ExitData(
-                        #     Door.Elevator,
-                        #     Area5.TransportAreas4And6,  # TODO: Area 5
-                        #     access_rule=HasAll(ItemName.MorphBall, ItemName.GrappleBeam),
-                        # ),
+                        ExitData(
+                            Door.Elevator,
+                            Area5.TransportAreas4And6.subregion("Upper"),
+                            access_rule=HasAll(ItemName.MorphBall, ItemName.GrappleBeam),
+                        ),
                         ExitData(
                             Door.Open,
                             Subregion("Upper"),

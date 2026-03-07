@@ -1,13 +1,12 @@
 import asyncio
 import pkgutil
 import struct
-from collections import Counter
 from collections.abc import Sequence
-from enum import IntEnum
+from dataclasses import dataclass
+from enum import IntEnum, IntFlag
 
 from CommonClient import logger
 
-from . import items, locations
 from .data.internal_names import AreaId, ItemId
 
 UUID_LENGTH = 36  # 32 hex digits + 4 hyphens
@@ -38,7 +37,9 @@ class PacketType(IntEnum):
     MALFORMED = 9
 
 
-MULTIWORLD_SUBSCRIPTION = 2
+class Subscription(IntFlag):
+    LOGGING = 1
+    MULTIWORLD = 2
 
 
 class LuaError(RuntimeError):
@@ -68,7 +69,6 @@ class SamusReturnsConnector:
 
         try:
             self.streams = await asyncio.wait_for(asyncio.open_connection(self.address, SR_PORT), 10)
-            await self._request(PacketType.HANDSHAKE, struct.pack("<B", 0))
         except TimeoutError:
             logger.debug("Connection failed: Timeout")
             self.disconnect()
@@ -86,34 +86,70 @@ class SamusReturnsConnector:
         self.streams = None
         self.request_number = 0
 
-    async def _request(self, packet: PacketType, data: bytes | bytearray) -> bytes:
-        async with self.lock:
-            if self.streams is None:
-                raise OSError("Not connected")
-            reader, writer = self.streams
+    async def send_msg(self, packet: PacketType, data: bytes | bytearray):
+        if self.streams is None:
+            raise OSError("Not connected")
 
-            try:
-                request = struct.pack(">B", packet) + data
-                logger.debug(f"> {packet.name} {data[:DEBUG_PREVIEW_LENGTH]} ({len(request)} bytes)")
-                assert len(request) <= 4096
-                writer.write(request)
-                await asyncio.wait_for(writer.drain(), timeout=5)
-                response = await asyncio.wait_for(reader.read(4096), timeout=5)
-                logger.debug(f"< {response[:DEBUG_PREVIEW_LENGTH]} ({len(response)} bytes)")
+        writer = self.streams[1]
+        try:
+            msg = struct.pack(">B", packet) + data
+            logger.debug("> %s %s (%d bytes)", packet.name, data[:DEBUG_PREVIEW_LENGTH], len(msg))
+            assert len(msg) <= 4096
+            writer.write(msg)
+            await writer.drain()
+        except OSError:
+            self.disconnect()
+            raise
 
-                if response == b"":
-                    raise OSError("Connection closed")
+    async def read_msg(self):
+        if self.streams is None:
+            raise OSError("Not connected")
+        reader = self.streams[0]
 
-                response_packet, sequence = response[:2]
-                if response_packet != packet or sequence != self.request_number:
-                    raise OSError("Unexpected response")
+        p = await reader.read(1)
+        if p == b"":
+            self.disconnect()
+            raise OSError("Connection closed")
 
-                self.request_number += 1
-                self.request_number &= 0xFF
-                return response[2:]
-            except OSError:
+        _packet = p[0]
+        try:
+            packet = PacketType(_packet)
+        except ValueError:
+            self.disconnect()
+            raise Exception(f"Unrecognized packet type {_packet}") from None
+
+        logger.debug("< %s", packet.name)
+        match packet:
+            case PacketType.HANDSHAKE:
+                _sequence = (await reader.read(1))[0]
+                data = ""
+            case PacketType.REMOTE_LUA_EXEC:
+                _sequence, _success, size = struct.unpack("<BBI", await reader.read(6))
+                data = (await reader.read(size)).decode("utf-8", errors="replace")
+            case (
+                PacketType.LOG_MESSAGE
+                | PacketType.NEW_INVENTORY
+                | PacketType.COLLECTED_INDICES
+                | PacketType.RECEIVED_ITEMS
+                | PacketType.GAME_STATE
+            ):
+                size = struct.unpack("<I", await reader.read(4))[0]
+                data = (await reader.read(size)).decode("utf-8", errors="replace")
+            case PacketType.MALFORMED:
+                type, received, expected = struct.unpack("<BII", await reader.read(9))
                 self.disconnect()
-                raise
+                raise Exception(
+                    f"Game was sent a {PacketType(type)} malformed packet, received {received} expected {expected}"
+                )
+        return packet, data
+
+    async def receive_msgs(self):
+        if self.streams is None:
+            raise OSError("Not connected")
+
+        reader = self.streams[0]
+        while reader == self.streams[0]:
+            yield await self.read_msg()
 
     async def run_lua(self, code: str | bytes):
         if isinstance(code, str):
@@ -121,15 +157,16 @@ class SamusReturnsConnector:
         else:
             code_bytes = code
         payload = struct.pack("<I", len(code_bytes)) + code_bytes
-        try:
-            response = await self._request(PacketType.REMOTE_LUA_EXEC, payload)
-        except TimeoutError:
-            return None
-        success, _ = struct.unpack_from("<BI", response)
-        data = response[struct.calcsize("<BI") :].decode()
-        if not success:
-            raise LuaError(data)
-        return data
+        await self.send_msg(PacketType.REMOTE_LUA_EXEC, payload)
+
+
+@dataclass
+class SamusReturnsState:
+    config_id: str | None = None
+    scenario: AreaId | None = None
+
+    def is_in_game(self):
+        return self.scenario is not None
 
 
 LOCATION_BATCH_SIZE = 80
@@ -137,9 +174,13 @@ LOCATION_BATCH_SIZE = 80
 
 class SamusReturnsInterface:
     connector: SamusReturnsConnector
+    game_state: SamusReturnsState
+    game_task: asyncio.Task | None
 
     def __init__(self):
         self.connector = SamusReturnsConnector()
+        self.game_state = SamusReturnsState()
+        self.game_task = None
 
     def is_connected(self):
         return self.connector.is_connected()
@@ -147,87 +188,70 @@ class SamusReturnsInterface:
     async def connect(self, address: str):
         if self.is_connected():
             return True
-        return await self.connector.connect(address)
+        if not await self.connector.connect(address):
+            self.disconnect()
+            return False
+
+        try:
+            await self.connector.send_msg(
+                PacketType.HANDSHAKE,
+                struct.pack("<B", Subscription.LOGGING | Subscription.MULTIWORLD),
+            )
+            await self.connector.read_msg()
+
+            await self.load_rando_code()
+            await self.connector.read_msg()
+
+            await self.connector.run_lua('Game.AddSF(2.0, RL.SendRandoIdentifier, "")')
+            await self.connector.read_msg()
+            await self.connector.run_lua('Game.AddSF(2.0, RL.UpdateRDVClient, "")')
+            await self.connector.read_msg()
+
+            self.game_task = asyncio.Task(self.read_messages(), name="Samus Returns Connector")
+        except OSError:
+            self.disconnect()
+            return False
+
+        return True
 
     def disconnect(self):
         self.connector.disconnect()
-
-    async def get_config_identifier(self):
-        rando_id = await self.connector.run_lua("return Init.sThisRandoIdentifier")
-        if rando_id is None:
-            return None
-        return rando_id[:-UUID_LENGTH]
+        self.game_task = None
 
     async def load_rando_code(self):
-        # Bootstrap
-        if await self.connector.run_lua("return AP") != "nil":
-            # Already loaded (we don't expect the code to change between DC and reconnect)
-            return
-
         await self.connector.run_lua(get_lua_file("bootstrap.lua"))
 
-        location_data = [
-            (location.ap_id, location.scenario, location.internal_name())
-            for location in locations.location_table.values()
-        ]
-        batches = [
-            location_data[i : i + LOCATION_BATCH_SIZE] for i in range(0, len(location_data), LOCATION_BATCH_SIZE)
-        ]
-        template = "for k, v in pairs({}) do AP.LocationMapping[k] = v end"
-        for batch in batches:
-            table = "{"
-            for id, scenario, name in batch:
-                table += f'[{id}]={{"{scenario}","{name}"}},'
-            table += "}"
-            code = template.format(table)
-            await self.connector.run_lua(code)
+    async def read_messages(self):
+        async for msg in self.connector.receive_msgs():
+            try:
+                packet, data = msg
+                logger.debug("%s", data)
+                match packet:
+                    case PacketType.GAME_STATE:
+                        key, value = data.split(":")
+                        match key:
+                            case "rando_id":
+                                self.game_state.config_id = value[:-UUID_LENGTH]
+                            case "scenario":
+                                try:
+                                    self.game_state.scenario = AreaId(value)
+                                except ValueError:
+                                    self.game_state.scenario = None
+                            case _:
+                                logger.debug("Unrecognized game state key: %s", key)
+            except Exception:
+                import traceback
 
-        code = "AP.ItemMapping = {"
-        for item in items.item_data_table.values():
-            code += f'[{item.ap_id}] = "{item.item_id}",'
-        code += "}"
-        await self.connector.run_lua(code)
-
-    async def is_in_game(self):
-        return await self.get_area() is not None
-
-    async def get_area(self):
-        result = await self.connector.run_lua("return Game.GetCurrentGameModeID() .. ';' .. Scenario.CurrentScenarioID")
-        if result is None:
-            return None
-        game_mode, scenario = result.split(";")
-        if game_mode != "INGAME":
-            return None
-        try:
-            return AreaId(scenario)
-        except ValueError:
-            logger.debug(f"Unrecognized scenario: {scenario}")
-            return None
+                traceback.print_exc()
 
     async def get_locations(self):
-        result = await self.connector.run_lua("return AP.CheckLocations()")
-        if result is None:
-            return None
-        locations: set[int] = {int(id) for id in result.split(",")} if result else set()
-        logger.debug(f"Got location list: {locations}")
-        return locations
+        return None
 
     async def get_inventory(self):
-        from . import SamusReturnsWorld
-
-        result = await self.connector.run_lua("return AP.GetInventory()")
-        if result is None:
-            return None
-        pairs = (map(int, kvp.split("=")) for kvp in result.split(","))
-        inventory = Counter({SamusReturnsWorld.item_id_to_name[id]: count for id, count in pairs})
-        logger.debug(f"Current inventory: {inventory}")
-        return inventory
+        return None
 
     async def give_items(self, items: Sequence[tuple[ItemId, int]]):
-        from open_samus_returns_rando import lua_editor as osrr_lua
-
-        resources = ",".join([f'{{item_id="{item}",quantity={amount}}}' for item, amount in items])
-        await self.connector.run_lua(f"{osrr_lua.get_parent_for(items[0][0])}.OnPickedUp({{ {{ {resources} }} }})")
+        return
 
     async def display_hud_message(self, text: str):
-        await self.connector.run_lua(f"Scenario.QueueAsyncPopup({text!r})")
+        return

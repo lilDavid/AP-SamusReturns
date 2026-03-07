@@ -88,6 +88,10 @@ class SamusReturnsDebugCommandProcessor(SamusReturnsCommandProcessor):
         """Reload the multiworld handling code"""
         self.ctx.is_ap_code_loaded = False
 
+    def _cmd_dump_state(self):
+        """Dump the current game state in the client"""
+        logger.info(self.ctx.game_interface.game_state)
+
     # Logic testing
     def _set_item(self, item: ItemId, enable: bool):
         Utils.async_start(self.ctx.test_lua(f"RandomizerPowerup.SetItemAmount('{item}', {int(bool(enable))})"))
@@ -202,18 +206,17 @@ class SamusReturnsContext(BaseContext):
                         await asyncio.sleep(BACKOFF_LONG)
                         continue
 
-                    if await self.game_interface.connect(self.ip_address):
-                        config_id = await self.game_interface.get_config_identifier()
-                        if config_id is None:
-                            logger.error("Config identifier returned None")
-                            self.game_interface.disconnect()
-                            await asyncio.sleep(BACKOFF_LONG)
-                            continue
-                        self.seed_name, self.auth = SamusReturnsPatch.parse_config_identifier(config_id)
-                        logger.debug(f"Connected to {self.seed_name} as {self.auth}")
-                    else:
+                    if not await self.game_interface.connect(self.ip_address):
                         await asyncio.sleep(BACKOFF_LONG)
                         continue
+
+                if self.auth is None:
+                    config_id = self.game_interface.game_state.config_id
+                    if config_id is None:
+                        await asyncio.sleep(BACKOFF_SHORT)
+                        continue
+                    self.seed_name, self.auth = SamusReturnsPatch.parse_config_identifier(config_id)
+                    logger.debug(f"Connected to {self.seed_name} as {self.auth}")
 
                 if self.server is None:
                     logger.info("Waiting for player to connect to server")
@@ -226,16 +229,18 @@ class SamusReturnsContext(BaseContext):
                     await asyncio.sleep(BACKOFF_SHORT)
                     continue
 
-                if await self.game_interface.is_in_game():
+                if self.game_interface.game_state.is_in_game():
                     await self.handle_game_ready()
                     await asyncio.sleep(POLL_COOLDOWN)
                 else:
                     await asyncio.sleep(BACKOFF_SHORT)
             except OSError as e:
                 logger.error(str(e))
+                self.game_interface.disconnect()
                 await asyncio.sleep(BACKOFF_LONG)
             except Exception:
                 logger.error(traceback.format_exc())
+                self.game_interface.disconnect()
                 await asyncio.sleep(BACKOFF_LONG)
 
     async def handle_game_ready(self):
@@ -367,8 +372,7 @@ class SamusReturnsContext(BaseContext):
 
     async def test_lua(self, code: str):
         try:
-            result = await self.game_interface.connector.run_lua(code)
-            logger.info(result)
+            await self.game_interface.connector.run_lua(code)
         except (OSError, LuaError) as e:
             logger.exception(str(e))
 

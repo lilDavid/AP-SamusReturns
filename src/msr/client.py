@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import pkgutil
 import shutil
+import struct
 import traceback
 from collections import Counter
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import Patch
@@ -13,9 +16,15 @@ from CommonClient import ClientCommandProcessor, get_base_parser, gui_enabled, l
 from NetUtils import NetworkItem
 from worlds._bizhawk.context import AuthStatus
 
+from .connector import (
+    UUID_LENGTH,
+    PacketType,
+    SamusReturnsConnector,
+    SRConnectorError,
+    Subscription,
+)
 from .data import GAME_NAME
-from .data.internal_names import ItemId
-from .game_interface import LuaError, SamusReturnsInterface
+from .data.internal_names import AreaId, ItemId
 from .items import ItemName, item_data_table, launcher_to_ammo, tanks, unique_items
 from .patch import GAME_ID_US, SamusReturnsPatch
 from .settings import SamusReturnsSettings, TargetSystem
@@ -67,7 +76,7 @@ class SamusReturnsCommandProcessor(ClientCommandProcessor):
 
     def _cmd_test_hud(self, *text: str):
         """Write a message to the HUD."""
-        Utils.async_start(self.ctx.game_interface.display_hud_message(" ".join(text)))
+        Utils.async_start(self.ctx.display_hud_message(" ".join(text)))
 
     def _cmd_console_ip(self, ip_address: str | None = None):
         """Get or set the IP address to connect to the game. Use "localhost" to connect to emulator."""
@@ -82,19 +91,19 @@ class SamusReturnsDebugCommandProcessor(SamusReturnsCommandProcessor):
     def _cmd_test_lua(self, *code: str):
         """Run some Lua code in the game."""
         joined_code = " ".join(code)
-        Utils.async_start(self.ctx.test_lua(joined_code))
+        Utils.async_start(self.ctx.run_lua(joined_code))
 
     def _cmd_reload_ap_code(self):
         """Reload the multiworld handling code"""
-        self.ctx.is_ap_code_loaded = False
+        Utils.async_start(self.ctx.load_rando_code())
 
     def _cmd_dump_state(self):
         """Dump the current game state in the client"""
-        logger.info(self.ctx.game_interface.game_state)
+        logger.info(self.ctx.game_state)
 
     # Logic testing
     def _set_item(self, item: ItemId, enable: bool):
-        Utils.async_start(self.ctx.test_lua(f"RandomizerPowerup.SetItemAmount('{item}', {int(bool(enable))})"))
+        Utils.async_start(self.ctx.run_lua(f"RandomizerPowerup.SetItemAmount('{item}', {int(bool(enable))})"))
 
     def _cmd_hi_jump(self, enable: bool):
         """Turn High Jump Boots on or off (doesn't work if you have the item)"""
@@ -107,6 +116,22 @@ class SamusReturnsDebugCommandProcessor(SamusReturnsCommandProcessor):
     def _cmd_gravity_suit(self, enable: bool):
         """Turn Gravity Suit on or off (doesn't work if you have the item)"""
         self._set_item(ItemId.GRAVITY_SUIT, enable)
+
+
+def get_lua_file(file):
+    lua = pkgutil.get_data(__name__, f"data/lua/{file}")
+    assert lua is not None
+    return lua
+
+
+@dataclass
+class SamusReturnsState:
+    config_id: str | None = None
+    scenario: AreaId | None = None
+    locations: frozenset[int] = frozenset()
+
+    def is_in_game(self):
+        return self.scenario is not None
 
 
 class SamusReturnsContext(BaseContext):
@@ -122,10 +147,11 @@ class SamusReturnsContext(BaseContext):
 
     # Game info
     game_sync_task: asyncio.Task
-    game_interface: SamusReturnsInterface
+    game_reader_task: asyncio.Task | None
     ip_address: str
+    connector: SamusReturnsConnector
+    game_state: SamusReturnsState
     force_client_dc: bool
-    is_ap_code_loaded: bool
 
     # Slot data
     ammo_amounts: dict[str, int]
@@ -148,10 +174,10 @@ class SamusReturnsContext(BaseContext):
         self.auth_status = AuthStatus.NOT_AUTHENTICATED
         self.password_requested = False
 
-        self.game_interface = SamusReturnsInterface()
         self.ip_address = self.get_default_ip_address()
+        self.connector = SamusReturnsConnector()
+        self.game_state = SamusReturnsState()
         self.force_client_dc = False
-        self.is_ap_code_loaded = False
 
         self.local_locations = set()
         self.ammo_amounts = {}
@@ -196,22 +222,37 @@ class SamusReturnsContext(BaseContext):
         while not self.exit_event.is_set():
             try:
                 if self.force_client_dc:
-                    self.game_interface.disconnect()
+                    self.connector.disconnect()
                     self.force_client_dc = False
 
-                if not self.game_interface.is_connected():
-                    self.is_ap_code_loaded = False
+                if not self.connector.is_connected():
                     if not self.ip_address:
                         logger.error("Client IP address is unset. Use /console_ip to connect to the game.")
                         await asyncio.sleep(BACKOFF_LONG)
                         continue
 
-                    if not await self.game_interface.connect(self.ip_address):
+                    if not await self.connector.connect(self.ip_address):
+                        self.connector.disconnect()
                         await asyncio.sleep(BACKOFF_LONG)
                         continue
 
+                    await self.connector.send_msg(
+                        PacketType.HANDSHAKE,
+                        struct.pack("<B", Subscription.LOGGING | Subscription.MULTIWORLD),
+                    )
+                    await self._read_msg()
+
+                    await self.load_rando_code()
+
+                    await self.connector.run_lua('Game.AddSF(2.0, RL.SendRandoIdentifier, "")')
+                    await self._read_msg()
+                    await self.connector.run_lua('Game.AddSF(2.0, RL.UpdateRDVClient, "")')
+                    await self._read_msg()
+
+                    self.game_reader_task = asyncio.create_task(self.handle_messages(), name="Samus Returns Messages")
+
                 if self.auth is None:
-                    config_id = self.game_interface.game_state.config_id
+                    config_id = self.game_state.config_id
                     if config_id is None:
                         await asyncio.sleep(BACKOFF_SHORT)
                         continue
@@ -227,27 +268,60 @@ class SamusReturnsContext(BaseContext):
                 else:
                     self.auth_status = AuthStatus.NOT_AUTHENTICATED
                     await asyncio.sleep(BACKOFF_SHORT)
-                    continue
-
-                if self.game_interface.game_state.is_in_game():
-                    await self.handle_game_ready()
-                    await asyncio.sleep(POLL_COOLDOWN)
-                else:
-                    await asyncio.sleep(BACKOFF_SHORT)
-            except OSError as e:
-                logger.error(str(e))
-                self.game_interface.disconnect()
+            except SRConnectorError as e:
+                self.connector.disconnect()
+                logger.debug(e, exc_info=True)
+                logger.info("Unable to connect to game")
                 await asyncio.sleep(BACKOFF_LONG)
-            except Exception:
+            except:
                 logger.error(traceback.format_exc())
-                self.game_interface.disconnect()
+                self.connector.disconnect()
                 await asyncio.sleep(BACKOFF_LONG)
+                raise
 
-    async def handle_game_ready(self):
-        if not self.is_ap_code_loaded:
-            await self.game_interface.load_rando_code()
-        await self.handle_locations()
-        await self.handle_received_items()
+        self.connector.disconnect()
+        if self.game_reader_task:
+            await self.game_reader_task
+
+    async def _read_msg(self):
+        while self.connector.is_connected():
+            try:
+                return await asyncio.wait_for(self.connector.read_msg(), 1)
+            except TimeoutError:
+                continue
+        raise SRConnectorError("Disconnected from game")
+
+    async def load_rando_code(self):
+        await self.connector.run_lua(get_lua_file("bootstrap.lua"))
+        await self._read_msg()
+
+    async def handle_messages(self):
+        try:
+            while self.connector.is_connected():
+                packet, data = await self._read_msg()
+                logger.debug("%s", data)
+                match packet:
+                    case PacketType.GAME_STATE:
+                        key, value = data.split(":")
+                        match key:
+                            case "rando_id":
+                                self.game_state.config_id = value[:-UUID_LENGTH]
+                            case "scenario":
+                                try:
+                                    self.game_state.scenario = AreaId(value)
+                                except ValueError:
+                                    self.game_state.scenario = None
+                            case _:
+                                logger.debug("Unrecognized game state key: %s", key)
+        except SRConnectorError as e:
+            self.connector.disconnect()
+            logger.debug(e, exc_info=True)
+            logger.info("Disconnected from game")
+            await asyncio.sleep(BACKOFF_LONG)
+        except Exception:
+            self.connector.disconnect()
+            logger.error(traceback.format_exc())
+            await asyncio.sleep(BACKOFF_LONG)
 
     async def handle_locations(self):
         from . import SamusReturnsWorld
@@ -370,11 +444,16 @@ class SamusReturnsContext(BaseContext):
             sender_name = None if sender is None else self.player_names[sender]
         return amount * amount_per_item, sender_name
 
-    async def test_lua(self, code: str):
+    async def run_lua(self, code: str):
         try:
-            await self.game_interface.connector.run_lua(code)
-        except (OSError, LuaError) as e:
+            await self.connector.run_lua(code)
+        except SRConnectorError as e:
+            logger.error(str(e))
+        except Exception as e:
             logger.exception(str(e))
+
+    async def display_hud_message(self, text: str):
+        await self.run_lua(f"Scenario.QueueAsyncPopup({text!r})")
 
 
 def launch_game(rom_file: str):

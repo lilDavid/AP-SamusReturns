@@ -1,13 +1,9 @@
 import asyncio
 import pkgutil
 import struct
-from collections.abc import Sequence
-from dataclasses import dataclass
 from enum import IntEnum, IntFlag
 
 from CommonClient import logger
-
-from .data.internal_names import AreaId, ItemId
 
 UUID_LENGTH = 36  # 32 hex digits + 4 hyphens
 
@@ -42,7 +38,7 @@ class Subscription(IntFlag):
     MULTIWORLD = 2
 
 
-class LuaError(RuntimeError):
+class SRConnectorError(RuntimeError):
     pass
 
 
@@ -88,7 +84,7 @@ class SamusReturnsConnector:
 
     async def send_msg(self, packet: PacketType, data: bytes | bytearray):
         if self.streams is None:
-            raise OSError("Not connected")
+            raise SRConnectorError("Not connected")
 
         writer = self.streams[1]
         try:
@@ -97,26 +93,26 @@ class SamusReturnsConnector:
             assert len(msg) <= 4096
             writer.write(msg)
             await writer.drain()
-        except OSError:
+        except OSError as e:
             self.disconnect()
-            raise
+            raise SRConnectorError(*e.args) from None
 
     async def read_msg(self):
         if self.streams is None:
-            raise OSError("Not connected")
+            raise SRConnectorError("Not connected")
         reader = self.streams[0]
 
         p = await reader.read(1)
         if p == b"":
             self.disconnect()
-            raise OSError("Connection closed")
+            raise SRConnectorError("Connection closed")
 
         _packet = p[0]
         try:
             packet = PacketType(_packet)
         except ValueError:
             self.disconnect()
-            raise Exception(f"Unrecognized packet type {_packet}") from None
+            raise SRConnectorError(f"Unrecognized packet type {_packet}") from None
 
         logger.debug("< %s", packet.name)
         match packet:
@@ -138,14 +134,14 @@ class SamusReturnsConnector:
             case PacketType.MALFORMED:
                 type, received, expected = struct.unpack("<BII", await reader.read(9))
                 self.disconnect()
-                raise Exception(
+                raise SRConnectorError(
                     f"Game was sent a {PacketType(type)} malformed packet, received {received} expected {expected}"
                 )
         return packet, data
 
     async def receive_msgs(self):
         if self.streams is None:
-            raise OSError("Not connected")
+            raise SRConnectorError("Not connected")
 
         reader = self.streams[0]
         while reader == self.streams[0]:
@@ -158,100 +154,3 @@ class SamusReturnsConnector:
             code_bytes = code
         payload = struct.pack("<I", len(code_bytes)) + code_bytes
         await self.send_msg(PacketType.REMOTE_LUA_EXEC, payload)
-
-
-@dataclass
-class SamusReturnsState:
-    config_id: str | None = None
-    scenario: AreaId | None = None
-
-    def is_in_game(self):
-        return self.scenario is not None
-
-
-LOCATION_BATCH_SIZE = 80
-
-
-class SamusReturnsInterface:
-    connector: SamusReturnsConnector
-    game_state: SamusReturnsState
-    game_task: asyncio.Task | None
-
-    def __init__(self):
-        self.connector = SamusReturnsConnector()
-        self.game_state = SamusReturnsState()
-        self.game_task = None
-
-    def is_connected(self):
-        return self.connector.is_connected()
-
-    async def connect(self, address: str):
-        if self.is_connected():
-            return True
-        if not await self.connector.connect(address):
-            self.disconnect()
-            return False
-
-        try:
-            await self.connector.send_msg(
-                PacketType.HANDSHAKE,
-                struct.pack("<B", Subscription.LOGGING | Subscription.MULTIWORLD),
-            )
-            await self.connector.read_msg()
-
-            await self.load_rando_code()
-            await self.connector.read_msg()
-
-            await self.connector.run_lua('Game.AddSF(2.0, RL.SendRandoIdentifier, "")')
-            await self.connector.read_msg()
-            await self.connector.run_lua('Game.AddSF(2.0, RL.UpdateRDVClient, "")')
-            await self.connector.read_msg()
-
-            self.game_task = asyncio.Task(self.read_messages(), name="Samus Returns Connector")
-        except OSError:
-            self.disconnect()
-            return False
-
-        return True
-
-    def disconnect(self):
-        self.connector.disconnect()
-        self.game_task = None
-
-    async def load_rando_code(self):
-        await self.connector.run_lua(get_lua_file("bootstrap.lua"))
-
-    async def read_messages(self):
-        async for msg in self.connector.receive_msgs():
-            try:
-                packet, data = msg
-                logger.debug("%s", data)
-                match packet:
-                    case PacketType.GAME_STATE:
-                        key, value = data.split(":")
-                        match key:
-                            case "rando_id":
-                                self.game_state.config_id = value[:-UUID_LENGTH]
-                            case "scenario":
-                                try:
-                                    self.game_state.scenario = AreaId(value)
-                                except ValueError:
-                                    self.game_state.scenario = None
-                            case _:
-                                logger.debug("Unrecognized game state key: %s", key)
-            except Exception:
-                import traceback
-
-                traceback.print_exc()
-
-    async def get_locations(self):
-        return None
-
-    async def get_inventory(self):
-        return None
-
-    async def give_items(self, items: Sequence[tuple[ItemId, int]]):
-        return
-
-    async def display_hud_message(self, text: str):
-        return

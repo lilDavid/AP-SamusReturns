@@ -26,6 +26,7 @@ from .connector import (
 from .data import GAME_NAME
 from .data.internal_names import AreaId, ItemId
 from .items import ItemName, item_data_table, launcher_to_ammo, tanks, unique_items
+from .locations import location_table
 from .patch import GAME_ID_US, SamusReturnsPatch
 from .settings import SamusReturnsSettings, TargetSystem
 
@@ -156,8 +157,6 @@ class SamusReturnsContext(BaseContext):
     # Slot data
     ammo_amounts: dict[str, int]
 
-    local_locations: set[int]
-
     def __init__(self, server_address: str | None, password: str | None):
         from . import SamusReturnsWorld
 
@@ -179,7 +178,6 @@ class SamusReturnsContext(BaseContext):
         self.game_state = SamusReturnsState()
         self.force_client_dc = False
 
-        self.local_locations = set()
         self.ammo_amounts = {}
 
     @staticmethod
@@ -268,7 +266,13 @@ class SamusReturnsContext(BaseContext):
                 else:
                     self.auth_status = AuthStatus.NOT_AUTHENTICATED
                     await asyncio.sleep(BACKOFF_SHORT)
-            except SRConnectorError as e:
+                    continue
+
+                await self.check_locations(self.game_state.locations)
+
+                await asyncio.sleep(POLL_COOLDOWN)
+
+            except (SRConnectorError, ConnectionResetError) as e:
                 self.connector.disconnect()
                 logger.debug(e, exc_info=True)
                 logger.info("Unable to connect to game")
@@ -293,9 +297,28 @@ class SamusReturnsContext(BaseContext):
 
     async def load_rando_code(self):
         await self.connector.run_lua(get_lua_file("bootstrap.lua"))
-        await self._read_msg()
+        logger.debug(await self._read_msg())
+
+        location_data = [
+            (location.ap_id, location.scenario, location.internal_name()) for location in location_table.values()
+        ]
+        batches = [
+            location_data[: len(location_data) // 2],
+            location_data[len(location_data) // 2 :],
+        ]
+        template = "for k, v in pairs{} do RL.LocationMapping[k] = RandomizerPowerup.PropertyForLocation(v) end"
+        for batch in batches:
+            table = "{"
+            for id, scenario, name in batch:
+                table += f'[{id}]="{scenario}_{name}",'
+            table += "}"
+            code = template.format(table)
+            await self.connector.run_lua(code)
+            logger.debug(await self._read_msg())
 
     async def handle_messages(self):
+        from . import SamusReturnsWorld
+
         try:
             while self.connector.is_connected():
                 packet, data = await self._read_msg()
@@ -313,6 +336,15 @@ class SamusReturnsContext(BaseContext):
                                     self.game_state.scenario = None
                             case _:
                                 logger.debug("Unrecognized game state key: %s", key)
+                    case PacketType.COLLECTED_INDICES:
+                        if not data:
+                            continue
+                        locations = frozenset(map(int, data.split(",")))
+                        new_locations = locations.difference(self.game_state.locations)
+                        self.game_state.locations = locations
+                        if SamusReturnsWorld.is_debug():
+                            for location in new_locations:
+                                logger.info(f"New location: {self.location_names.lookup_in_game(location, GAME_NAME)}")
         except SRConnectorError as e:
             self.connector.disconnect()
             logger.debug(e, exc_info=True)
@@ -322,19 +354,6 @@ class SamusReturnsContext(BaseContext):
             self.connector.disconnect()
             logger.error(traceback.format_exc())
             await asyncio.sleep(BACKOFF_LONG)
-
-    async def handle_locations(self):
-        from . import SamusReturnsWorld
-
-        locations = await self.game_interface.get_locations()
-        if locations is None:
-            return
-        locations.difference_update(self.local_locations)
-        self.local_locations.update(locations)
-        if SamusReturnsWorld.is_debug():
-            for location in locations:
-                logger.info(f"New location: {self.location_names.lookup_in_slot(location)}")
-        await self.check_locations(locations)
 
     async def handle_received_items(self):
         # Uniques

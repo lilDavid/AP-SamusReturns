@@ -1,3 +1,15 @@
+RL.LocationMapping = {}
+function RL.GetCollectedIndicesAndSend()
+    local playerSection = Game.GetPlayerBlackboardSectionName()
+    local locations = {}
+    for id, propName in pairs(RL.LocationMapping) do
+        if Blackboard.GetProp(playerSection, propName) then
+            table.insert(locations, tostring(id))
+        end
+    end
+    RL.SendIndices(table.concat(locations, ","))
+end
+
 function RL.SendRandoIdentifier()
     RL.SendNewGameState(string.format("rando_id:%s", Init.sThisRandoIdentifier))
 end
@@ -15,4 +27,8 @@ end
 
 function RL.UpdateRDVClient(new_scenario)
     RL.GetGameStateAndSend()
+    if Game.GetCurrentGameModeID() == "INGAME" then
+        Game.AddSF(0, RL.GetInventoryAndSend, "")
+        Game.AddSF(0.05, RL.GetCollectedIndicesAndSend, "")
+    end
 end

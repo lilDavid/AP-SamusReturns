@@ -4,6 +4,7 @@ import functools
 import json
 import shutil
 from collections import Counter
+from collections.abc import Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING
 from zipfile import ZipFile
@@ -30,6 +31,10 @@ MD5_US_DECRYPTED = "d5c4ea950c46a5344e07c9108828142a"
 MOD_FILES = {"romfs", "code.bin", "exheader.bin"}
 
 PATCH_SCHEMA = "https://raw.githubusercontent.com/randovania/open-samus-returns-rando/refs/heads/main/src/open_samus_returns_rando/files/schema.json"
+
+
+def create_resource(resources: Sequence[tuple[str, int]]):
+    return [{"item_id": item_id, "quantity": quantity} for item_id, quantity in resources]
 
 
 class SamusReturnsPatch(APAutoPatchInterface):
@@ -175,7 +180,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 pickup["caption"] = f"{location.item.name} acquired."
                 pickup["sound"] = item_data.pickup_sound()
             else:
-                pickup["resources"] = [[self.create_resource(ItemId.NOTHING, 1)]]
+                pickup["resources"] = [create_resource([(ItemId.NOTHING, 1)])]
                 pickup["caption"] = (
                     f"{world.multiworld.player_name[location.item.player]}'s {location.item.name} acquired."
                 )
@@ -219,22 +224,15 @@ class SamusReturnsPatch(APAutoPatchInterface):
             case OtherItemData(_, ItemId.DNA):
                 self.placed_dna += 1
                 item_id = ItemId(RANDO_DNA_TEMPLATE + str(self.placed_dna))
-                return [[self.create_resource(item_id, 1)]]
+                return [create_resource([(item_id, 1)])]
             case TankData(_, item_id):
-                return [[self.create_resource(item_id, world.ammo_amounts[item])]]
+                return [create_resource([(item_id, world.ammo_amounts[item])])]
             case UniqueItemData(_, item_id) | OtherItemData(_, item_id):
                 ammo_id = launcher_to_ammo.get(item.name)
                 if ammo_id is None:
-                    return [[self.create_resource(item_id, 1)]]
+                    return [create_resource([(item_id, 1)])]
                 else:  # noqa: RET505
-                    return [[self.create_resource(item_id, 1), self.create_resource(ammo_id, world.ammo_amounts[item])]]
-
-    @staticmethod
-    def create_resource(item_id: ItemId, quantity: int):
-        return {
-            "item_id": item_id,
-            "quantity": quantity,
-        }
+                    return [create_resource([(item_id, 1), (ammo_id, world.ammo_amounts[item])])]
 
     @staticmethod
     @functools.cache

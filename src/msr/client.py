@@ -7,6 +7,7 @@ import shutil
 import struct
 import traceback
 from collections import Counter
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -27,7 +28,7 @@ from .data import GAME_NAME
 from .data.internal_names import AreaId, ItemId
 from .items import ItemName, item_data_table, launcher_to_ammo, tanks, unique_items
 from .locations import location_table
-from .patch import GAME_ID_US, SamusReturnsPatch
+from .patch import GAME_ID_US, SamusReturnsPatch, create_resource
 from .settings import SamusReturnsSettings, TargetSystem
 
 if TYPE_CHECKING:
@@ -130,9 +131,22 @@ class SamusReturnsState:
     config_id: str | None = None
     scenario: AreaId | None = None
     locations: frozenset[int] = frozenset()
+    inventory: Counter[str] | None = None
+    received_item_index: int | None = None
 
     def is_in_game(self):
         return self.scenario is not None
+
+
+INVENTORY_ITEM_MAPPING: dict[str, str] = {data.item_id: name for name, data in item_data_table.items()}
+
+INVENTORY_ITEMS = [
+    *INVENTORY_ITEM_MAPPING.keys(),
+    ItemId.MISSILE_CAPACITY,
+    ItemId.SUPER_MISSILE_CAPACITY,
+    ItemId.POWER_BOMB_CAPACITY,
+    ItemId.MAX_ENERGY,
+]
 
 
 class SamusReturnsContext(BaseContext):
@@ -156,6 +170,7 @@ class SamusReturnsContext(BaseContext):
 
     # Slot data
     ammo_amounts: dict[str, int]
+    dna_required: int
 
     def __init__(self, server_address: str | None, password: str | None):
         from . import SamusReturnsWorld
@@ -209,6 +224,7 @@ class SamusReturnsContext(BaseContext):
             slot_data = args["slot_data"]
             try:
                 self.ammo_amounts = slot_data["ammo_amounts"]
+                self.dna_required = slot_data["options"]["dna_required"]
             except KeyError as e:
                 message = f'Missing slot data key: "{e}"'
                 logger.exception(message)
@@ -269,6 +285,7 @@ class SamusReturnsContext(BaseContext):
                     continue
 
                 await self.check_locations(self.game_state.locations)
+                await self.handle_received_items()
 
                 await asyncio.sleep(POLL_COOLDOWN)
 
@@ -316,6 +333,11 @@ class SamusReturnsContext(BaseContext):
             await self.connector.run_lua(code)
             logger.debug(await self._read_msg())
 
+        name_list = ",".join(f'"{item}"' for item in INVENTORY_ITEMS)
+        code = f"RL.Items = {{{name_list}}}"
+        await self.connector.run_lua(code)
+        logger.debug(await self._read_msg())
+
     async def handle_messages(self):
         from . import SamusReturnsWorld
 
@@ -345,6 +367,28 @@ class SamusReturnsContext(BaseContext):
                         if SamusReturnsWorld.is_debug():
                             for location in new_locations:
                                 logger.info(f"New location: {self.location_names.lookup_in_game(location, GAME_NAME)}")
+                    case PacketType.NEW_INVENTORY:
+                        pairs = [pair.split("=") for pair in data.split(",")]
+                        internal_inventory = {k: int(v) for k, v in pairs}
+                        inventory = Counter(
+                            {
+                                INVENTORY_ITEM_MAPPING[k]: v
+                                for k, v in internal_inventory.items()
+                                if k in INVENTORY_ITEM_MAPPING
+                            }
+                        )
+                        if inventory[ItemName.MissileLauncher]:
+                            inventory[ItemName.MissileTank] = internal_inventory[ItemId.MISSILE_CAPACITY]
+                        if inventory[ItemName.SuperMissile]:
+                            inventory[ItemName.SuperMissileTank] = internal_inventory[ItemId.SUPER_MISSILE_CAPACITY]
+                        if inventory[ItemName.PowerBomb]:
+                            inventory[ItemName.PowerBombTank] = internal_inventory[ItemId.POWER_BOMB_CAPACITY]
+                        inventory[ItemName.EnergyTank] = internal_inventory[ItemId.MAX_ENERGY]
+                        self.game_state.inventory = inventory
+                    case PacketType.RECEIVED_ITEMS:
+                        self.game_state.received_item_index = int(data)
+                    case PacketType.LOG_MESSAGE:
+                        logger.info(data)
         except SRConnectorError as e:
             self.connector.disconnect()
             logger.debug(e, exc_info=True)
@@ -356,44 +400,75 @@ class SamusReturnsContext(BaseContext):
             await asyncio.sleep(BACKOFF_LONG)
 
     async def handle_received_items(self):
-        # Uniques
-        current_inventory = await self.game_interface.get_inventory()
+        current_inventory = self.game_state.inventory
         if current_inventory is None:
             return
+
+        # Uniques and E-tanks
+        # (E-tanks can't be received in bulk, so may as well have fun and mix them into the majors)
+        energy_capacity = 99
         for network_item in self.items_received:
             item = self.item_names.lookup_in_slot(network_item.item)
             if item in unique_items:
-                await self.give_item_if_not_owned(current_inventory, network_item)
+                if await self.give_item_if_not_owned(current_inventory, network_item):
+                    return
+            if item == ItemName.EnergyTank:
+                energy_capacity += self.ammo_amounts[ItemName.EnergyTank]
+                if energy_capacity > current_inventory[ItemName.EnergyTank]:
+                    await self.give_e_tank(network_item)
+                    return
 
-        # Consumables
-        # FIXME: Modify capacities on the fly to avoid the double read
-        current_inventory = await self.game_interface.get_inventory()
-        if current_inventory is None:
+        if await self.handle_metroid_dna(current_inventory):
             return
-        await self.handle_weapon_capacity(current_inventory, ItemName.MissileTank, ItemName.MissileLauncher)
-        await self.handle_weapon_capacity(current_inventory, ItemName.SuperMissileTank, ItemName.SuperMissile)
-        await self.handle_weapon_capacity(current_inventory, ItemName.PowerBombTank, ItemName.PowerBomb)
-        await self.handle_energy_capacity(current_inventory)
-        await self.handle_aeion_capacity(current_inventory)
+        if await self.handle_weapon_capacity(current_inventory, ItemName.MissileTank, ItemName.MissileLauncher):
+            return
+        if await self.handle_weapon_capacity(current_inventory, ItemName.SuperMissileTank, ItemName.SuperMissile):
+            return
+        if await self.handle_weapon_capacity(current_inventory, ItemName.PowerBombTank, ItemName.PowerBomb):
+            return
+        if await self.handle_aeion_capacity(current_inventory):
+            return
+
+    async def give_items(self, msg: str, items: Sequence[tuple[str, int]], index: int):
+        from open_samus_returns_rando.pickups.multiworld_integration import get_lua_for_item
+
+        scenario = '""'
+        await self.connector.run_lua(
+            f"RL.ReceivePickup('{msg}', '{get_lua_for_item([create_resource(items)], scenario)}', {index})"
+        )
 
     async def give_item_if_not_owned(self, current_inventory: Counter[str], network_item: NetworkItem):
+        received_item_index = self.game_state.received_item_index
+        if received_item_index is None:
+            return False
+
         item_name = self.item_names.lookup_in_slot(network_item.item)
-        if current_inventory[item_name] >= 0:
-            return
+        if current_inventory[item_name] > 0:
+            return False
 
         item_data = item_data_table[item_name]
-        ammo_id = launcher_to_ammo.get(item_name)
-        if ammo_id is None:
-            await self.game_interface.give_items([(item_data.item_id, 1)])
-        else:
-            await self.game_interface.give_items([(item_data.item_id, 1), (ammo_id, self.ammo_amounts[item_name])])
+        resources = [(item_data.item_id, 1)]
         current_inventory[item_name] = 1
-        message = f"{item_name} online"
+        ammo_id = launcher_to_ammo.get(item_name)
+        if ammo_id is not None:
+            ammo_amount = self.ammo_amounts[item_name]
+            resources.append((ammo_id, ammo_amount))
+            current_inventory[ammo_id] += ammo_amount
+
+        message = f"{item_name} "
+        message += "acquired" if item_name == ItemName.Hatchling else "online"
         if network_item.player != self.slot:
             message += f" ({self.player_names[network_item.player]})"
-        await self.game_interface.display_hud_message(message)
+
+        await self.give_items(message, resources, received_item_index)
+        self.game_state.received_item_index = None
+        return True
 
     async def handle_weapon_capacity(self, current_inventory: Counter[str], item: ItemName, launcher: ItemName):
+        received_item_index = self.game_state.received_item_index
+        if received_item_index is None:
+            return False
+
         item_data = tanks[item]
         current_capacity = current_inventory[item]
         new_capacity = 0
@@ -406,24 +481,28 @@ class SamusReturnsContext(BaseContext):
             message = f"{item[: -len(' Tank')]} capacity increased by {diff}"
             if diff == self.ammo_amounts[item] and sender is not None:
                 message += f" ({sender})"
-            await self.game_interface.give_items([(item_data.item_id, diff)])
-            await self.game_interface.display_hud_message(message)
+            await self.give_items(message, [(item_data.item_id, diff)], received_item_index)
+            return True
+        return False
 
-    async def handle_energy_capacity(self, current_inventory: Counter[str]):
-        current_capacity = current_inventory[ItemName.EnergyTank]
-        new_capacity, sender = self.get_count_and_sender(ItemName.EnergyTank, self.ammo_amounts[ItemName.EnergyTank])
-        new_capacity = min(99 + new_capacity, 1099)
-        diff = new_capacity - current_capacity
-        if diff > 0:
-            message = f"Energy capacity increased by {diff}"
-            if diff == self.ammo_amounts[ItemName.EnergyTank] and sender is not None:
-                message += f" ({sender})"
-            await self.game_interface.give_items(
-                [(tanks[ItemName.EnergyTank].item_id, (diff - 99) // self.ammo_amounts[ItemName.EnergyTank])]
-            )
-            await self.game_interface.display_hud_message(message)
+    async def give_e_tank(self, network_item: NetworkItem):
+        received_item_index = self.game_state.received_item_index
+        if received_item_index is None:
+            return False
+
+        message = f"{ItemName.EnergyTank} acquired"
+        if network_item.player != self.slot:
+            message += f" ({self.player_names[network_item.player]})"
+
+        await self.give_items(message, [(tanks[ItemName.EnergyTank].item_id, 1)], received_item_index)
+        self.game_state.received_item_index = None
+        return True
 
     async def handle_aeion_capacity(self, current_inventory: Counter[str]):
+        received_item_index = self.game_state.received_item_index
+        if received_item_index is None:
+            return False
+
         current_capacity = 1000 + current_inventory[ItemName.AeionTank]
         new_capacity, sender = self.get_count_and_sender(ItemName.AeionTank, self.ammo_amounts[ItemName.AeionTank])
         for upgrade in (ItemName.ScanPulse, ItemName.LightningArmor, ItemName.BeamBurst, ItemName.PhaseDrift):
@@ -433,21 +512,28 @@ class SamusReturnsContext(BaseContext):
             message = f"Aeion capacity increased by {diff}"
             if diff == self.ammo_amounts[ItemName.AeionTank] and sender is not None:
                 message += f" ({sender})"
-            await self.game_interface.give_items([(tanks[ItemName.AeionTank].item_id, diff)])
-            await self.game_interface.display_hud_message(message)
+            await self.give_items(message, [(tanks[ItemName.AeionTank].item_id, diff)], received_item_index)
+            return True
+        return False
 
     async def handle_metroid_dna(self, current_inventory: Counter[str]):
-        current_amount = current_inventory[ItemName.MetroidDna]
+        received_item_index = self.game_state.received_item_index
+        if received_item_index is None:
+            return False
+
+        current_amount = self.dna_required - current_inventory[ItemName.MetroidDna]
         new_amount, sender = self.get_count_and_sender(ItemName.MetroidDna)
-        diff = new_amount - current_amount
+        diff = min(new_amount, self.dna_required) - current_amount
         if diff > 0:
             message = "Metroid DNA received"
             if diff > 1:
                 message += f" x{diff}"
             elif sender is not None:
                 message += f" ({sender})"
-            await self.game_interface.give_items([(tanks[ItemName.MetroidDna].item_id, diff)])
-            await self.game_interface.display_hud_message(message)
+            # TODO: Work out a way to increment area counts when receiving local DNAs
+            await self.give_items(message, [("ITEM_RANDO_DNA", diff)], received_item_index)
+            return True
+        return False
 
     def get_count_and_sender(self, item: ItemName, amount_per_item: int = 1):
         amount = 0

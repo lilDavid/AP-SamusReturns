@@ -53,6 +53,8 @@ class SamusReturnsFilter(logging.Filter):
         self.last_message = None
 
     def filter(self, record: logging.LogRecord):
+        if record.levelno < logging.INFO:
+            return True
         matches = record.getMessage() == self.last_message
         if matches:
             return False

@@ -104,20 +104,25 @@ class SamusReturnsDebugCommandProcessor(SamusReturnsCommandProcessor):
         logger.info(self.ctx.game_state)
 
     # Logic testing
-    def _set_item(self, item: ItemId, enable: bool):
-        Utils.async_start(self.ctx.run_lua(f"RandomizerPowerup.SetItemAmount('{item}', {int(bool(enable))})"))
-
-    def _cmd_hi_jump(self, enable: bool):
-        """Turn High Jump Boots on or off (doesn't work if you have the item)"""
-        self._set_item(ItemId.HIGH_JUMP_BOOTS, enable)
-
-    def _cmd_space_jump(self, enable: bool):
-        """Turn Space Jump on or off (doesn't work if you have the item)"""
-        self._set_item(ItemId.SPACE_JUMP, enable)
-
-    def _cmd_gravity_suit(self, enable: bool):
-        """Turn Gravity Suit on or off (doesn't work if you have the item)"""
-        self._set_item(ItemId.GRAVITY_SUIT, enable)
+    def _cmd_set_item(self, *item: str):
+        """
+        Enable an item without affecting the AP server. You must return to your last save or
+        checkpoint to reset the item.
+        """
+        item_name = " ".join(item)
+        if item_name not in unique_items:
+            logger.warning("No effect!")
+            return
+        current_inventory = self.ctx.game_state.inventory
+        if current_inventory is None:
+            current_inventory = Counter()
+        item_data = unique_items[item_name]
+        Utils.async_start(
+            self.ctx.give_item_if_not_owned(
+                current_inventory,
+                NetworkItem(item_data.ap_id, self.ctx.slot or 0, 0),
+            )
+        )
 
 
 def get_lua_file(file):
@@ -442,7 +447,7 @@ class SamusReturnsContext(BaseContext):
         if received_item_index is None:
             return False
 
-        item_name = self.item_names.lookup_in_slot(network_item.item)
+        item_name = self.item_names.lookup_in_game(network_item.item, GAME_NAME)
         if current_inventory[item_name] > 0:
             return False
 

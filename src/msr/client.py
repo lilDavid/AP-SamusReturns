@@ -357,10 +357,25 @@ class SamusReturnsContext(BaseContext):
                             case "rando_id":
                                 self.game_state.config_id = value[:-UUID_LENGTH]
                             case "scenario":
+                                previous = self.game_state.scenario
                                 try:
                                     self.game_state.scenario = AreaId(value)
                                 except ValueError:
                                     self.game_state.scenario = None
+                                if self.game_state.scenario != previous:
+                                    await self.send_msgs(
+                                        [
+                                            {
+                                                "cmd": "Set",
+                                                "key": f"msr_area_{self.team}_{self.slot}",
+                                                "default": None,
+                                                "want_reply": False,
+                                                "operations": [
+                                                    {"operation": "replace", "value": self.game_state.scenario}
+                                                ],
+                                            }
+                                        ]
+                                    )
                             case _:
                                 logger.debug("Unrecognized game state key: %s", key)
                     case PacketType.COLLECTED_INDICES:

@@ -165,6 +165,8 @@ class SamusReturnsContext(BaseContext):
 
     log_filter: SamusReturnsFilter
 
+    current_area: AreaId | None
+
     # Game info
     game_sync_task: asyncio.Task
     game_reader_task: asyncio.Task | None
@@ -192,6 +194,8 @@ class SamusReturnsContext(BaseContext):
 
         self.auth_status = AuthStatus.NOT_AUTHENTICATED
         self.password_requested = False
+
+        self.current_area = None
 
         self.ip_address = self.get_default_ip_address()
         self.connector = SamusReturnsConnector()
@@ -289,8 +293,7 @@ class SamusReturnsContext(BaseContext):
                     await asyncio.sleep(BACKOFF_SHORT)
                     continue
 
-                await self.check_locations(self.game_state.locations)
-                await self.handle_received_items()
+                await self.handle_game_ready()
 
                 await asyncio.sleep(POLL_COOLDOWN)
 
@@ -308,6 +311,22 @@ class SamusReturnsContext(BaseContext):
         self.connector.disconnect()
         if self.game_reader_task:
             await self.game_reader_task
+
+    async def handle_game_ready(self):
+        await self.check_locations(self.game_state.locations)
+        await self.handle_received_items()
+        if self.game_state.scenario != self.current_area:
+            await self.send_msg(
+                cmd="Set",
+                key=f"msr_area_{self.team}_{self.slot}",
+                default=None,
+                want_reply=False,
+                operations=[{"operation": "replace", "value": self.game_state.scenario}],
+            )
+            self.current_area = self.game_state.scenario
+
+    async def send_msg(self, **kwargs):
+        await self.send_msgs([kwargs])
 
     async def _read_msg(self):
         while self.connector.is_connected():
@@ -357,25 +376,10 @@ class SamusReturnsContext(BaseContext):
                             case "rando_id":
                                 self.game_state.config_id = value[:-UUID_LENGTH]
                             case "scenario":
-                                previous = self.game_state.scenario
                                 try:
                                     self.game_state.scenario = AreaId(value)
                                 except ValueError:
                                     self.game_state.scenario = None
-                                if self.game_state.scenario != previous:
-                                    await self.send_msgs(
-                                        [
-                                            {
-                                                "cmd": "Set",
-                                                "key": f"msr_area_{self.team}_{self.slot}",
-                                                "default": None,
-                                                "want_reply": False,
-                                                "operations": [
-                                                    {"operation": "replace", "value": self.game_state.scenario}
-                                                ],
-                                            }
-                                        ]
-                                    )
                             case _:
                                 logger.debug("Unrecognized game state key: %s", key)
                     case PacketType.COLLECTED_INDICES:

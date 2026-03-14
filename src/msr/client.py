@@ -438,6 +438,8 @@ class SamusReturnsContext(BaseContext):
                     return
             if item == ItemName.EnergyTank:
                 energy_capacity += self.ammo_amounts[ItemName.EnergyTank]
+                if energy_capacity > 1099:
+                    energy_capacity = 1099
                 if energy_capacity > current_inventory[ItemName.EnergyTank]:
                     await self.give_e_tank(network_item)
                     return

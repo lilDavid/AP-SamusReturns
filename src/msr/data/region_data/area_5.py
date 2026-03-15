@@ -36,15 +36,32 @@ from ..room_names import Area5Interior as Interior
 from ..room_names import Area5Lobby as Lobby
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
-can_escape_interior_save_station_water = Or(can_spider, Has(ItemName.GravitySuit) & can_high_ledge)
 can_cross_interior_gamma_access = Or(
     Has(ItemName.SpaceJump),
     can_spider_boost,
     Has(ItemName.LightningArmor) | can_damage_boost(DamageBoost.option_static),
 )
+
+# To main area
+can_escape_lobby_teleporter_east_pickup_left = And(
+    Or(
+        can_spider,
+        Has(ItemName.GravitySuit) & can_climb_wall,
+        can_fly_vertical,
+    ),
+    can_bomb_block,
+)
+# To Lobby Passageway
+can_escape_lobby_teleporter_east_pickup_right = HasAll(ItemName.MorphBall, ItemName.GrappleBeam)
+can_escape_phase_drift_chamber = can_bomb_block
+
 # A super jump does it too but logic doesn't account for those yet
+can_escape_exerior_zeta_arena = can_high_jump
 can_escape_gravity_chamber_access = HasAny(ItemName.HighJumpBoots, ItemName.GravitySuit) | can_spider
 can_escape_gravity_chamber = HasAny(ItemName.HighJumpBoots, ItemName.GravitySuit) | can_spider_boost_underwater
+
+can_escape_interior_save_station_water = Or(can_spider, Has(ItemName.GravitySuit) & can_high_ledge)
+can_escape_evolved_zeta_arena = can_high_jump
 
 area_5_lobby_data = AreaData(
     name="Area 5 Tower Lobby",
@@ -64,6 +81,7 @@ area_5_lobby_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Lobby.PhaseDrift,
+                            access_rule=can_escape_phase_drift_chamber,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -513,7 +531,13 @@ area_5_lobby_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Pickup"),
-                            access_rule=can_high_bomb_block,
+                            access_rule=And(
+                                can_high_bomb_block,
+                                Or(
+                                    can_escape_lobby_teleporter_east_pickup_left,
+                                    can_escape_lobby_teleporter_east_pickup_right,
+                                ),
+                            ),
                         ),
                         ExitData(
                             Door.Normal,
@@ -527,22 +551,17 @@ area_5_lobby_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Upper"),
-                            access_rule=Or(
-                                can_spider,
-                                Has(ItemName.GravitySuit) & can_climb_wall,
-                                can_fly_vertical,
-                            ),
+                            access_rule=can_escape_lobby_teleporter_east_pickup_left,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Lobby.LobbyPassageway.subregion("Upper"),
-                            access_rule=Has(ItemName.GrappleBeam),
+                            access_rule=can_escape_lobby_teleporter_east_pickup_right,
                         ),
                     ],
                     pickups=[
                         PickupData(),
                     ],
-                    require_exit_access=True,
                 ),
             ],
         ),
@@ -597,12 +616,12 @@ area_5_lobby_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Lobby.MeboidMillpond.subregion("Exit"),
-                            access_rule=can_bomb_block,
+                            access_rule=can_escape_phase_drift_chamber,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Lobby.MeboidMillpond.subregion("Lake"),
-                            access_rule=can_bomb_block,
+                            access_rule=can_escape_phase_drift_chamber,
                         ),
                     ],
                     pickups=[
@@ -615,7 +634,6 @@ area_5_lobby_data = AreaData(
                             access_rule=Has(ItemName.PhaseDrift) | can_spider_boost,
                         ),
                     ],
-                    require_exit_access=True,
                 )
             ],
         ),
@@ -946,6 +964,7 @@ area_5_exterior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Exterior.Zeta,
+                            access_rule=can_escape_exerior_zeta_arena,
                         ),
                     ],
                 ),
@@ -997,7 +1016,7 @@ area_5_exterior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Exterior.ZetaAccess.subregion("Left"),
-                            access_rule=can_high_jump,
+                            access_rule=can_escape_exerior_zeta_arena,
                         )
                     ],
                     pickups=[
@@ -1005,7 +1024,6 @@ area_5_exterior_data = AreaData(
                             access_rule=can_damage_metroid,
                         ),
                     ],
-                    require_exit_access=True,
                 )
             ],
         ),
@@ -1257,6 +1275,7 @@ area_5_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Water"),
+                            access_rule=can_escape_interior_save_station_water,
                         ),
                         ExitData(
                             Door.Open,
@@ -1284,7 +1303,6 @@ area_5_interior_data = AreaData(
                             access_rule=can_bomb_block,
                         )
                     ],
-                    require_exit_access=True,
                 ),
             ],
         ),
@@ -1602,7 +1620,11 @@ area_5_interior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Interior.Zeta2,
-                            access_rule=can_climb_wall_underwater & HasAll(ItemName.SpaceJump, ItemName.ScrewAttack),
+                            access_rule=And(
+                                can_climb_wall_underwater,
+                                HasAll(ItemName.SpaceJump, ItemName.ScrewAttack),
+                                can_escape_evolved_zeta_arena,
+                            ),
                         ),
                     ],
                     pickups=[
@@ -1777,7 +1799,7 @@ area_5_interior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Interior.Zeta2Access.subregion("Right"),
-                            access_rule=can_high_jump,
+                            access_rule=can_escape_evolved_zeta_arena,
                         )
                     ],
                     pickups=[
@@ -1785,7 +1807,6 @@ area_5_interior_data = AreaData(
                             access_rule=can_damage_metroid,
                         )
                     ],
-                    require_exit_access=True,
                 )
             ],
         ),
@@ -1798,7 +1819,7 @@ area_5_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.InteriorSaveStation.subregion("Water"),
-                            access_rule=can_cross_interior_gamma_access,
+                            access_rule=can_cross_interior_gamma_access & can_escape_interior_save_station_water,
                         ),
                         ExitData(
                             Door.MorphTunnel,

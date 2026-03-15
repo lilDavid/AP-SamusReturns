@@ -24,6 +24,9 @@ from ..room_names import Area2Entryway as Area2
 from ..room_names import SurfaceEast as Surface
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
+can_escape_ice_chamber_access = Has(ItemName.IceBeam) | can_high_jump
+can_escape_inner_temple_west_hall = can_climb_wall
+
 area_1_data = AreaData(
     name="Area 1",
     id=AreaId.AREA_1,
@@ -215,7 +218,6 @@ area_1_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Lower"),
-                            # FIXME: Dangerous action
                         ),
                     ],
                 ),
@@ -234,7 +236,7 @@ area_1_data = AreaData(
                         ExitData(
                             Door.Open,
                             Area1.IceBeamAccess,
-                            # FIXME: Dangerous action
+                            access_rule=can_escape_ice_chamber_access,
                         ),
                     ],
                 ),
@@ -277,21 +279,7 @@ area_1_data = AreaData(
                         ),
                         ExitData(
                             Door.Normal,
-                            Subregion("Chamber access"),
-                        ),
-                    ],
-                ),
-                RegionData(
-                    "Chamber access",
-                    exits=[
-                        ExitData(
-                            Door.MorphTunnel,
                             Subregion("Chamber"),
-                            # FIXME: Dangerous action
-                        ),
-                        ExitData(
-                            Door.Open,
-                            Area1.TempleExterior.subregion("Southeast"),
                         ),
                     ],
                 ),
@@ -299,15 +287,17 @@ area_1_data = AreaData(
                     "Chamber",
                     exits=[
                         ExitData(
-                            Door.MorphTunnel,
-                            Subregion("Chamber access"),
-                            access_rule=Or(Has(ItemName.SpaceJump), can_spider, can_ibj(IBJ.option_vertical)),
+                            Door.Open,
+                            Area1.TempleExterior.subregion("Southeast"),
                         ),
                     ],
                     pickups=[
                         PickupData(
                             "Buried Item",
-                            access_rule=Has(ItemName.MorphBall),
+                            access_rule=And(
+                                Has(ItemName.MorphBall),
+                                can_high_ledge,
+                            ),
                         )
                     ],
                 ),
@@ -733,7 +723,7 @@ area_1_data = AreaData(
                         ExitData(
                             Door.Open,
                             Area1.InnerTempleSaveStation,
-                            access_rule=can_climb_wall,
+                            access_rule=can_escape_inner_temple_west_hall,
                         ),
                         ExitData(
                             Door.Normal,
@@ -759,7 +749,7 @@ area_1_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Area1.CavernsHub,
-                            access_rule=can_climb_wall,
+                            access_rule=can_escape_inner_temple_west_hall,
                         ),
                     ],
                 ),
@@ -856,11 +846,11 @@ area_1_data = AreaData(
                             Door.Gigadora,
                             Area1.InnerTempleUpperHallway,
                         ),
-                        ExitData(
-                            Door.Open,
-                            Area1.InnerTempleTeleporterAccess,
-                            # FIXME: Dangerous action
-                        ),
+                        # ExitData(
+                        #     Door.Open,
+                        #     Area1.InnerTempleTeleporterAccess,
+                        #     # Best not to think about the logical implications of these pitfall blocks
+                        # ),
                     ],
                     pickups=[
                         PickupData(
@@ -883,7 +873,7 @@ area_1_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Area1.InnerTempleWHall.subregion("Lower"),
-                            # FIXME: Dangerous action
+                            access_rule=can_escape_inner_temple_west_hall,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -959,7 +949,7 @@ area_1_data = AreaData(
                         ExitData(
                             Door.Open,
                             Area1.InnerTempleWHall.subregion("Upper"),
-                            # FIXME: Dangerous action
+                            access_rule=can_escape_inner_temple_west_hall,
                         ),
                         ExitData(
                             Door.Open,
@@ -1019,7 +1009,7 @@ area_1_data = AreaData(
                         ExitData(
                             Door.Open,
                             Area1.InnerTempleEHall.subregion("Lower"),
-                            access_rule=Has(ItemName.IceBeam) | can_high_jump,
+                            access_rule=can_escape_ice_chamber_access,
                         ),
                         ExitData(
                             Door.Missile,

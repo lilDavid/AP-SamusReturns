@@ -44,7 +44,6 @@ class RegionData(NamedTuple):
     exits: Sequence[ExitData] = ()
     pickups: Sequence[PickupData] = ()
     events: Sequence[EventData] = ()
-    require_exit_access: bool = False  # Require access to one of this room's exits for pickups/events to be reachable
 
 
 class ExitData(NamedTuple):

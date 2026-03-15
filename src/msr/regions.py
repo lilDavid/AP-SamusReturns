@@ -4,9 +4,8 @@ import itertools
 from typing import TYPE_CHECKING
 
 from BaseClasses import Region
-from rule_builder.rules import False_
 
-from .data.region_data import ExitData, RegionData, Subregion
+from .data.region_data import ExitData, Subregion
 from .data.region_data.area_1 import area_1_data
 from .data.region_data.area_2 import area_2_entryway_data, area_2_exterior_data, area_2_interior_data
 from .data.region_data.area_3 import area_3_caverns_data, area_3_exterior_data, area_3_interior_data
@@ -56,13 +55,6 @@ def can_take_exit(exit: ExitData):
     return door_rules[exit.door] & exit.access_rule
 
 
-def can_leave_area(subregion: RegionData):
-    rule = False_()
-    for exit in subregion.exits:
-        rule |= can_take_exit(exit)
-    return rule
-
-
 def create_regions(world: SamusReturnsWorld):
     regions: list[Region] = []
     for room, subregion in walk_region_graph():
@@ -91,8 +83,6 @@ def set_location_rules(world: SamusReturnsWorld):
         for action in itertools.chain(subregion.pickups, subregion.events):
             location = world.get_location(room.name.location(action.name))
             access_rule = action.access_rule
-            if subregion.require_exit_access:
-                access_rule &= can_leave_area(subregion)
             world.set_rule(location, access_rule)
 
 

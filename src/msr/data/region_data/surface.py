@@ -13,6 +13,7 @@ from ...logic import (
     can_power_bomb,
     can_spider,
     can_wall_jump,
+    door_rules,
 )
 from ...options import WallJump
 from ..internal_names import AreaId
@@ -20,6 +21,10 @@ from ..room_names import Area1
 from ..room_names import SurfaceEast as East
 from ..room_names import SurfaceWest as West
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
+
+can_escape_cavern_cavity = can_climb_shaft
+can_escape_energy_recharge_shaft = can_high_ledge
+can_escape_charge_chamber = Or(can_high_ledge & door_rules[Door.Missile], door_rules[Door.Charge])
 
 surface_east_data = AreaData(
     name="Surface East",
@@ -256,7 +261,6 @@ surface_east_data = AreaData(
                     pickups=[
                         PickupData(),
                     ],
-                    require_exit_access=True,
                 ),
             ],
         ),
@@ -403,7 +407,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.Open,
                             East.ScanPulse.subregion("Left"),
-                            access_rule=can_climb_shaft,
+                            access_rule=can_escape_cavern_cavity,
                         ),
                         ExitData(
                             Door.Normal,
@@ -434,10 +438,12 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.Missile,
                             East.ChargeBeam,
+                            access_rule=can_escape_charge_chamber,
                         ),
                         ExitData(
                             Door.Charge,
                             East.ChargeBeam,
+                            access_rule=can_escape_charge_chamber,
                         ),
                         ExitData(
                             Door.Normal,
@@ -567,6 +573,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             East.CavernCavity,
+                            access_rule=can_escape_cavern_cavity,
                         )
                     ],
                     pickups=[
@@ -591,6 +598,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Lower"),
+                            access_rule=can_escape_energy_recharge_shaft,
                         ),
                     ],
                     pickups=[
@@ -605,7 +613,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Upper"),
-                            access_rule=can_high_ledge,
+                            access_rule=can_escape_energy_recharge_shaft,
                         ),
                         ExitData(
                             Door.MorphTunnel,

@@ -21,6 +21,7 @@ from ...logic import (
     can_spider,
     can_spider_boost,
     can_spider_boost_underwater,
+    door_rules,
     has_knowledge,
 )
 from ...options import IBJ, DamageBoost, Knowledge, Movement
@@ -44,6 +45,22 @@ can_cross_caves_gamma_hazards = Or(
     can_spider_boost,
     can_damage_boost(DamageBoost.option_static),
 )
+
+can_escape_spazer_chamber = door_rules[Door.Gigadora] & can_high_ledge
+can_escape_pink_crystals = Or(
+    Has(ItemName.SpaceJump),
+    can_ibj(IBJ.option_vertical),
+    # There are spikes at the top of the room but there's a gap so
+    # you can either do the damage boost or squeeze in
+    And(
+        can_spider_boost,
+        Or(
+            can_damage_boost(DamageBoost.option_static),
+            has_knowledge(Knowledge.option_enable),
+        ),
+    ),
+)
+can_escape_evolved_gamma = can_high_ledge
 
 area_4_caves_data = AreaData(
     name="Area 4 Central Caves",
@@ -153,7 +170,6 @@ area_4_caves_data = AreaData(
                     pickups=[
                         PickupData(),
                     ],
-                    require_exit_access=True,
                 )
             ],
         ),
@@ -653,6 +669,7 @@ area_4_caves_data = AreaData(
                         ExitData(
                             Door.Missile,
                             Caves.SpazerBeam,
+                            access_rule=can_escape_spazer_chamber,
                         ),
                         # ExitData(
                         #     Door.Locked,
@@ -1003,7 +1020,7 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Bottom"),
-                            # FIXME: Dangerous action?
+                            access_rule=can_escape_pink_crystals,
                         ),
                         ExitData(
                             Door.Open,
@@ -1018,19 +1035,7 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
-                            access_rule=Or(
-                                Has(ItemName.SpaceJump),
-                                can_ibj(IBJ.option_vertical),
-                                # There are spikes at the top of the room but there's a gap so
-                                # you can either do the damage boost or squeeze in
-                                And(
-                                    can_spider_boost,
-                                    Or(
-                                        can_damage_boost(DamageBoost.option_static),
-                                        has_knowledge(Knowledge.option_enable),
-                                    ),
-                                ),
-                            ),
+                            access_rule=can_escape_pink_crystals,
                         ),
                         ExitData(
                             Door.Normal,
@@ -1192,12 +1197,12 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
-                            access_rule=can_high_ledge,
+                            access_rule=Has(ItemName.VariaSuit) & can_high_ledge,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Arena Left"),
-                            access_rule=Has(ItemName.SuperMissile) & can_bomb_block,
+                            access_rule=HasAll(ItemName.SuperMissile, ItemName.VariaSuit) & can_bomb_block,
                         ),
                     ],
                 ),
@@ -1207,20 +1212,22 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Left"),
+                            access_rule=Has(ItemName.VariaSuit),
                         ),
                         ExitData(
                             Door.Open,
                             Subregion("Right"),
+                            access_rule=Has(ItemName.VariaSuit),
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Mines.BasaltBasin.subregion("Top"),
-                            access_rule=can_bomb_block,
+                            access_rule=Has(ItemName.VariaSuit) & can_bomb_block,
                         ),
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=HasAll(ItemName.MorphBall, ItemName.SuperMissile),
+                            access_rule=HasAll(ItemName.MorphBall, ItemName.SuperMissile, ItemName.VariaSuit),
                         )
                     ],
                 ),
@@ -1230,19 +1237,23 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
-                            access_rule=Or(
-                                can_high_ledge,
-                                can_movement(Movement.option_enable),  # Slightly tricky jump around the ledge
+                            access_rule=And(
+                                Has(ItemName.VariaSuit),
+                                Or(
+                                    can_high_ledge,
+                                    can_movement(Movement.option_enable),  # Slightly tricky jump around the ledge
+                                ),
                             ),
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Mines.BasaltBasin.subregion("Top"),
-                            access_rule=Has(ItemName.SuperMissile) & can_bomb_block,
+                            access_rule=HasAll(ItemName.SuperMissile, ItemName.VariaSuit) & can_bomb_block,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Mines.Gamma2,
+                            access_rule=Has(ItemName.VariaSuit) & can_escape_evolved_gamma,
                         ),
                     ],
                 ),
@@ -1255,16 +1266,19 @@ area_4_mines_data = AreaData(
                             access_rule=And(
                                 can_fly_vertical,
                                 can_bomb_block,
-                                Has(ItemName.SuperMissile),
+                                HasAll(ItemName.SuperMissile, ItemName.VariaSuit),
                             ),
                         ),
                         ExitData(
                             Door.Open,
                             Subregion("Arena Right"),
-                            access_rule=Or(
-                                can_fly,
-                                can_spider_boost,
-                                can_damage_boost(DamageBoost.option_static),
+                            access_rule=And(
+                                Has(ItemName.VariaSuit),
+                                Or(
+                                    can_fly,
+                                    can_spider_boost,
+                                    can_damage_boost(DamageBoost.option_static),
+                                ),
                             ),
                         ),
                     ],
@@ -1275,15 +1289,22 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Mines.BasaltBasin.subregion("Seal"),
-                            access_rule=can_climb_wall & can_bomb_block,
+                            access_rule=And(
+                                Has(ItemName.VariaSuit),
+                                can_climb_wall,
+                                can_bomb_block,
+                            ),
                         ),
                         ExitData(
                             Door.Open,
                             Subregion("Arena Left"),
-                            access_rule=Or(
-                                can_fly,
-                                can_spider_boost,
-                                can_damage_boost(DamageBoost.option_static),
+                            access_rule=And(
+                                Has(ItemName.VariaSuit),
+                                Or(
+                                    can_fly,
+                                    can_spider_boost,
+                                    can_damage_boost(DamageBoost.option_static),
+                                ),
                             ),
                         ),
                     ],
@@ -1405,15 +1426,14 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Mines.GawronGroove.subregion("Right"),
-                            access_rule=can_high_ledge,
+                            access_rule=Has(ItemName.VariaSuit) & can_escape_evolved_gamma,
                         )
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=Has(ItemName.VariaSuit) & can_damage_metroid,
                         )
                     ],
-                    require_exit_access=True,
                 )
             ],
         ),
@@ -1585,7 +1605,6 @@ area_4_mines_data = AreaData(
                             access_rule=can_climb_shaft,
                         ),
                         # There's an entrance from SJ chamber that goes through this little backdoor area
-                        # TODO: When I make that ensure that part is considered in the logic
                     ],
                     pickups=[
                         PickupData(

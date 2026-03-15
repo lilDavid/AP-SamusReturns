@@ -14,7 +14,6 @@ from ...logic import (
     can_damage_tough_enemy,
     can_fly,
     can_fly_vertical,
-    can_high_bomb_block,
     can_high_ledge,
     can_ibj,
     can_movement,
@@ -44,6 +43,23 @@ can_climb_ascending_alleyway = And(
 )
 can_grapple_tunnel = Has(ItemName.GrappleBeam) | can_fly_vertical
 
+can_escape_factory_exterior_access = Or(
+    # Through the grapple blocks
+    Has(ItemName.GrappleBeam),
+    # Using the teleport station
+    can_blobthrower,
+    can_spider,
+    can_fly,
+)
+
+can_escape_evolved_alpha_north_to_gamma = can_climb_wall & can_bomb_block
+
+can_escape_paraby_periphery = can_climb_wall
+can_escape_factory_intersection = can_climb_wall
+# Unless you already have access from Metroid caverns, you're locked in lower exterior if you drop down
+can_escape_ramulken_residence = can_climb_shaft
+can_escape_gamma_arena_caverns_transport = can_grapple_tunnel & can_climb_wall
+can_escape_gamma_arena_entrance = can_high_ledge
 
 area_3_exterior_data = AreaData(
     name="Area 3 Factory Exterior",
@@ -652,7 +668,7 @@ area_3_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Upper arena"),
-                            access_rule=can_high_ledge & can_bomb,
+                            access_rule=can_high_ledge & can_bomb_block,
                         ),
                     ],
                 ),
@@ -662,7 +678,7 @@ area_3_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Entrance"),
-                            access_rule=can_bomb_block & can_beam_block_through_tunnel,
+                            access_rule=can_bomb_block,
                         ),
                     ],
                     pickups=[
@@ -670,7 +686,6 @@ area_3_exterior_data = AreaData(
                             access_rule=can_damage_metroid,
                         )
                     ],
-                    require_exit_access=True,
                 ),
             ],
         ),
@@ -698,13 +713,15 @@ area_3_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Upper"),
-                            # FIXME: Dangerous action
-                            access_rule=Or(
-                                can_climb_wall,
-                                And(
-                                    can_high_ledge | can_wall_jump(WallJump.option_advanced),
-                                    can_damage_tough_enemy,
+                            access_rule=And(
+                                Or(
+                                    can_climb_wall,
+                                    And(
+                                        can_high_ledge | can_wall_jump(WallJump.option_advanced),
+                                        can_damage_tough_enemy,
+                                    ),
                                 ),
+                                can_escape_factory_exterior_access,
                             ),
                         ),
                     ],
@@ -1417,7 +1434,7 @@ area_3_caverns_data = AreaData(
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
-                            Caverns.Gamma2SAccess.subregion("Hub"),
+                            Caverns.Gamma2SAccess,
                             access_rule=can_bomb_block,
                         ),
                     ],
@@ -1434,7 +1451,6 @@ area_3_caverns_data = AreaData(
             id="collision_camera_034",
             regions=[
                 RegionData(
-                    "Hub",
                     exits=[
                         ExitData(
                             Door.MorphTunnel,
@@ -1442,25 +1458,10 @@ area_3_caverns_data = AreaData(
                             access_rule=can_bomb_block,
                         ),
                         ExitData(
-                            Door.MorphTunnel,
-                            Subregion("Arena"),
-                            access_rule=can_bomb_block,
+                            Door.Normal,
+                            Caverns.WaterfallCavern,
                         ),
                     ],
-                ),
-                RegionData(
-                    "Arena",
-                    exits=[
-                        ExitData(
-                            Door.MorphTunnel,
-                            Subregion("Hub"),
-                            access_rule=can_high_ledge & can_bomb_block,
-                        ),
-                    ],
-                    events=[
-                        EventData("Southeast arena"),
-                    ],
-                    require_exit_access=True,
                 ),
             ],
         ),
@@ -1476,7 +1477,7 @@ area_3_caverns_data = AreaData(
                         ),
                         ExitData(
                             Door.Normal,
-                            Caverns.Gamma2SAccess.subregion("Hub"),
+                            Caverns.Gamma2SAccess,
                         ),
                     ]
                 )
@@ -1538,7 +1539,7 @@ area_3_caverns_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Exit"),
-                            access_rule=can_high_bomb_block,  # FIXME: Dangerous action
+                            access_rule=can_escape_evolved_alpha_north_to_gamma,
                         ),
                     ],
                     pickups=[
@@ -1557,7 +1558,7 @@ area_3_caverns_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Arena"),
-                            access_rule=can_climb_wall & can_bomb_block,
+                            access_rule=can_escape_evolved_alpha_north_to_gamma,
                         ),
                     ],
                 ),
@@ -1664,7 +1665,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Right"),
-                            # FIXME: Dangerous action
+                            access_rule=can_escape_paraby_periphery,
                         ),
                     ],
                 ),
@@ -1678,7 +1679,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Left"),
-                            access_rule=can_climb_wall,
+                            access_rule=can_escape_paraby_periphery,
                         ),
                     ],
                     pickups=[
@@ -1766,7 +1767,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Bottom"),
-                            # FIXME: Dangerous action
+                            access_rule=can_escape_factory_intersection,
                         ),
                     ],
                 ),
@@ -1787,7 +1788,12 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Interior.RamulkenResidence,
-                            # FIXME: Dangerous action
+                            access_rule=can_escape_ramulken_residence,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Top"),
+                            access_rule=can_escape_factory_intersection,
                         ),
                     ],
                 ),
@@ -1881,8 +1887,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Center"),
-                            access_rule=can_grapple_tunnel,
-                            # FIXME: Dangerous action
+                            access_rule=can_escape_gamma_arena_caverns_transport,
                         ),
                     ],
                     pickups=[
@@ -1897,13 +1902,12 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Arena"),
-                            access_rule=can_climb_wall,
-                            # FIXME: Dangerous action
+                            access_rule=can_escape_gamma_arena_caverns_transport,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Interior.GammaCAccess.subregion("Lower"),
-                            access_rule=can_high_ledge,
+                            access_rule=can_escape_gamma_arena_entrance,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1940,7 +1944,6 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Southwest"),
-                            # FIXME: Dangerous action
                         ),
                     ],
                 ),
@@ -1969,7 +1972,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Interior.FactoryIntersection.subregion("Bottom"),
-                            access_rule=can_climb_shaft,
+                            access_rule=can_escape_ramulken_residence,
                         ),
                         ExitData(
                             Door.Normal,
@@ -2090,7 +2093,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.GammaTransportCavernsE.subregion("Arena"),
-                            # FIXME: Dangerous action
+                            access_rule=can_escape_gamma_arena_entrance,
                         ),
                         ExitData(
                             Door.MorphTunnel,

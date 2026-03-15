@@ -267,9 +267,9 @@ class SamusReturnsContext(BaseContext):
 
                     await self.load_rando_code()
 
-                    await self.connector.run_lua('Game.AddSF(2.0, RL.SendRandoIdentifier, "")')
+                    await self.connector.run_lua('Game.AddSF(0.5, RL.SendRandoIdentifier, "")')
                     await self._read_msg()
-                    await self.connector.run_lua('Game.AddSF(2.0, RL.UpdateRDVClient, "")')
+                    await self.connector.run_lua('Game.AddSF(1.0, RL.UpdateRDVClient, "")')
                     await self._read_msg()
 
                     self.game_reader_task = asyncio.create_task(self.handle_messages(), name="Samus Returns Messages")

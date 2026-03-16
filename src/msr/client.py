@@ -459,6 +459,7 @@ class SamusReturnsContext(BaseContext):
         from open_samus_returns_rando.pickups.multiworld_integration import get_lua_for_item
 
         scenario = '""'
+        self.game_state.received_item_index = None
         await self.connector.run_lua(
             f"RL.ReceivePickup('{msg}', '{get_lua_for_item([create_resource(items)], scenario)}', {index})"
         )
@@ -487,7 +488,6 @@ class SamusReturnsContext(BaseContext):
             message += f" ({self.player_names[network_item.player]})"
 
         await self.give_items(message, resources, received_item_index)
-        self.game_state.received_item_index = None
         return True
 
     async def handle_weapon_capacity(self, current_inventory: Counter[str], item: ItemName, launcher: ItemName):

@@ -4,7 +4,7 @@ from typing import Any, ClassVar
 
 import Utils
 from BaseClasses import ItemClassification
-from Options import Option
+from Options import DeathLink, Option
 from rule_builder.rules import Has
 from worlds import LauncherComponents as Launcher
 from worlds.AutoWorld import WebWorld, World
@@ -178,6 +178,7 @@ class SamusReturnsWorld(World):
             "ammo_amounts": self.ammo_amounts,
             "options": get_options(
                 MetroidDnaRequired,
+                DeathLink,
                 "Logic",
             ),
         }

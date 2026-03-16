@@ -1,6 +1,15 @@
 from dataclasses import dataclass
 
-from Options import Choice, DefaultOnToggle, OptionGroup, PerGameCommonOptions, Range, StartInventoryPool, Toggle
+from Options import (
+    Choice,
+    DeathLink,
+    DefaultOnToggle,
+    OptionGroup,
+    PerGameCommonOptions,
+    Range,
+    StartInventoryPool,
+    Toggle,
+)
 
 
 class LogicTrick(Choice):
@@ -194,6 +203,7 @@ class SamusReturnsOptions(PerGameCommonOptions):
     # Game options
     dna_available: MetroidDnaAvailable
     dna_required: MetroidDnaRequired
+    death_link: DeathLink
 
     # Item pool
     shuffle_reserve_tanks: ReserveTankShuffle

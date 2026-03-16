@@ -61,6 +61,10 @@ function RL.SendRandoIdentifier()
     RL.SendNewGameState(string.format("rando_id:%s", Init.sThisRandoIdentifier))
 end
 
+function RL.SendPlayerDeath()
+    RL.SendNewGameState("player_death:")
+end
+
 function RL.GetGameStateAndSend()
     local game_mode = Game.GetCurrentGameModeID()
     local scenario
@@ -90,4 +94,14 @@ function RL.UpdateRDVClient(new_scenario)
             Game.AddSF(0.05, RL.GetReceivedPickupsAndSend, "b", false)
         end
     end
+end
+
+function guicallbacks.OnPlayerDead(_ARG_0_)
+    if logiccallbacks then
+        logiccallbacks.OnPlayerDead(_ARG_0_)
+    end
+    if hud then
+        hud.OnPlayerDead(_ARG_0_)
+    end
+    RL.SendPlayerDeath()
 end

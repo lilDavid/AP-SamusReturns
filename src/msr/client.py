@@ -5,6 +5,7 @@ import logging
 import pkgutil
 import shutil
 import struct
+import time
 import traceback
 from collections import Counter
 from collections.abc import Sequence
@@ -88,6 +89,10 @@ class SamusReturnsCommandProcessor(ClientCommandProcessor):
             self.ctx.ip_address = ip_address
             self.ctx.force_client_dc = True
 
+    def _cmd_death_link(self):
+        """Toggle Death Link from client. Overrides default setting."""
+        self.ctx.death_link = not self.ctx.death_link
+
 
 class SamusReturnsDebugCommandProcessor(SamusReturnsCommandProcessor):
     def _cmd_test_lua(self, *code: str):
@@ -138,6 +143,7 @@ class SamusReturnsState:
     locations: frozenset[int] = frozenset()
     inventory: Counter[str] | None = None
     received_item_index: int | None = None
+    last_death: float = 0
 
     def is_in_game(self):
         return self.scenario is not None
@@ -166,6 +172,8 @@ class SamusReturnsContext(BaseContext):
     log_filter: SamusReturnsFilter
 
     current_area: AreaId | None
+    last_death: float
+    killing_player: bool
 
     # Game info
     game_sync_task: asyncio.Task
@@ -178,6 +186,7 @@ class SamusReturnsContext(BaseContext):
     # Slot data
     ammo_amounts: dict[str, int]
     dna_required: int
+    death_link: bool | None
 
     def __init__(self, server_address: str | None, password: str | None):
         from . import SamusReturnsWorld
@@ -196,13 +205,16 @@ class SamusReturnsContext(BaseContext):
         self.password_requested = False
 
         self.current_area = None
+        self.last_death = 0
 
         self.ip_address = self.get_default_ip_address()
         self.connector = SamusReturnsConnector()
         self.game_state = SamusReturnsState()
         self.force_client_dc = False
+        self.killing_player = False
 
         self.ammo_amounts = {}
+        self.death_link = None
 
     @staticmethod
     def get_default_ip_address():
@@ -234,11 +246,17 @@ class SamusReturnsContext(BaseContext):
             try:
                 self.ammo_amounts = slot_data["ammo_amounts"]
                 self.dna_required = slot_data["options"]["dna_required"]
+                if self.death_link is None:
+                    self.death_link = slot_data["options"].get("death_link", None)
             except KeyError as e:
                 message = f'Missing slot data key: "{e}"'
                 logger.exception(message)
                 self._messagebox_connection_loss = self.gui_error("Could not connect", message)
                 Utils.async_start(self.disconnect(False))
+
+    def on_deathlink(self, data):
+        super().on_deathlink(data)
+        self.killing_player = True
 
     async def game_sync_loop(self):
         logger.debug("Starting Samus Returns connector, attempting to connect to game")
@@ -293,7 +311,10 @@ class SamusReturnsContext(BaseContext):
                     await asyncio.sleep(BACKOFF_SHORT)
                     continue
 
-                await self.handle_game_ready()
+                if self.death_link is not None:
+                    await self.update_death_link(self.death_link)
+                if self.game_state.is_in_game():
+                    await self.handle_game_ready()
 
                 await asyncio.sleep(POLL_COOLDOWN)
 
@@ -324,6 +345,7 @@ class SamusReturnsContext(BaseContext):
                 operations=[{"operation": "replace", "value": self.game_state.scenario}],
             )
             self.current_area = self.game_state.scenario
+        await self.handle_death_link()
 
     async def send_msg(self, **kwargs):
         await self.send_msgs([kwargs])
@@ -380,6 +402,8 @@ class SamusReturnsContext(BaseContext):
                                     self.game_state.scenario = AreaId(value)
                                 except ValueError:
                                     self.game_state.scenario = None
+                            case "player_death":
+                                self.game_state.last_death = time.time()
                             case _:
                                 logger.debug("Unrecognized game state key: %s", key)
                     case PacketType.COLLECTED_INDICES:
@@ -574,6 +598,24 @@ class SamusReturnsContext(BaseContext):
         else:
             sender_name = None if sender is None else self.player_names[sender]
         return amount * amount_per_item, sender_name
+
+    async def handle_death_link(self):
+        if not self.death_link:
+            self.killing_player = False
+            self.last_death = self.game_state.last_death
+            return
+
+        if self.last_death >= self.game_state.last_death:
+            if self.killing_player:
+                await self.run_lua("Game.KillPlayer()")
+            return
+
+        self.last_death = self.game_state.last_death
+
+        if self.killing_player:
+            self.killing_player = False
+        else:
+            await self.send_death()
 
     async def run_lua(self, code: str):
         try:

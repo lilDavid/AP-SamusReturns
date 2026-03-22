@@ -908,6 +908,9 @@ area_5_exterior_data = AreaData(
                             Exterior.TowerExt.subregion("Southwest"),
                         ),
                     ],
+                    pickups=[
+                        PickupData("Left"),
+                    ],
                 ),
             ],
         ),
@@ -926,7 +929,10 @@ area_5_exterior_data = AreaData(
                             Exterior.ScrewAttackAccess,
                             access_rule=Has(ItemName.ScrewAttack) & can_climb_shaft,
                         ),
-                    ]
+                    ],
+                    pickups=[
+                        PickupData(),
+                    ],
                 )
             ],
         ),
@@ -1477,6 +1483,9 @@ area_5_interior_data = AreaData(
                             Door.Normal,
                             Subregion("Underwater"),
                         ),
+                    ],
+                    pickups=[
+                        PickupData(),
                     ],
                 ),
             ],

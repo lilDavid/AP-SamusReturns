@@ -151,11 +151,11 @@ area_5_lobby_data = AreaData(
                             Door.Elevator,
                             Interior.TransportTowerLobbyE.subregion("Bottom"),
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Lobby.LobbyTeleporterW.subregion("Cave"),
-                        #     access_rule=Has(ItemName.SpaceJump) | can_spider,
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Lobby.LobbyTeleporterW.subregion("Cave"),
+                            access_rule=Has(ItemName.SpaceJump) | can_spider,
+                        ),
                     ],
                 ),
             ],
@@ -410,11 +410,11 @@ area_5_lobby_data = AreaData(
                                 ),
                             ),
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Lobby.TransportTowerIntW,
-                        #     access_rule=can_climb_wall,
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Lobby.TransportTowerIntW,
+                            access_rule=can_climb_wall,
+                        ),
                     ],
                 ),
                 RegionData(
@@ -921,10 +921,10 @@ area_5_exterior_data = AreaData(
             regions=[
                 RegionData(
                     exits=[
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Exterior.ScrewAttackAccess,
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Exterior.ScrewAttackAccess,
+                        ),
                         ExitData(
                             Door.Open,
                             Exterior.ScrewAttackAccess,
@@ -1783,10 +1783,10 @@ area_5_interior_data = AreaData(
                             Interior.GrappleShuffler.subregion("Tunnel"),
                             access_rule=can_high_ledge,
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Interior.AutrackAcropolis,
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Interior.AutrackAcropolis,
+                        ),
                         ExitData(
                             Door.Normal,
                             Interior.GrappleShuffler.subregion("Puzzle Top"),

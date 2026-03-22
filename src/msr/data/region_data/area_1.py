@@ -351,10 +351,10 @@ area_1_data = AreaData(
                             Door.Normal,
                             Area1.InnerTempleEHall.subregion("Upper"),
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Area1.SpiderBall.subregion("Chamber"),
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Area1.SpiderBall.subregion("Chamber"),
+                        ),
                         ExitData(
                             Door.Normal,
                             Area1.ExteriorAlpha,
@@ -965,10 +965,10 @@ area_1_data = AreaData(
             regions=[
                 RegionData(
                     exits=[
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Area1.InnerTempleEHall.subregion("Upper"),
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Area1.InnerTempleEHall.subregion("Upper"),
+                        ),
                         ExitData(
                             Door.MorphTunnel,
                             Area1.InnerTempleVentShaft.subregion("Tunnel"),

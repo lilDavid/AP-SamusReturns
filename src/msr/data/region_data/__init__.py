@@ -25,6 +25,7 @@ class Door(Enum):
     Gryncore = "Gryncore door"
     Taramarga = "Taramarga door"
     Elevator = "Elevator"
+    Locked = "Locked door"
 
 
 class AreaData(NamedTuple):

@@ -135,10 +135,10 @@ area_2_exterior_data = AreaData(
                             Exterior.Arachnus,
                             access_rule=can_escape_arachnus_loop,
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Exterior.MaintenanceTunnel,
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Exterior.MaintenanceTunnel,
+                        ),
                     ],
                 ),
                 RegionData(
@@ -187,10 +187,10 @@ area_2_exterior_data = AreaData(
                                 Has(ItemName.Hatchling) & can_climb_shaft,
                             ),
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Exterior.CavernsEntrance,
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Exterior.CavernsEntrance,
+                        ),
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
@@ -234,10 +234,10 @@ area_2_exterior_data = AreaData(
             regions=[
                 RegionData(
                     exits=[
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Exterior.DamExterior.subregion("Inner"),
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Exterior.DamExterior.subregion("Inner"),
+                        ),
                         ExitData(
                             Door.MorphTunnel,
                             Exterior.FanFunnel,
@@ -1510,10 +1510,10 @@ area_2_entryway_data = AreaData(
                             Door.Elevator,
                             Area1.TransportSurfaceArea2.subregion("Area 2"),
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Entryway.EntrywayTeleporter.subregion("Upper"),
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Entryway.EntrywayTeleporter.subregion("Upper"),
+                        ),
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Seal"),

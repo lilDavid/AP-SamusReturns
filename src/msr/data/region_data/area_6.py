@@ -337,11 +337,11 @@ area_6_data = AreaData(
             regions=[
                 RegionData(
                     exits=[
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Area6.TransportArea7,
-                        #     access_rule=can_bomb_block,
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Area6.TransportArea7,
+                            access_rule=can_bomb_block,
+                        ),
                         ExitData(
                             Door.Normal,
                             Area6.ElectricEscalade,
@@ -620,10 +620,10 @@ area_6_data = AreaData(
                             Area6.TeleporterS,
                             access_rule=can_high_ledge,
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Area6.CrumblingStairwell,
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Area6.CrumblingStairwell,
+                        ),
                     ],
                     pickups=[
                         PickupData(
@@ -722,10 +722,10 @@ area_6_data = AreaData(
                             Door.Charge,
                             Area6.HideoutEntrance,
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Area6.TeleporterNAccess,
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Area6.TeleporterNAccess,
+                        ),
                     ],
                 ),
             ],

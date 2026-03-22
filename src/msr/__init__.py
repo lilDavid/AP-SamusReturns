@@ -104,6 +104,7 @@ class SamusReturnsWorld(World):
             region,
             Has(ItemName.MetroidDna, self.options.dna_required.value),
         )
+        self.visualize_regions()
 
     def set_rules(self):
         self.set_completion_rule(Has(VICTORY))

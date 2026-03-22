@@ -158,10 +158,10 @@ area_4_caves_data = AreaData(
             regions=[
                 RegionData(
                     exits=[
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Caves.AmethystAltars,
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Caves.AmethystAltars,
+                        ),
                         ExitData(
                             Door.Gigadora,
                             Caves.AmethystAltars,
@@ -180,10 +180,10 @@ area_4_caves_data = AreaData(
             regions=[
                 RegionData(
                     exits=[
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Caves.CavesIntersectionTerminal.subregion("Center"),
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Caves.CavesIntersectionTerminal.subregion("Center"),
+                        ),
                         ExitData(
                             Door.MorphTunnel,
                             Caves.CavesIntersectionTerminal.subregion("Center"),
@@ -454,10 +454,10 @@ area_4_caves_data = AreaData(
                             Door.Charge,
                             Caves.CavesIntersectionTerminal.subregion("Bottom"),
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Caves.Alpha2Access.subregion("Upper"),
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Caves.Alpha2Access.subregion("Upper"),
+                        ),
                         ExitData(
                             Door.Charge,
                             Subregion("Middle"),
@@ -672,10 +672,10 @@ area_4_caves_data = AreaData(
                             Caves.SpazerBeam,
                             access_rule=can_escape_spazer_chamber,
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Caves.SpazerBeam,
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Caves.SpazerBeam,
+                        ),
                     ],
                     pickups=[
                         PickupData(
@@ -733,10 +733,10 @@ area_4_caves_data = AreaData(
                 RegionData(
                     "Lower",
                     exits=[
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Caves.TransitTunnel.subregion("Bottom"),
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Caves.TransitTunnel.subregion("Bottom"),
+                        ),
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Upper"),
@@ -1326,11 +1326,11 @@ area_4_mines_data = AreaData(
                             Door.Charge,
                             Mines.DiggernautExcavationTunnels.subregion("Entrance"),
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Mines.TsumuriTunnel,
-                        #     access_rule=can_fly_vertical,
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Mines.TsumuriTunnel,
+                            access_rule=can_fly_vertical,
+                        ),
                     ]
                 )
             ],
@@ -1406,10 +1406,10 @@ area_4_mines_data = AreaData(
                             Door.Open,
                             Mines.PinkCrystalPreserve.subregion("Bottom"),
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Mines.LavaReservoir.subregion("Left"),
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Mines.LavaReservoir.subregion("Left"),
+                        ),
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Bottom"),

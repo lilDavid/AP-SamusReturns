@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from rule_builder.options import OptionFilter
-from rule_builder.rules import And, Has, HasAll, HasAny, Or, Rule, True_
+from rule_builder.rules import And, False_, Has, HasAll, HasAny, Or, Rule, True_
 from typing_extensions import override
 
 from .data import GAME_NAME
@@ -132,4 +132,5 @@ door_rules = {
     Door.Gryncore: Has(ItemName.PlasmaBeam),
     Door.Taramarga: Has(ItemName.WaveBeam),
     Door.Elevator: True_(),
+    Door.Locked: False_(),
 }

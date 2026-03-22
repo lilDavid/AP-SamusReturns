@@ -531,10 +531,10 @@ area_3_exterior_data = AreaData(
                             Door.Normal,
                             Exterior.TransportArea2.subregion("Upper"),
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Exterior.TransportCavernsW,
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Exterior.TransportCavernsW,
+                        ),
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Pickup"),
@@ -560,11 +560,6 @@ area_3_exterior_data = AreaData(
                             Subregion("Intersection"),
                             access_rule=can_bomb_block,
                         ),
-                        # ExitData(
-                        #     Door.MorphTunnel,
-                        #     Exterior.FactoryExtAccess.subregion("Lower"),
-                        #     Grapple block
-                        # ),
                     ],
                     pickups=[
                         PickupData(
@@ -811,10 +806,10 @@ area_3_caverns_data = AreaData(
                             Door.Normal,
                             Caverns.GammaC.subregion("Arena"),
                         ),
-                        # ExitData(
-                        #     Door.Locked,
-                        #     Caverns.GammaS.subregion("West"),
-                        # ),
+                        ExitData(
+                            Door.Locked,
+                            Caverns.GammaS.subregion("West"),
+                        ),
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Bottom"),

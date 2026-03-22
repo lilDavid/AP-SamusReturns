@@ -74,7 +74,7 @@ can_beam_block_through_fan_tunnel = Or(Has(ItemName.WaveBeam), can_power_bomb, c
 
 can_spider = HasAll(ItemName.MorphBall, ItemName.SpiderBall)
 can_spider_boost = HasAll(ItemName.MorphBall, ItemName.SpiderBall, ItemName.PowerBomb)
-can_spider_boost_underwater = And(can_spider_boost, has_knowledge(Knowledge.option_enable), Has(ItemName.GravitySuit))
+can_spider_boost_underwater = And(can_spider_boost, has_knowledge(Knowledge.option_enable) | Has(ItemName.GravitySuit))
 can_cross_pitfall_bridge = Or(Has(ItemName.PhaseDrift), has_knowledge(Knowledge.option_enable) & can_spider_boost)
 
 can_fly_vertical = Or(Has(ItemName.SpaceJump), can_spider_boost, can_ibj(IBJ.option_vertical))

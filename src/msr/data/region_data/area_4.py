@@ -21,6 +21,7 @@ from ...logic import (
     can_spider,
     can_spider_boost,
     can_spider_boost_underwater,
+    can_thorns,
     door_rules,
     has_knowledge,
 )
@@ -38,12 +39,12 @@ can_cross_purple_puddle = Or(
     # FIXME: Longest requires exactly one e-tank, and repeated dips are rather painful
     can_damage_boost(DamageBoost.option_static),
 )
-can_traverse_transit_tunnel = Or(can_spider, Has(ItemName.LightningArmor), can_damage_boost(DamageBoost.option_static))
+can_traverse_transit_tunnel = can_spider | can_thorns
 can_escape_evolved_alpha = can_high_jump | Has(ItemName.GravitySuit)
 can_cross_caves_gamma_hazards = Or(
-    HasAny(ItemName.GrappleBeam, ItemName.LightningArmor),
+    Has(ItemName.GrappleBeam),
     can_spider_boost,
-    can_damage_boost(DamageBoost.option_static),
+    can_thorns,
 )
 
 can_escape_spazer_chamber = door_rules[Door.Gigadora] & can_high_ledge

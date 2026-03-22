@@ -90,6 +90,11 @@ can_underwater_high_jump = Or(Has(ItemName.GravitySuit) & can_high_jump, can_spi
 
 # Needs ~hi-jump height to break but not to access the tunnel
 can_high_bomb_block = Or(can_high_ledge & can_bomb, can_power_bomb)
+can_bomb_block_near_ceiling = Or(
+    can_spider & can_bomb_block,
+    Has(ItemName.SpaceJump) & can_power_bomb,
+    # IBJ alone is possible but super tricky
+)
 
 can_short_shaft = can_high_ledge | can_wall_jump(WallJump.option_simple)
 can_climb_shaft = can_wall_jump(WallJump.option_simple) | can_climb_wall
@@ -104,6 +109,15 @@ can_blobthrower = Has(ItemName.BeamBurst) | can_power_bomb
 can_tunnel_steel_orb = Or(
     Has(ItemName.BeamBurst) & can_beam_block_through_tunnel,
     can_power_bomb,
+)
+
+# Brief contact at least
+can_thorns = Has(ItemName.LightningArmor) | can_damage_boost(DamageBoost.option_static)
+
+# TODO: Proper combat logic. SJ seems required for no damage
+can_combat_omega = And(
+    can_damage_metroid,
+    Has(ItemName.SpaceJump),
 )
 
 door_rules = {

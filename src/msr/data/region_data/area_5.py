@@ -26,6 +26,7 @@ from ...logic import (
     can_spider,
     can_spider_boost,
     can_spider_boost_underwater,
+    can_thorns,
     can_wall_jump,
 )
 from ...options import IBJ, DamageBoost, Movement, WallJump
@@ -34,12 +35,13 @@ from ..room_names import Area4Caves as Area4
 from ..room_names import Area5Exterior as Exterior
 from ..room_names import Area5Interior as Interior
 from ..room_names import Area5Lobby as Lobby
+from ..room_names import Area6
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
 can_cross_interior_gamma_access = Or(
     Has(ItemName.SpaceJump),
     can_spider_boost,
-    Has(ItemName.LightningArmor) | can_damage_boost(DamageBoost.option_static),
+    can_thorns,
 )
 
 # To main area
@@ -284,11 +286,10 @@ area_5_lobby_data = AreaData(
                             Door.MorphTunnel,
                             Subregion("Southeast"),
                         ),
-                        # TODO: Area 6
-                        # ExitData(
-                        #     Door.Elevator,
-                        #     Area6.TransportArea5,
-                        # ),
+                        ExitData(
+                            Door.Elevator,
+                            Area6.TransportArea5,
+                        ),
                     ],
                 ),
                 RegionData(
@@ -404,7 +405,7 @@ area_5_lobby_data = AreaData(
                             access_rule=Or(
                                 can_spider_boost,
                                 And(
-                                    Has(ItemName.LightningArmor) | can_damage_boost(DamageBoost.option_static),
+                                    can_thorns,
                                     Has(ItemName.Hatchling) | can_power_bomb,
                                 ),
                             ),
@@ -423,7 +424,7 @@ area_5_lobby_data = AreaData(
                             Door.Open,
                             Subregion("Upper"),
                             access_rule=And(
-                                Has(ItemName.LightningArmor) | can_damage_boost(DamageBoost.option_static),
+                                can_thorns,
                                 Has(ItemName.Hatchling) | can_power_bomb,
                             ),
                         ),
@@ -431,7 +432,7 @@ area_5_lobby_data = AreaData(
                             Door.Normal,
                             Lobby.TransportTowerIntE.subregion("Top"),
                             access_rule=And(
-                                Has(ItemName.LightningArmor) | can_damage_boost(DamageBoost.option_static),
+                                can_thorns,
                                 Has(ItemName.Hatchling) | can_power_bomb,
                             ),
                         ),
@@ -1066,9 +1067,9 @@ area_5_exterior_data = AreaData(
                             access_rule=And(
                                 Has(ItemName.VariaSuit),
                                 Or(
-                                    HasAny(ItemName.SpaceJump, ItemName.LightningArmor),
+                                    Has(ItemName.SpaceJump),
                                     can_spider_boost,
-                                    can_damage_boost(DamageBoost.option_static),
+                                    can_thorns,
                                 ),
                             ),
                         ),
@@ -1078,9 +1079,9 @@ area_5_exterior_data = AreaData(
                             access_rule=And(
                                 Has(ItemName.VariaSuit),
                                 Or(
-                                    HasAny(ItemName.SpaceJump, ItemName.LightningArmor),
+                                    Has(ItemName.SpaceJump),
                                     can_spider_boost,
-                                    can_damage_boost(DamageBoost.option_static),
+                                    can_thorns,
                                 ),
                             ),
                         ),

@@ -22,6 +22,7 @@ from ...logic import (
     can_short_shaft,
     can_spider,
     can_spider_boost,
+    can_thorns,
     can_wall_jump,
 )
 from ...options import IBJ, DamageBoost, Movement, WallJump
@@ -54,7 +55,7 @@ can_escape_transport_access = Or(
     can_spider,
     And(
         can_short_shaft,
-        Has(ItemName.LightningArmor) | can_damage_boost(DamageBoost.option_static),
+        can_thorns,
     ),
 )
 
@@ -1724,7 +1725,9 @@ area_2_entryway_data = AreaData(
                         )
                     ],
                     pickups=[
-                        PickupData(access_rule=Has(ItemName.LightningArmor)),
+                        PickupData(
+                            access_rule=Has(ItemName.LightningArmor),
+                        ),
                     ],
                 )
             ],

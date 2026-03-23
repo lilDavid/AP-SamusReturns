@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import hashlib
 import json
 import shutil
 from collections import Counter
@@ -28,7 +29,7 @@ if TYPE_CHECKING:
 GAME_ID_US = "00040000001BB200"
 MD5_US_DECRYPTED = "d5c4ea950c46a5344e07c9108828142a"
 
-MOD_FILES = {"romfs", "code.bin", "exheader.bin"}
+MOD_FILES = {"romfs", "code.bin", "exheader.bin", "archipelago.json"}
 
 PATCH_SCHEMA = "https://raw.githubusercontent.com/randovania/open-samus-returns-rando/refs/heads/main/src/open_samus_returns_rando/files/schema.json"
 
@@ -43,13 +44,14 @@ class SamusReturnsPatch(APAutoPatchInterface):
     result_file_ending = ""
 
     config: dict
+    config_md5: str
     required_dna: int
     placed_dna: int
 
     def __init__(self, path: str | None = None, player: int | None = None, player_name: str = "", server: str = ""):
         super().__init__(path, player, player_name, server)
 
-    def patch(self, target: str):
+    def patch(self, target: str | Path):
         from open_samus_returns_rando import samus_returns_patcher
 
         from . import SamusReturnsWorld
@@ -57,13 +59,32 @@ class SamusReturnsPatch(APAutoPatchInterface):
         self.read()
 
         rom_path = self.get_path(SamusReturnsWorld.settings.rom_file)
-        output_path = Path(target)
+        output_path = target if isinstance(target, Path) else Path(target)
         output_path.mkdir(exist_ok=True)
         output_path /= GAME_ID_US
         self.verify_file_structure(output_path)
         output_path.mkdir(exist_ok=True)
 
+        # Skip patching if it's already been done before for this seed
+        # as determined by the patching world version and patch file contents
+        config_cache = output_path / "archipelago.json"
+        world_version = SamusReturnsWorld.world_version.as_simple_string()
+        try:
+            with open(config_cache, "r") as stream:
+                patch_info = json.load(stream)
+                if patch_info["world_version"] == world_version and patch_info["config_md5"] == self.config_md5:
+                    return
+        except (FileNotFoundError, Exception):
+            pass
+
+        for file in output_path.iterdir():
+            shutil.rmtree(file, ignore_errors=True)
         samus_returns_patcher.patch_extracted(rom_path, output_path, self.config)
+        with open(config_cache, "w") as stream:
+            json.dump(
+                {"world_version": world_version, "config_md5": self.config_md5},
+                stream,
+            )
 
     @staticmethod
     def get_path(path: str):
@@ -80,12 +101,17 @@ class SamusReturnsPatch(APAutoPatchInterface):
                     "Unexpected files were found in the output path. "
                     f'Verify you have the correct path and delete "{target}" if it is correct.'
                 )
-            shutil.rmtree(target)
         except FileNotFoundError:
             pass
 
     def read_contents(self, opened_zipfile: ZipFile):
-        self.config = json.loads(opened_zipfile.read("config.json"))
+        config_bytes = opened_zipfile.read("config.json")
+        self.config = json.loads(config_bytes)
+
+        hasher = hashlib.md5()
+        hasher.update(config_bytes)
+        self.config_md5 = hasher.hexdigest()
+
         return super().read_contents(opened_zipfile)
 
     def write_contents(self, opened_zipfile: ZipFile):

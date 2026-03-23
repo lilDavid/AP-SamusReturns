@@ -3,20 +3,20 @@ from __future__ import annotations
 import asyncio
 import logging
 import pkgutil
-import shutil
 import struct
 import time
 import traceback
 from collections import Counter
 from collections.abc import Sequence
 from dataclasses import dataclass
+from pathlib import Path
 from typing import TYPE_CHECKING
 
-import Patch
 import Utils
 from CommonClient import ClientCommandProcessor, get_base_parser, gui_enabled, logger, server_loop
 from NetUtils import NetworkItem
 from worlds._bizhawk.context import AuthStatus
+from worlds.Files import AutoPatchRegister
 
 from .connector import (
     UUID_LENGTH,
@@ -29,7 +29,7 @@ from .data import GAME_NAME
 from .data.internal_names import AreaId, ItemId
 from .items import ItemName, item_data_table, launcher_to_ammo, tanks, unique_items
 from .locations import location_table
-from .patch import GAME_ID_US, SamusReturnsPatch, create_resource
+from .patch import SamusReturnsPatch, create_resource
 from .settings import SamusReturnsSettings, TargetSystem
 
 if TYPE_CHECKING:
@@ -629,7 +629,7 @@ class SamusReturnsContext(BaseContext):
         await self.run_lua(f"Scenario.QueueAsyncPopup({text!r})")
 
 
-def launch_game(rom_file: str):
+def launch_game():
     import subprocess
     import webbrowser
 
@@ -646,29 +646,25 @@ def launch_game(rom_file: str):
         webbrowser.open(rom_file)
 
 
-def install_rando_patch(patch_dir: str):
+def get_patch_destination(patch_file: str):
     from . import SamusReturnsWorld
 
     settings: SamusReturnsSettings = SamusReturnsWorld.settings
     if settings.target_system == TargetSystem.CONSOLE:
         path = settings.console_settings.sd_path
         if path is None:
-            return
+            return Path(patch_file).with_suffix(SamusReturnsPatch.result_file_ending)
         output_path = SamusReturnsPatch.get_path(path) / "luma"
         output_path.mkdir(exist_ok=True)
         output_path /= "titles"
     else:
         path = settings.emulator_settings.user_path
         if path is None:
-            return
+            return Path(patch_file).with_suffix(SamusReturnsPatch.result_file_ending)
         output_path = SamusReturnsPatch.get_path(path) / "load"
         output_path.mkdir(exist_ok=True)
         output_path /= "mods"
-    output_path.mkdir(exist_ok=True)
-    SamusReturnsPatch.verify_file_structure(output_path / GAME_ID_US)
-
-    shutil.copytree(patch_dir, output_path, dirs_exist_ok=True)
-    logger.info(f"Wrote randomizer patch to {output_path}")
+    return output_path
 
 
 def launch(*launch_args: str):
@@ -678,11 +674,18 @@ def launch(*launch_args: str):
         args = parser.parse_args(launch_args)
 
         if args.patch_file:
-            metadata, result_file = Patch.create_rom_file(args.patch_file)
-            install_rando_patch(result_file)
-            if "server" in metadata:
-                args.connect = metadata["server"]
-            launch_game(result_file)
+            auto_handler = AutoPatchRegister.get_handler(args.patch_file)
+            if auto_handler is not SamusReturnsPatch:
+                logger.error("Invalid Samus Returns patch file: %s", args.patch_file)
+            else:
+                handler = SamusReturnsPatch(args.patch_file)
+                target = get_patch_destination(args.patch_file)
+                handler.patch(target)
+                logger.info(f"Wrote randomizer patch to {target}")
+
+                if handler.server:
+                    args.connect = handler.server
+                launch_game()
 
         ctx = SamusReturnsContext(args.connect, args.password)
         ctx.server_task = asyncio.create_task(server_loop(ctx), name="server loop")

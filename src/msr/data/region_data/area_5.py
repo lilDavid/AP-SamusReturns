@@ -263,7 +263,7 @@ area_5_lobby_data = AreaData(
                                     Has(ItemName.SpaceJump),
                                     And(
                                         can_wall_jump(WallJump.option_simple),
-                                        can_movement(Movement.option_enable),  # Unmorph to grab a block
+                                        can_movement(Movement.option_simple),  # Unmorph to grab a block
                                     ),
                                 ),
                             ),
@@ -454,13 +454,13 @@ area_5_lobby_data = AreaData(
                             Door.MorphTunnel,
                             Lobby.LobbySaveStation.subregion("Exit"),
                             # Unmorph to grab the ledge
-                            access_rule=can_bomb_block & can_movement(Movement.option_enable),
+                            access_rule=can_bomb_block & can_movement(Movement.option_simple),
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Lobby.LobbyTeleporterW.subregion("Lower"),
                             # Unmorph to grab the ledge
-                            access_rule=can_bomb_block & can_movement(Movement.option_enable),
+                            access_rule=can_bomb_block & can_movement(Movement.option_simple),
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1259,12 +1259,12 @@ area_5_interior_data = AreaData(
                             access_rule=Or(
                                 Has(ItemName.SpaceJump),
                                 can_ibj(IBJ.option_diagonal),
-                                can_spider & can_movement(Movement.option_enable),  # Drop off the ceiling into the gap
+                                can_spider & can_movement(Movement.option_simple),  # Drop off the ceiling into the gap
                                 And(
                                     Has(ItemName.HighJumpBoots),
                                     Or(
                                         can_damage_boost(DamageBoost.option_static),
-                                        can_movement(Movement.option_enable),  # Jump with good timing to avoid damage
+                                        can_movement(Movement.option_simple),  # Jump with good timing to avoid damage
                                     ),
                                 ),
                             ),
@@ -1291,7 +1291,7 @@ area_5_interior_data = AreaData(
                                 HasAll(ItemName.MorphBall, ItemName.GrappleBeam),
                                 can_fly,
                                 # There's a steep slope that you can boost from safely
-                                can_spider_boost & can_movement(Movement.option_enable),
+                                can_spider_boost & can_movement(Movement.option_simple),
                             ),
                         ),
                     ],

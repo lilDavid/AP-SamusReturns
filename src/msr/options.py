@@ -12,11 +12,6 @@ from Options import (
 )
 
 
-class LogicTrick(Choice):
-    option_disable = 0
-    default = option_disable
-
-
 # Game options
 class MetroidDnaAvailable(Range):
     """Amount of Metroid DNA in the item pool"""
@@ -51,6 +46,12 @@ class ScanPulseStart(DefaultOnToggle):
     display_name = "Starting Scan Pulse"
 
 
+# Logic
+class LogicTrick(Choice):
+    option_disable = 0
+    default = option_disable
+
+
 class WallJump(LogicTrick):
     """
     Jump off of walls in midair.
@@ -62,7 +63,7 @@ class WallJump(LogicTrick):
 
     display_name = "Wall Jump"
     option_simple = 1
-    option_advanced = 2
+    option_intermediate = 2
 
 
 class IBJ(LogicTrick):
@@ -96,11 +97,11 @@ class DamageBoost(LogicTrick):
 
 class Knowledge(LogicTrick):
     """
-    Tricks that require knowledge of how the game works.
+    Tricks that require knowledge of how the game works or offscreen portions of the map.
     """
 
     display_name = "Knowledge"
-    option_enable = 1
+    option_simple = 1
 
 
 class Movement(LogicTrick):
@@ -109,7 +110,8 @@ class Movement(LogicTrick):
     """
 
     display_name = "Movement"
-    option_enable = 1
+    option_simple = 1
+    option_intermediate = 2
 
 
 # Game Patches

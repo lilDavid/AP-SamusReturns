@@ -104,7 +104,6 @@ class SamusReturnsWorld(World):
             region,
             Has(ItemName.MetroidDna, self.options.dna_required.value),
         )
-        self.visualize_regions()
 
     def create_items(self):
         prefilled_locations = place_starting_loadout(self)

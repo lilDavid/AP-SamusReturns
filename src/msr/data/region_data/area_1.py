@@ -68,7 +68,7 @@ area_1_data = AreaData(
                                     Has(ItemName.Bomb),
                                     And(
                                         # Shoot the missile block in the tunnel from the opposite side
-                                        can_movement(Movement.option_enable),
+                                        can_movement(Movement.option_simple),
                                         Has(ItemName.MissileLauncher),
                                     ),
                                     And(
@@ -76,7 +76,7 @@ area_1_data = AreaData(
                                         Or(
                                             can_climb_shaft,
                                             # Break spin after breaking the screw blocks so you can grab one
-                                            can_movement(Movement.option_enable),
+                                            can_movement(Movement.option_simple),
                                         ),
                                     ),
                                 ),
@@ -459,7 +459,7 @@ area_1_data = AreaData(
                                 Or(
                                     can_high_ledge,
                                     # Go through the topmost beam block and unmorph to regrab the ledge in the tunnel
-                                    can_movement(Movement.option_enable),
+                                    can_movement(Movement.option_simple),
                                 ),
                                 can_bomb_block,
                             ),
@@ -683,7 +683,7 @@ area_1_data = AreaData(
                                                 Or(
                                                     Has(ItemName.HighJumpBoots),
                                                     # DBJ and then unmorph
-                                                    can_movement(Movement.option_enable),
+                                                    can_movement(Movement.option_simple),
                                                 ),
                                             ),
                                         ),

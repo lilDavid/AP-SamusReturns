@@ -726,7 +726,7 @@ area_2_exterior_data = AreaData(
                                 Or(
                                     can_bomb,
                                     # Time an unmorph to grab the ledge
-                                    can_movement(Movement.option_enable) & can_power_bomb,
+                                    can_movement(Movement.option_simple) & can_power_bomb,
                                 ),
                             )
                         ),
@@ -1132,7 +1132,7 @@ area_2_interior_data = AreaData(
                                             can_power_bomb,
                                             can_ibj(IBJ.option_double),
                                             And(
-                                                can_movement(Movement.option_enable),
+                                                can_movement(Movement.option_simple),
                                                 can_wall_jump(WallJump.option_simple) | can_high_jump,
                                             ),
                                         ),

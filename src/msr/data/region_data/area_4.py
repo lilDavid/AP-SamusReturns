@@ -57,7 +57,7 @@ can_escape_pink_crystals = Or(
         can_spider_boost,
         Or(
             can_damage_boost(DamageBoost.option_static),
-            has_knowledge(Knowledge.option_enable),
+            has_knowledge(Knowledge.option_simple),
         ),
     ),
 )
@@ -684,7 +684,7 @@ area_4_caves_data = AreaData(
                                 Or(
                                     Has(ItemName.IceBeam),
                                     # Drop down and shoot the block in midair
-                                    can_fly_vertical & can_movement(Movement.option_enable),
+                                    can_fly_vertical & can_movement(Movement.option_simple),
                                 ),
                             ),
                         )
@@ -1046,7 +1046,7 @@ area_4_mines_data = AreaData(
                                 And(
                                     can_spider,
                                     # Spider around the opposite wall with either a ball jump or midair morph
-                                    HasAny(ItemName.Bomb, ItemName.SpringBall) | can_movement(Movement.option_enable),
+                                    HasAny(ItemName.Bomb, ItemName.SpringBall) | can_movement(Movement.option_simple),
                                 ),
                             ),
                         ),
@@ -1149,7 +1149,7 @@ area_4_mines_data = AreaData(
                                 Or(
                                     # Spider boost out of the water
                                     And(
-                                        has_knowledge(Knowledge.option_enable),
+                                        has_knowledge(Knowledge.option_simple),
                                         Has(ItemName.GravitySuit),
                                     ),
                                     # Jump up the shaft after getting out of the water
@@ -1157,7 +1157,7 @@ area_4_mines_data = AreaData(
                                         Or(
                                             HasAny(ItemName.GravitySuit, ItemName.HighJumpBoots),
                                             # Spider up and unmorph to grab ledge
-                                            can_spider & can_movement(Movement.option_enable),
+                                            can_spider & can_movement(Movement.option_simple),
                                         ),
                                         HasAny(ItemName.SpaceJump, ItemName.HighJumpBoots),
                                     ),
@@ -1242,7 +1242,7 @@ area_4_mines_data = AreaData(
                                 Has(ItemName.VariaSuit),
                                 Or(
                                     can_high_ledge,
-                                    can_movement(Movement.option_enable),  # Slightly tricky jump around the ledge
+                                    can_movement(Movement.option_simple),  # Slightly tricky jump around the ledge
                                 ),
                             ),
                         ),

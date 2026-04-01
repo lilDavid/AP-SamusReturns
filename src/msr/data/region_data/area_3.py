@@ -172,13 +172,13 @@ area_3_exterior_data = AreaData(
                                         Or(
                                             can_spider,
                                             # Unmorph to grab the ledge in the small tunnel
-                                            can_movement(Movement.option_enable),
+                                            can_movement(Movement.option_simple),
                                         ),
                                     ),
                                     # Slide down the goop to attach to the left wall
                                     can_spider_boost,
                                     # Unmorph to grab the ledges
-                                    can_movement(Movement.option_enable),
+                                    can_movement(Movement.option_simple),
                                 ),
                                 # Courtesy in case of mistake, which also happens to solve the exit condition
                                 can_bomb_block,
@@ -266,7 +266,7 @@ area_3_exterior_data = AreaData(
                                 # Drop off before the spikes and unmorph (morph ball falls super fast)
                                 # Alternatively, you can spider boost from just the right spot in the crevice and hit
                                 # the ceiling just to the right of the spikes
-                                can_movement(Movement.option_enable) & can_spider_boost,
+                                can_movement(Movement.option_simple) & can_spider_boost,
                             ),
                         ),
                     ],
@@ -288,7 +288,7 @@ area_3_exterior_data = AreaData(
                             Subregion("Top"),
                             access_rule=And(
                                 # Grapple point is offscreen without high jump
-                                has_knowledge(Knowledge.option_enable) | can_high_ledge,
+                                has_knowledge(Knowledge.option_simple) | can_high_ledge,
                                 Has(ItemName.GrappleBeam),
                                 can_spider,
                             ),
@@ -456,7 +456,7 @@ area_3_exterior_data = AreaData(
                                 Or(
                                     HasAny(ItemName.SpaceJump, ItemName.PhaseDrift),
                                     can_spider,
-                                    can_movement(Movement.option_enable),
+                                    can_movement(Movement.option_simple),
                                 ),
                             )
                         )
@@ -712,7 +712,7 @@ area_3_exterior_data = AreaData(
                                 Or(
                                     can_climb_wall,
                                     And(
-                                        can_high_ledge | can_wall_jump(WallJump.option_advanced),
+                                        can_high_ledge | can_wall_jump(WallJump.option_intermediate),
                                         can_damage_tough_enemy,
                                     ),
                                 ),
@@ -1143,7 +1143,7 @@ area_3_caverns_data = AreaData(
                             access_rule=Or(
                                 can_fly_vertical,
                                 And(
-                                    has_knowledge(Knowledge.option_enable) | can_climb_wall,
+                                    has_knowledge(Knowledge.option_simple) | can_climb_wall,
                                     Has(ItemName.GrappleBeam),
                                 ),
                             ),

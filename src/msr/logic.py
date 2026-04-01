@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from . import SamusReturnsWorld
 
 # TODO: Ammo logic
+# TODO: Go through all the high-jump requirements to separate out High Jump/DBJ from super jump
 
 
 @dataclass
@@ -69,13 +70,13 @@ def can_ibj(ibj: int):
     return Trick(IBJ, ibj) & can_bomb
 
 
-can_beam_block_through_tunnel = Or(Has(ItemName.WaveBeam), can_bomb_block, can_movement(Movement.option_enable))
-can_beam_block_through_fan_tunnel = Or(Has(ItemName.WaveBeam), can_power_bomb, can_movement(Movement.option_enable))
+can_beam_block_through_tunnel = Or(Has(ItemName.WaveBeam), can_bomb_block, can_movement(Movement.option_simple))
+can_beam_block_through_fan_tunnel = Or(Has(ItemName.WaveBeam), can_power_bomb, can_movement(Movement.option_simple))
 
 can_spider = HasAll(ItemName.MorphBall, ItemName.SpiderBall)
 can_spider_boost = HasAll(ItemName.MorphBall, ItemName.SpiderBall, ItemName.PowerBomb)
-can_spider_boost_underwater = And(can_spider_boost, has_knowledge(Knowledge.option_enable) | Has(ItemName.GravitySuit))
-can_cross_pitfall_bridge = Or(Has(ItemName.PhaseDrift), has_knowledge(Knowledge.option_enable) & can_spider_boost)
+can_spider_boost_underwater = And(can_spider_boost, has_knowledge(Knowledge.option_simple) | Has(ItemName.GravitySuit))
+can_cross_pitfall_bridge = Or(Has(ItemName.PhaseDrift), has_knowledge(Knowledge.option_simple) & can_spider_boost)
 
 can_fly_vertical = Or(Has(ItemName.SpaceJump), can_spider_boost, can_ibj(IBJ.option_vertical))
 can_fly_vertical_underwater = Or(Has(ItemName.GravitySuit) & can_fly_vertical, can_spider_boost_underwater)
@@ -100,9 +101,13 @@ can_short_shaft = can_high_ledge | can_wall_jump(WallJump.option_simple)
 can_climb_shaft = can_wall_jump(WallJump.option_simple) | can_climb_wall
 
 can_any_missile = HasAny(ItemName.MissileLauncher, ItemName.SuperMissile)
-can_damage_tough_enemy = Or(
-    HasAny(ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst, ItemName.ScrewAttack),
+can_damage_tough_enemy_ranged = Or(
+    HasAny(ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst),
     can_power_bomb,
+)
+can_damage_tough_enemy = Or(
+    can_damage_tough_enemy_ranged,
+    Has(ItemName.ScrewAttack),
 )
 can_damage_metroid = HasAny(ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst, ItemName.IceBeam)
 can_blobthrower = Has(ItemName.BeamBurst) | can_power_bomb
@@ -123,7 +128,7 @@ can_combat_omega = And(
 door_rules = {
     Door.Open: True_(),
     Door.Normal: True_(),  # Player always has a weapon to open this with (power beam can't be randomized)
-    Door.Charge: Or(Has(ItemName.ChargeBeam), has_knowledge(Knowledge.option_enable) & Has(ItemName.BeamBurst)),
+    Door.Charge: Or(Has(ItemName.ChargeBeam), has_knowledge(Knowledge.option_simple) & Has(ItemName.BeamBurst)),
     Door.Missile: can_any_missile,
     Door.Super: Has(ItemName.SuperMissile),
     Door.PowerBomb: can_power_bomb,

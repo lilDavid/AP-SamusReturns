@@ -26,7 +26,7 @@ from ...logic import (
 from ...options import IBJ, DamageBoost, Movement, WallJump
 from ..internal_names import AreaId
 from ..room_names import Area5Lobby as Area5
-from ..room_names import Area6
+from ..room_names import Area6, Area7
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
 can_cross_crumbling_bridge = Has(ItemName.PhaseDrift) | can_spider_boost
@@ -86,11 +86,11 @@ area_6_data = AreaData(
                             Area6.Diggernaut,
                             access_rule=can_escape_diggernaut_loop,
                         ),
-                        # ExitData(
-                        #     Door.Normal,
-                        #     Area7.TransportArea6,  # TODO: Area 7
-                        #     access_rule=can_bomb_block,
-                        # ),
+                        ExitData(
+                            Door.Elevator,
+                            Area7.TransportArea6.subregion("Transport"),
+                            access_rule=Has(ItemName.MorphBall),
+                        ),
                     ],
                     pickups=[
                         PickupData(
@@ -568,7 +568,7 @@ area_6_data = AreaData(
                                         Or(
                                             can_spider,
                                             Has(ItemName.PhaseDrift),
-                                            can_movement(Movement.option_enable),
+                                            can_movement(Movement.option_simple),
                                         ),
                                     ),
                                 ),
@@ -630,7 +630,7 @@ area_6_data = AreaData(
                             "Tunnel",
                             access_rule=And(
                                 can_bomb_block,
-                                can_spider | can_movement(Movement.option_enable),
+                                can_spider | can_movement(Movement.option_simple),
                             ),
                         ),
                         PickupData(

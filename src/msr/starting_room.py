@@ -2,33 +2,42 @@ from __future__ import annotations
 
 import logging
 from collections import Counter
-from typing import TYPE_CHECKING
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, NamedTuple
 
-from BaseClasses import CollectionState, Item
+from BaseClasses import CollectionState, Item, ItemClassification
 from Fill import fill_restrictive
 
 from .data import GAME_NAME
 from .data.room_names import SurfaceWest
-from .items import ItemName
+from .items import VICTORY, ItemName, SamusReturnsItem
 
 if TYPE_CHECKING:
     from . import SamusReturnsWorld
 
 
-def set_starting_room(world: SamusReturnsWorld):
-    starting_region = SurfaceWest.LandingSite.subregion("East")
-    loadout = [ItemName.MissileLauncher, ItemName.MorphBall]
+class StartingRoomData(NamedTuple):
+    region_name: str
+    loadout: Sequence[ItemName]
 
+
+landing_site_data = StartingRoomData(
+    SurfaceWest.LandingSite.subregion("East"),
+    [ItemName.MissileLauncher, ItemName.MorphBall],
+)
+
+
+def set_starting_room(world: SamusReturnsWorld):
+    starting_region = landing_site_data.region_name
     logging.debug("Starting region for %s: %s", world.player_name, starting_region)
     world.origin_region_name = starting_region
-    place_starting_loadout(world, Counter(loadout))
 
 
-def place_starting_loadout(world: SamusReturnsWorld, equipment: Counter[ItemName]):
+def place_starting_loadout(world: SamusReturnsWorld):
     precollected = Counter(ItemName(item.name) for item in world.multiworld.precollected_items[world.player])
-    loadout = equipment - precollected
+    loadout = Counter(landing_site_data.loadout) - precollected
     if loadout.total() == 0:
-        return
+        return 0
 
     # Determine the maximal set of locations we could put these items in
     # The result will contain locations that go unused because they're only reachable with all and that's ok
@@ -42,6 +51,8 @@ def place_starting_loadout(world: SamusReturnsWorld, equipment: Counter[ItemName
 
     state = CollectionState(world.multiworld)
     state.sweep_for_advancements()
+    if state.has(VICTORY, world.player):
+        state.remove(SamusReturnsItem(VICTORY, ItemClassification.progression, None, world.player))
     world.random.shuffle(items)
     world.random.shuffle(locations)
     fill_restrictive(
@@ -60,4 +71,4 @@ def place_starting_loadout(world: SamusReturnsWorld, equipment: Counter[ItemName
         logging.debug("Added %s to starting equipment", world.multiworld.get_name_string_for_object(item))
 
     world.skipped_items.update(loadout)
-    world.prefilled_locations += initial_location_count - len(locations)
+    return initial_location_count - len(locations)

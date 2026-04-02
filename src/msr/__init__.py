@@ -17,7 +17,7 @@ from .options import MetroidDnaRequired, SamusReturnsOptions, msr_option_groups
 from .patch import SamusReturnsPatch
 from .regions import connect_entrances, create_regions, set_location_rules
 from .settings import SamusReturnsSettings
-from .starting_room import set_starting_room
+from .starting_room import place_starting_loadout, set_starting_room
 
 LOCATION_COUNT = 211
 
@@ -44,7 +44,6 @@ class SamusReturnsWorld(World):
 
     ammo_amounts: dict[str, int]
     skipped_items: Counter[ItemName]
-    prefilled_locations: int
 
     displaced_filler: list[ItemName]
 
@@ -81,7 +80,6 @@ class SamusReturnsWorld(World):
             self.push_precollected(self.create_item(item))
 
         self.skipped_items = starting_items
-        self.prefilled_locations = 0
         self.displaced_filler = []
 
     def create_regions(self):
@@ -89,6 +87,8 @@ class SamusReturnsWorld(World):
         set_location_rules(self)
         connect_entrances(self)
         set_starting_room(self)
+
+        self.set_completion_rule(Has(VICTORY))
 
         # TODO: Temporary fix so the locations can all be present
         from BaseClasses import Region
@@ -106,10 +106,9 @@ class SamusReturnsWorld(World):
         )
         self.visualize_regions()
 
-    def set_rules(self):
-        self.set_completion_rule(Has(VICTORY))
-
     def create_items(self):
+        prefilled_locations = place_starting_loadout(self)
+
         major_item_pool: Counter[ItemName] = Counter()
         minor_item_pool: Counter[ItemName] = Counter()
 
@@ -131,7 +130,7 @@ class SamusReturnsWorld(World):
         assert all(count >= 0 for count in major_item_pool.values()), major_item_pool
 
         item_count = major_item_pool.total() + minor_item_pool.total()
-        location_count = LOCATION_COUNT - self.prefilled_locations
+        location_count = LOCATION_COUNT - prefilled_locations
         if item_count < location_count:
             minor_item_pool[self.get_filler_item_name()] = location_count - item_count
         elif item_count > location_count:

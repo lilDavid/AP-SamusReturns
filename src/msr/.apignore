@@ -1,0 +1,12 @@
+.idea
+.vscode
+
+.venv*
+.code-workspace
+
+test/
+README.md
+
+*.3ds
+*.cci
+*.apmsr

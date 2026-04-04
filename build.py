@@ -6,11 +6,10 @@ import os
 import shutil
 import subprocess
 import sys
-import zipfile
 from argparse import ArgumentParser
 from pathlib import Path
 
-# TODO: Support 3.14 once Lupa does
+# TODO: Support 3.14 once both AP and Lupa do
 PYTHON_VERSIONS = ["3.11", "3.12", "3.13"]
 
 PLATFORMS = {
@@ -20,22 +19,19 @@ PLATFORMS = {
     "linux_x86_64": ["manylinux_2_28_x86_64", "manylinux_2_17_x86_64"],
 }
 
-WORLD_NAME = "msr"
-
 BASE_PATH = Path(__file__).parent
+
+WORLD_NAME = "msr"
 WORLD_PATH = BASE_PATH / "src" / WORLD_NAME
+with open(WORLD_PATH / "archipelago.json", "r", encoding="utf-8") as file:
+    GAME_NAME: str = json.load(file)["game"]
+
 LIB_PATH = WORLD_PATH / "lib"
 BUILD_PATH = BASE_PATH / "build"
 LIB_PATCHES = BASE_PATH / "lib_patches"
-
 REQUIREMENTS = BASE_PATH / "requirements.txt"
 
-
-EXCLUDE = [
-    "**/__pycache__",
-    "**/__MACOSX",
-    "**/.DS_STORE",
-]
+ap_path: Path
 
 
 def clean_build_path():
@@ -95,58 +91,31 @@ def setup_requirements():
         apply_patch(source_file, patch_file)
 
 
-def get_files():
-    files: set[Path] = set()
-    for path in WORLD_PATH.rglob("*"):
-        files.add(path)
-    for pattern in EXCLUDE:
-        for path in WORLD_PATH.glob(pattern):
-            if path.is_dir():
-                files.difference_update(path.rglob("*"))
-            try:
-                files.remove(path)
-            except KeyError:
-                pass
-    files.remove(WORLD_PATH / "archipelago.json")
-    return files
+def call_ap_component(component: str, *args: str):
+    cmd = [sys.executable, "Launcher.py", component]
+    if args:
+        cmd += ["--", *args]
+    subprocess.check_call(cmd, cwd=ap_path)
 
 
 def build_apworld():
     setup_requirements()
 
     logger.info("Packaging APWorld")
+    call_ap_component("Build APWorlds", GAME_NAME)
+    apworld_name = f"{WORLD_NAME}.apworld"
+    shutil.copy(ap_path.joinpath("build", "apworlds", apworld_name), BUILD_PATH / apworld_name)
 
-    from worlds.Files import APWorldContainer
 
-    with open(WORLD_PATH / "archipelago.json", "r", encoding="utf-8") as file:
-        manifest: dict = json.load(file)
-    zip_path = BUILD_PATH / f"{WORLD_NAME}.apworld"
-    container = APWorldContainer(str(zip_path))
-    container.game = manifest["game"]
-    manifest.update(container.get_manifest())
-
-    zip_path = BUILD_PATH / f"{WORLD_NAME}.apworld"
-    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as apworld:
-        for path in get_files():
-            relative_path = f"{WORLD_NAME}/{path.relative_to(WORLD_PATH)}"
-            apworld.write(path, relative_path)
-        apworld.writestr(f"{WORLD_NAME}/archipelago.json", json.dumps(manifest))
+def get_file_safe_name(name: str) -> str:
+    return "".join(c for c in name if c not in '<>:"/\\|?*')
 
 
 def generate_template():
-    import Options
-    import Utils
-
     logger.info("Creating template")
-
-    templates = BUILD_PATH / "templates"
-    templates.mkdir(exist_ok=True)
-    Options.generate_yaml_templates(templates, generate_hidden=False)
-    with open(WORLD_PATH / "archipelago.json", "r", encoding="utf-8") as file:
-        game: str = json.load(file)["game"]
-    template = templates / f"{Utils.get_file_safe_name(game)}.yaml"
-    template.rename(BUILD_PATH / f"{template.name.replace(' ', '_')}")
-    shutil.rmtree(templates, ignore_errors=True)
+    call_ap_component("Generate Template Options", "--skip_open_folder")
+    template_name = f"{get_file_safe_name(GAME_NAME)}.yaml"
+    shutil.copy(ap_path.joinpath("Players", "Templates", template_name), BUILD_PATH / template_name.replace(" ", "_"))
 
 
 logger = logging.Logger(Path(__file__).name)
@@ -158,11 +127,7 @@ if __name__ == "__main__":
     parser.add_argument("-q", "--quiet", action="store_true", help="Print less information")
     args = parser.parse_args()
 
-    ap_path = args.path or os.getenv("AP_SOURCE_PATH") or os.getenv("AP_PATH") or os.getcwd()
-    sys.path.append(ap_path)
-
-    logging.basicConfig()
-    logging.root.setLevel(logging.CRITICAL)
+    ap_path = Path(args.path or os.getenv("AP_SOURCE_PATH") or os.getenv("AP_PATH") or os.getcwd())
 
     if args.quiet:
         logger.setLevel(logging.WARNING)

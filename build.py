@@ -38,12 +38,10 @@ EXCLUDE = [
 ]
 
 
-def clean_build_path(path: Path):
-    assert path == BUILD_PATH or BUILD_PATH in path.parents, path
-    try:
-        shutil.rmtree(path)
-    except FileNotFoundError:
-        pass
+def clean_build_path():
+    BUILD_PATH.mkdir(exist_ok=True)
+    for child in BUILD_PATH.iterdir():
+        shutil.rmtree(child, ignore_errors=True)
 
 
 def install_dependency(
@@ -127,7 +125,6 @@ def build_apworld():
     container.game = manifest["game"]
     manifest.update(container.get_manifest())
 
-    BUILD_PATH.mkdir(parents=True, exist_ok=True)
     zip_path = BUILD_PATH / f"{WORLD_NAME}.apworld"
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as apworld:
         for path in get_files():
@@ -143,13 +140,13 @@ def generate_template():
     logger.info("Creating template")
 
     templates = BUILD_PATH / "templates"
-    templates.mkdir(parents=True, exist_ok=True)
+    templates.mkdir(exist_ok=True)
     Options.generate_yaml_templates(templates, generate_hidden=False)
     with open(WORLD_PATH / "archipelago.json", "r", encoding="utf-8") as file:
         game: str = json.load(file)["game"]
     template = templates / f"{Utils.get_file_safe_name(game)}.yaml"
     template.rename(BUILD_PATH / f"{template.name.replace(' ', '_')}")
-    clean_build_path(templates)
+    shutil.rmtree(templates, ignore_errors=True)
 
 
 logger = logging.Logger(Path(__file__).name)
@@ -172,6 +169,6 @@ if __name__ == "__main__":
     else:
         logger.setLevel(logging.INFO)
 
-    clean_build_path(BUILD_PATH)
+    clean_build_path()
     build_apworld()
     generate_template()

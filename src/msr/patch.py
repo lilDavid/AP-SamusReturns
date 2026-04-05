@@ -21,6 +21,7 @@ from .items import ItemName, OtherItemData, TankData, UniqueItemData, item_data_
 from .locations import location_table
 from .options import ApItemModels, PickupModels
 from .regions import all_areas_data
+from .starting_room import landing_site_data
 
 if TYPE_CHECKING:
     from . import SamusReturnsWorld
@@ -122,10 +123,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
         self.config = {
             "$schema": PATCH_SCHEMA,
             "configuration_identifier": self.get_config_identifier(world),
-            "starting_location": {
-                "scenario": AreaId.SURFACE_EAST,
-                "actor": "StartPoint0",
-            },
+            "starting_location": landing_site_data.to_config(),
             "starting_items": self.create_starting_items(world),
             "pickups": self.create_pickups(world),
             "hints": [],

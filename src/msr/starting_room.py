@@ -9,7 +9,7 @@ from BaseClasses import CollectionState, Item, ItemClassification
 from Fill import fill_restrictive
 
 from .data import GAME_NAME
-from .data.room_names import SurfaceWest
+from .data.room_names import RoomName, SurfaceEast
 from .items import VICTORY, ItemName, SamusReturnsItem
 
 if TYPE_CHECKING:
@@ -17,18 +17,28 @@ if TYPE_CHECKING:
 
 
 class StartingRoomData(NamedTuple):
-    region_name: str
-    loadout: Sequence[ItemName]
+    room: RoomName
+    actor: str
+    loadout: Sequence[ItemName] = ()
+    subregion: str | None = None
+
+    def to_config(self):
+        return {
+            "scenario": self.room.area().id,
+            "actor": self.actor,
+        }
 
 
 landing_site_data = StartingRoomData(
-    SurfaceWest.LandingSite.subregion("East"),
-    [ItemName.MissileLauncher, ItemName.MorphBall],
+    SurfaceEast.LandingSite,
+    subregion="East",
+    actor="StartPoint0",
+    loadout=[ItemName.MissileLauncher, ItemName.MorphBall],
 )
 
 
 def set_starting_room(world: SamusReturnsWorld):
-    starting_region = landing_site_data.region_name
+    starting_region = landing_site_data.room.subregion(landing_site_data.subregion)
     logging.debug("Starting region for %s: %s", world.player_name, starting_region)
     world.origin_region_name = starting_region
 

@@ -18,8 +18,7 @@ from ...logic import (
     can_spider,
 )
 from ...options import IBJ, Movement
-from ..internal_names import AreaId
-from ..room_names import Area1
+from ..room_names import Area, Area1
 from ..room_names import Area2Entryway as Area2
 from ..room_names import SurfaceEast as Surface
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
@@ -28,8 +27,7 @@ can_escape_ice_chamber_access = Has(ItemName.IceBeam) | can_high_jump
 can_escape_inner_temple_west_hall = can_climb_wall
 
 area_1_data = AreaData(
-    name="Area 1",
-    id=AreaId.AREA_1,
+    area=Area.Area1,
     rooms=[
         RoomData(
             Area1.TransportSurfaceArea2,

@@ -28,7 +28,7 @@ from ...logic import (
     has_knowledge,
 )
 from ...options import IBJ, DamageBoost, Knowledge, Movement, WallJump
-from ..internal_names import AreaId
+from ..room_names import Area
 from ..room_names import Area2Entryway as Area2
 from ..room_names import Area3Caverns as Caverns
 from ..room_names import Area3Exterior as Exterior
@@ -62,8 +62,7 @@ can_escape_gamma_arena_caverns_transport = can_grapple_tunnel & can_climb_wall
 can_escape_gamma_arena_entrance = can_high_ledge
 
 area_3_exterior_data = AreaData(
-    name="Area 3 Factory Exterior",
-    id=AreaId.AREA_3_EXTERIOR,
+    area=Area.Area3Exterior,
     rooms=[
         RoomData(
             Exterior.TransportArea2,
@@ -756,8 +755,7 @@ area_3_exterior_data = AreaData(
 )
 
 area_3_caverns_data = AreaData(
-    name="Area 3 Metroid Caverns",
-    id=AreaId.AREA_3_CAVERNS,
+    area=Area.Area3Caverns,
     rooms=[
         RoomData(
             Caverns.TransportFactoryExtN,
@@ -1591,8 +1589,7 @@ area_3_caverns_data = AreaData(
 )
 
 area_3_interior_data = AreaData(
-    name="Area 3 Factory Interior",
-    id=AreaId.AREA_3_INTERIOR,
+    area=Area.Area3Interior,
     rooms=[
         RoomData(
             Interior.SecuritySite,

@@ -23,8 +23,7 @@ from ...logic import (
     can_wall_jump,
 )
 from ...options import IBJ, Movement, WallJump
-from ..internal_names import AreaId
-from ..room_names import Area6, Area7, AreaName
+from ..room_names import Area, Area6, Area7
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
 can_cross_omega_arena_north_access = Or(Has(ItemName.SpaceJump), can_spider_boost, can_thorns)
@@ -47,8 +46,7 @@ can_escape_evolved_omega_arena = Or(
 can_escape_grapple_puzzle_madness = HasAll(ItemName.MorphBall, ItemName.ScrewAttack) & can_climb_shaft
 
 area_7_data = AreaData(
-    name=AreaName.Area7,
-    id=AreaId.AREA_7,
+    area=Area.Area7,
     rooms=[
         RoomData(
             Area7.LabTeleporterW,

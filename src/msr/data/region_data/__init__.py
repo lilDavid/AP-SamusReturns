@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from rule_builder.rules import Rule, True_
 
-from ..internal_names import AreaId
-from ..room_names import RoomName
+from ..room_names import Area, RoomName
 
 if TYPE_CHECKING:
     from ... import SamusReturnsWorld
@@ -29,8 +28,7 @@ class Door(Enum):
 
 
 class AreaData(NamedTuple):
-    name: str
-    id: AreaId
+    area: Area
     rooms: Sequence[RoomData]
 
 

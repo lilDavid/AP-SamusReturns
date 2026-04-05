@@ -16,8 +16,7 @@ from ...logic import (
     door_rules,
 )
 from ...options import WallJump
-from ..internal_names import AreaId
-from ..room_names import Area1
+from ..room_names import Area, Area1
 from ..room_names import SurfaceEast as East
 from ..room_names import SurfaceWest as West
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
@@ -27,8 +26,7 @@ can_escape_energy_recharge_shaft = can_high_ledge
 can_escape_charge_chamber = Or(can_high_ledge & door_rules[Door.Missile], door_rules[Door.Charge])
 
 surface_east_data = AreaData(
-    name="Surface East",
-    id=AreaId.SURFACE_EAST,
+    area=Area.SurfaceEast,
     rooms=[
         RoomData(
             East.LandingSite,
@@ -645,8 +643,7 @@ surface_east_data = AreaData(
 )
 
 surface_west_data = AreaData(
-    name="Surface West",
-    id=AreaId.SURFACE_WEST,
+    Area.SurfaceWest,
     rooms=[
         RoomData(
             West.TransportArea8,

@@ -30,12 +30,11 @@ from ...logic import (
     can_wall_jump,
 )
 from ...options import IBJ, DamageBoost, Movement, WallJump
-from ..internal_names import AreaId
+from ..room_names import Area, Area6
 from ..room_names import Area4Caves as Area4
 from ..room_names import Area5Exterior as Exterior
 from ..room_names import Area5Interior as Interior
 from ..room_names import Area5Lobby as Lobby
-from ..room_names import Area6
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
 can_cross_interior_gamma_access = Or(
@@ -66,8 +65,7 @@ can_escape_interior_save_station_water = Or(can_spider, Has(ItemName.GravitySuit
 can_escape_evolved_zeta_arena = can_high_jump
 
 area_5_lobby_data = AreaData(
-    name="Area 5 Tower Lobby",
-    id=AreaId.AREA_5_LOBBY,
+    area=Area.Area5Lobby,
     rooms=[
         RoomData(
             Lobby.LobbySaveStation,
@@ -738,8 +736,7 @@ area_5_lobby_data = AreaData(
 )
 
 area_5_exterior_data = AreaData(
-    name="Area 5 Tower Exterior",
-    id=AreaId.AREA_5_EXTERIOR,
+    area=Area.Area5Exterior,
     rooms=[
         RoomData(
             Exterior.TowerExt,
@@ -1172,8 +1169,7 @@ area_5_exterior_data = AreaData(
 )
 
 area_5_interior_data = AreaData(
-    name="Area 5 Dam Interior",
-    id=AreaId.AREA_5_INTERIOR,
+    area=Area.Area5Interior,
     rooms=[
         RoomData(
             Interior.TransportTowerLobbyE,

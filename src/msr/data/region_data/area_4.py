@@ -26,7 +26,7 @@ from ...logic import (
     has_knowledge,
 )
 from ...options import IBJ, DamageBoost, Knowledge, Movement
-from ..internal_names import AreaId
+from ..room_names import Area
 from ..room_names import Area3Exterior as Area3
 from ..room_names import Area4Caves as Caves
 from ..room_names import Area4Mines as Mines
@@ -64,8 +64,7 @@ can_escape_pink_crystals = Or(
 can_escape_evolved_gamma = can_high_ledge
 
 area_4_caves_data = AreaData(
-    name="Area 4 Central Caves",
-    id=AreaId.AREA_4_CAVES,
+    area=Area.Area4Caves,
     rooms=[
         RoomData(
             Caves.CavesIntersectionTerminal,
@@ -850,8 +849,7 @@ area_4_caves_data = AreaData(
 )
 
 area_4_mines_data = AreaData(
-    name="Area 4 Crystal Mines",
-    id=AreaId.AREA_4_MINES,
+    area=Area.Area4Mines,
     rooms=[
         RoomData(
             Mines.MinesIntersectionTerminal,

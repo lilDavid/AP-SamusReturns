@@ -1,51 +1,54 @@
 from __future__ import annotations
 
-from enum import StrEnum
-from typing import Protocol
+from enum import Enum, StrEnum
+
+from .internal_names import AreaId
 
 
-class AreaName(StrEnum):
-    SurfaceEast = "Surface"
-    Area1 = "Area 1"
-    Area2Exterior = "Area 2"
-    Area2Interior = "Area 2"
-    Area2Entryway = "Area 2"
-    Area3Exterior = "Area 3"
-    Area3Caverns = "Area 3"
-    Area3Interior = "Area 3"
-    Area4Caves = "Area 4"
-    Area4Mines = "Area 4"
-    Area5Lobby = "Area 5"
-    Area5Exterior = "Area 5"
-    Area5Interior = "Area 5"
-    Area6 = "Area 6"
-    Area7 = "Area 7"
-    Area8 = "Area 8"
-    SurfaceWest = "Surface"
+class Area(Enum):
+    SurfaceEast = AreaId.SURFACE_EAST, "Surface", "East"
+    Area1 = AreaId.AREA_1, "Area 1"
+    Area2Exterior = AreaId.AREA_2_EXTERIOR, "Area 2", "Dam Exterior"
+    Area2Interior = AreaId.AREA_2_INTERIOR, "Area 2", "Dam Interior"
+    Area2Entryway = AreaId.AREA_2_ENTRYWAY, "Area 2", "Dam Entryway"
+    Area3Exterior = AreaId.AREA_3_EXTERIOR, "Area 3", "Factory Exterior"
+    Area3Caverns = AreaId.AREA_3_CAVERNS, "Area 3", "Metroid Caverns"
+    Area3Interior = AreaId.AREA_3_INTERIOR, "Area 3", "Factory Interior"
+    Area4Caves = AreaId.AREA_4_CAVES, "Area 4", "Central Caves"
+    Area4Mines = AreaId.AREA_4_MINES, "Area 4", "Crystal Mines"
+    Area5Lobby = AreaId.AREA_5_LOBBY, "Area 5", "Tower Lobby"
+    Area5Exterior = AreaId.AREA_5_EXTERIOR, "Area 5", "Tower Exterior"
+    Area5Interior = AreaId.AREA_5_INTERIOR, "Area 5", "Tower Interior"
+    Area6 = AreaId.AREA_6, "Area 6"
+    Area7 = AreaId.AREA_7, "Area 7"
+    Area8 = AreaId.AREA_8, "Area 8"
+    SurfaceWest = AreaId.SURFACE_WEST, "Surface", "West"
+
+    def __init__(self, area_id: AreaId, name: str, subarea: str | None = None):
+        self.id = area_id
+        self.short_name = name
+        self.full_name = name if subarea is None else f"{name} - {subarea}"
 
 
-def format_room_name(area: AreaName, room: str):
-    return f"{area}: {room}"
+# This is a bit of a hack, but it beats writing a custom metaclass since an enum can't derive from an ABC
+class _RoomName:
+    def area(self) -> Area: ...
 
+    def with_area(self):
+        return f"{self.area().short_name}: {self}"
 
-# This is a bit of a hack, but it beats writing a custom metaclass
-class _WithArea(Protocol):
-    def with_area(self) -> str: ...
-
-
-class _RoomNameMixin:
-    def subregion(self: _WithArea, name: str | None = None):
+    def subregion(self, name: str | None = None):
         if name is None:
             return self.with_area()
         return f"{self.with_area()} ({name})"
 
-    def location(self: _WithArea, name: str | None = None):
+    def location(self, name: str | None = None):
         if name is None:
             return self.with_area()
         return f"{self.with_area()} - {name}"
 
 
-class SurfaceEast(_RoomNameMixin, StrEnum):
+class SurfaceEast(_RoomName, StrEnum):
     LandingSite = "Landing Site"
     TwistyTunnel = "Twisty Tunnel"
     MorphBall = "Morph Ball Chamber"
@@ -68,11 +71,11 @@ class SurfaceEast(_RoomNameMixin, StrEnum):
     EnergyRechargeShaft = "Energy Recharge Station Shaft"
     AmmoRecharge = "Ammo Recharge Station"
 
-    def with_area(self):
-        return format_room_name(AreaName.SurfaceEast, self)
+    def area(self):
+        return Area.SurfaceEast
 
 
-class Area1(_RoomNameMixin, StrEnum):
+class Area1(_RoomName, StrEnum):
     TransportSurfaceArea2 = "Transport to Surface and Area 2"
     MoheekMount = "Moheek Mount"
     GulluggGangway = "Gullugg Gangway"
@@ -106,11 +109,11 @@ class Area1(_RoomNameMixin, StrEnum):
     CavernsAlphaSw = "Metroid Caverns Alpha Arena Southwest"
     ChuteLeechCabin = "Chute Leech Cabin"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area1, self)
+    def area(self):
+        return Area.Area1
 
 
-class Area2Exterior(_RoomNameMixin, StrEnum):
+class Area2Exterior(_RoomName, StrEnum):
     DamExterior = "Dam Exterior"
     Arachnus = "Arachnus Arena"
     FanFunnel = "Fan Funnel"
@@ -134,11 +137,11 @@ class Area2Exterior(_RoomNameMixin, StrEnum):
     CavernsAmmoRecharge = "Metroid Caverns Ammo Recharge Station"
     CavernsAlphaE = "Metroid Caverns Alpha Arena East"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area2Exterior, self)
+    def area(self):
+        return Area.Area2Exterior
 
 
-class Area2Interior(_RoomNameMixin, StrEnum):
+class Area2Interior(_RoomName, StrEnum):
     WaveBeam = "Wave Beam & Transport to Dam Exterior West"
     VariaSuit = "Varia Suit Chamber"
     InteriorIntersection = "Interior Intersection Terminal"
@@ -156,11 +159,11 @@ class Area2Interior(_RoomNameMixin, StrEnum):
     Gamma = "Gamma Arena"
     GeneratorAccess = "Generator Access"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area2Interior, self)
+    def area(self):
+        return Area.Area2Interior
 
 
-class Area2Entryway(_RoomNameMixin, StrEnum):
+class Area2Entryway(_RoomName, StrEnum):
     TransportAreas1And3 = "Transport to Areas 1 and 3"
     EntrywayTeleporter = "Entryway Teleporter"
     LightningArmor = "Lightning Armor & Transport to Dam Exterior East"
@@ -168,11 +171,11 @@ class Area2Entryway(_RoomNameMixin, StrEnum):
     FleechSwarmFloodway = "Fleech Swarm Floodway"
     Alpha2 = "Alpha+ Arena"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area2Entryway, self)
+    def area(self):
+        return Area.Area2Entryway
 
 
-class Area3Exterior(_RoomNameMixin, StrEnum):
+class Area3Exterior(_RoomName, StrEnum):
     TransportArea2 = "Transport to Area 2"
     ExteriorMaze = "Exterior Maze"
     GrappleBeam = "Grapple Beam Chamber"
@@ -188,11 +191,11 @@ class Area3Exterior(_RoomNameMixin, StrEnum):
     NooksCranny = "Nook's Cranny"
     FactoryExtAccess = "Factory Exterior Access"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area3Exterior, self)
+    def area(self):
+        return Area.Area3Exterior
 
 
-class Area3Caverns(_RoomNameMixin, StrEnum):
+class Area3Caverns(_RoomName, StrEnum):
     TransportFactoryExtN = "Transport to Factory Exterior North"
     Alpha2W = "Alpha+ Arena West"
     GammaC = "Gamma Arena Center"
@@ -215,11 +218,11 @@ class Area3Caverns(_RoomNameMixin, StrEnum):
     LetumShrine = "Letum Shrine"
     CavernsTeleporterW = "Caverns Teleporter West"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area3Caverns, self)
+    def area(self):
+        return Area.Area3Caverns
 
 
-class Area3Interior(_RoomNameMixin, StrEnum):
+class Area3Interior(_RoomName, StrEnum):
     SecuritySite = "Security Site"
     GammaSAccess = "Factory Gamma Arena South Access"
     ParabyPeriphery = "Paraby Periphery"
@@ -238,11 +241,11 @@ class Area3Interior(_RoomNameMixin, StrEnum):
     FactoryTeleporterAccess = "Factory Teleporter Access"
     GammaCAccess = "Gamma Arena Center Access"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area3Interior, self)
+    def area(self):
+        return Area.Area3Interior
 
 
-class Area4Caves(_RoomNameMixin, StrEnum):
+class Area4Caves(_RoomName, StrEnum):
     CavesIntersectionTerminal = "Caves Intersection Terminal"
     SpazerBeam = "Spazer Beam Chamber"
     CrumbleCatwalk = "Crumble Catwalk"
@@ -261,11 +264,11 @@ class Area4Caves(_RoomNameMixin, StrEnum):
     VenomousPond = "Venomous Pond"
     TransportArea5 = "Transport to Area 5"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area4Caves, self)
+    def area(self):
+        return Area.Area4Caves
 
 
-class Area4Mines(_RoomNameMixin, StrEnum):
+class Area4Mines(_RoomName, StrEnum):
     MinesIntersectionTerminal = "Mines Intersection Terminal"
     SuperMissile = "Super Missile Chamber"
     PinkCrystalPreserve = "Pink Crystal Preserve"
@@ -284,11 +287,11 @@ class Area4Mines(_RoomNameMixin, StrEnum):
     SpaceJump = "Space Jump Chamber"
     DiggernautExcavationTunnels = "Diggernaut Excavation Tunnels"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area4Mines, self)
+    def area(self):
+        return Area.Area4Mines
 
 
-class Area5Lobby(_RoomNameMixin, StrEnum):
+class Area5Lobby(_RoomName, StrEnum):
     LobbySaveStation = "Lobby Save Station"
     TransportTowerIntE = "Transport to Tower Interior East"
     TransportAreas4And6 = "Transport to Areas 4 and 6"
@@ -303,11 +306,11 @@ class Area5Lobby(_RoomNameMixin, StrEnum):
     Gamma2 = "Lobby Gamma+ Arena"
     LobbyPassageway = "Lobby Passageway"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area5Lobby, self)
+    def area(self):
+        return Area.Area5Lobby
 
 
-class Area5Exterior(_RoomNameMixin, StrEnum):
+class Area5Exterior(_RoomName, StrEnum):
     TowerExt = "Tower Exterior"
     OvergrownMaze = "Overgrown Maze"
     ScrewAttack = "Screw Attack Chamber"
@@ -320,11 +323,11 @@ class Area5Exterior(_RoomNameMixin, StrEnum):
     ScrewAttackAccess = "Screw Attack Chamber Access"
     Gamma2 = "Gamma+ Arena & Access"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area5Exterior, self)
+    def area(self):
+        return Area.Area5Exterior
 
 
-class Area5Interior(_RoomNameMixin, StrEnum):
+class Area5Interior(_RoomName, StrEnum):
     TransportTowerLobbyE = "Transport to Tower Lobby East"
     InteriorSaveStation = "Interior Save Station"
     TransportTowerExtE = "Transport to Tower Exterior East"
@@ -346,11 +349,11 @@ class Area5Interior(_RoomNameMixin, StrEnum):
     Zeta2 = "Zeta+ Arena"
     Gamma2Access = "Tower Gamma+ Arena Access"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area5Interior, self)
+    def area(self):
+        return Area.Area5Interior
 
 
-class Area6(_RoomNameMixin, StrEnum):
+class Area6(_RoomName, StrEnum):
     TransportArea7 = "Transport to Area 7"
     TeleporterS = "Teleporter South"
     Omega = "Omega Arena"
@@ -371,11 +374,11 @@ class Area6(_RoomNameMixin, StrEnum):
     ChozoSealW = "Chozo Seal West Intersection Terminal"
     TeleporterN = "Teleporter North"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area6, self)
+    def area(self):
+        return Area.Area6
 
 
-class Area7(_RoomNameMixin, StrEnum):
+class Area7(_RoomName, StrEnum):
     LabTeleporterW = "Laboratory Teleporter West"
     GrapplePuzzleMadness = "Grapple Puzzle Madness"
     SpiderBoostTunnelS = "Spider Boost Tunnel South"
@@ -393,11 +396,11 @@ class Area7(_RoomNameMixin, StrEnum):
     SpiderBoostTunnelN = "Spider Boost Tunnel North"
     TransportArea8 = "Transport to Area 8"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area7, self)
+    def area(self):
+        return Area.Area7
 
 
-class Area8(_RoomNameMixin, StrEnum):
+class Area8(_RoomName, StrEnum):
     TransportSurface = "Transport to Surface"
     NestHallwayS = "Metroid Nest Hallway South"
     Amphitheater = "Amphitheater"
@@ -417,18 +420,18 @@ class Area8(_RoomNameMixin, StrEnum):
     NestVestibule = "Nest Vestibule"
     NestTeleporter = "Metroid Nest Teleporter"
 
-    def with_area(self):
-        return format_room_name(AreaName.Area8, self)
+    def area(self):
+        return Area.Area8
 
 
-class SurfaceWest(_RoomNameMixin, StrEnum):
+class SurfaceWest(_RoomName, StrEnum):
     LandingSite = "Landing Site"
     TransportArea8 = "Transport to Area 8"
     SurfaceStash = "Surface Stash"
     SurfaceCrumbleChallenge = "Surface Crumble Block Challenge"
 
-    def with_area(self):
-        return format_room_name(AreaName.SurfaceWest, self)
+    def area(self):
+        return Area.SurfaceWest
 
 
 RoomName = (

@@ -1,10 +1,8 @@
-from ..internal_names import AreaId
-from ..room_names import Area8, AreaName
+from ..room_names import Area, Area8
 from . import AreaData, RoomData
 
 area_8_data = AreaData(
-    name=AreaName.Area8,
-    id=AreaId.AREA_8,
+    area=Area.Area8,
     rooms=[
         RoomData(
             Area8.TransportSurface,

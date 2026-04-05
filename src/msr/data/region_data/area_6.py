@@ -24,9 +24,8 @@ from ...logic import (
     can_wall_jump,
 )
 from ...options import IBJ, DamageBoost, Movement, WallJump
-from ..internal_names import AreaId
+from ..room_names import Area, Area6, Area7
 from ..room_names import Area5Lobby as Area5
-from ..room_names import Area6, Area7
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
 can_cross_crumbling_bridge = Has(ItemName.PhaseDrift) | can_spider_boost
@@ -67,8 +66,7 @@ can_escape_diggernaut_loop = And(
 )
 
 area_6_data = AreaData(
-    name="Area 6",
-    id=AreaId.AREA_6,
+    area=Area.Area6,
     rooms=[
         RoomData(
             Area6.TransportArea7,

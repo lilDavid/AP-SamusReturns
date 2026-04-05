@@ -26,8 +26,7 @@ from ...logic import (
     can_wall_jump,
 )
 from ...options import IBJ, DamageBoost, Movement, WallJump
-from ..internal_names import AreaId
-from ..room_names import Area1
+from ..room_names import Area, Area1
 from ..room_names import Area2Entryway as Entryway
 from ..room_names import Area2Exterior as Exterior
 from ..room_names import Area2Interior as Interior
@@ -60,8 +59,7 @@ can_escape_transport_access = Or(
 )
 
 area_2_exterior_data = AreaData(
-    name="Area 2 Dam Exterior",
-    id=AreaId.AREA_2_EXTERIOR,
+    area=Area.Area2Exterior,
     rooms=[
         RoomData(
             Exterior.DamExterior,
@@ -847,8 +845,7 @@ area_2_exterior_data = AreaData(
 )
 
 area_2_interior_data = AreaData(
-    name="Area 2 Dam Interior",
-    id=AreaId.AREA_2_INTERIOR,
+    area=Area.Area2Interior,
     rooms=[
         RoomData(
             Interior.WaveBeam,
@@ -1496,8 +1493,7 @@ area_2_interior_data = AreaData(
 )
 
 area_2_entryway_data = AreaData(
-    name="Area 2 Dam Entryway",
-    id=AreaId.AREA_2_ENTRYWAY,
+    area=Area.Area2Entryway,
     rooms=[
         RoomData(
             Entryway.TransportAreas1And3,

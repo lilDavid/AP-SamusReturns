@@ -6,7 +6,7 @@ from .internal_names import AreaId
 
 
 class Area(Enum):
-    SurfaceEast = AreaId.SURFACE_EAST, "Surface", "East"
+    SurfaceEast = AreaId.SURFACE_EAST, "Surface"
     Area1 = AreaId.AREA_1, "Area 1"
     Area2Exterior = AreaId.AREA_2_EXTERIOR, "Area 2", "Dam Exterior"
     Area2Interior = AreaId.AREA_2_INTERIOR, "Area 2", "Dam Interior"
@@ -22,30 +22,29 @@ class Area(Enum):
     Area6 = AreaId.AREA_6, "Area 6"
     Area7 = AreaId.AREA_7, "Area 7"
     Area8 = AreaId.AREA_8, "Area 8"
-    SurfaceWest = AreaId.SURFACE_WEST, "Surface", "West"
+    SurfaceWest = AreaId.SURFACE_WEST, "Surface"
 
     def __init__(self, area_id: AreaId, name: str, subarea: str | None = None):
         self.id = area_id
         self.short_name = name
-        self.full_name = name if subarea is None else f"{name} - {subarea}"
+        self.full_name = name if subarea is None else f"{name} {subarea}"
 
 
 # This is a bit of a hack, but it beats writing a custom metaclass since an enum can't derive from an ABC
 class _RoomName:
     def area(self) -> Area: ...
 
-    def with_area(self):
-        return f"{self.area().short_name}: {self}"
-
     def subregion(self, name: str | None = None):
+        room_name = f"{self.area().full_name}: {self}"
         if name is None:
-            return self.with_area()
-        return f"{self.with_area()} ({name})"
+            return room_name
+        return f"{room_name} ({name})"
 
     def location(self, name: str | None = None):
+        room_name = f"{self.area().short_name}: {self}"
         if name is None:
-            return self.with_area()
-        return f"{self.with_area()} - {name}"
+            return room_name
+        return f"{room_name} - {name}"
 
 
 class SurfaceEast(_RoomName, StrEnum):

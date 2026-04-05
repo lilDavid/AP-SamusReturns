@@ -91,12 +91,12 @@ def connect_entrances(world: SamusReturnsWorld):
 
         def resolve_region_name(name: str | RoomName | Subregion, room: RoomName = room.name):
             if isinstance(name, RoomName):
-                return name.with_area()
+                return name.subregion()
             if isinstance(name, Subregion):
                 return room.subregion(name)
             return name
 
-        region_name = room.name.subregion(subregion.name) if subregion.name else room.name.with_area()
+        region_name = room.name.subregion(subregion.name)
         region = world.get_region(region_name)
         for exit in subregion.exits:
             world.create_entrance(

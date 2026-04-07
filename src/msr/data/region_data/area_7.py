@@ -23,7 +23,7 @@ from ...logic import (
     can_wall_jump,
 )
 from ...options import IBJ, Movement, WallJump
-from ..room_names import Area, Area6, Area7
+from ..room_names import Area, Area6, Area7, Area8
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
 can_cross_omega_arena_north_access = Or(Has(ItemName.SpaceJump), can_spider_boost, can_thorns)
@@ -969,11 +969,11 @@ area_7_data = AreaData(
                             Area7.GrapplePuzzleFoyer.subregion("Top"),
                             access_rule=Has(ItemName.MorphBall),
                         ),
-                        # ExitData(
-                        #     Door.Elevator,
-                        #     Area8.TransportArea7,  # TODO: Area 8
-                        #     access_rule=Has(ItemName.MorphBall) & can_climb_shaft,
-                        # ),
+                        ExitData(
+                            Door.Elevator,
+                            Area8.TransportArea7,
+                            access_rule=Has(ItemName.MorphBall) & can_climb_shaft,
+                        ),
                     ]
                 )
             ],

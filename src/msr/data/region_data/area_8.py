@@ -1,5 +1,61 @@
-from ..room_names import Area, Area8
-from . import AreaData, RoomData
+from rule_builder.rules import And, Has, HasAll, HasAny, Or
+
+from ...items import ItemName
+from ...logic import (
+    can_any_missile,
+    can_bomb,
+    can_bomb_block,
+    can_climb_wall,
+    can_damage_metroid,
+    can_fly_vertical,
+    can_high_ledge,
+    can_movement,
+    can_power_bomb,
+    can_short_shaft,
+    can_spider,
+    can_spider_boost,
+    can_thorns,
+    can_wall_jump,
+    door_rules,
+)
+from ...options import Movement, WallJump
+from ..room_names import Area, Area7, Area8
+from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
+
+# TODO: Bombless Metroid combat trick
+can_combat_metroid_larva = Has(ItemName.IceBeam) & can_any_missile & can_bomb_block
+can_combat_queen = And(
+    can_damage_metroid,
+    can_spider,
+    Has(ItemName.SpaceJump) | can_spider_boost,
+)
+
+can_climb_nest_network = can_climb_wall
+can_climb_nest_network_tunnels = And(
+    Has(ItemName.ScrewAttack),
+    Has(ItemName.HighJumpBoots) | can_wall_jump(WallJump.option_simple),
+)
+can_climb_nest_nodule = can_short_shaft
+can_navigate_metroid_nest_shaft_west = And(can_combat_metroid_larva, can_high_ledge, Has(ItemName.MorphBall))
+
+can_escape_nest_network_bottom_to_center = Or(
+    can_climb_nest_nodule,  # Necessary to get to center from earlier in the game
+    Has(ItemName.ScrewAttack),  # Warp to start in Transport to Area 7, if start was later in A8
+)
+can_escape_nest_network_tunnels = Or(
+    can_climb_nest_network_tunnels,
+    And(
+        Or(
+            door_rules[Door.MorphTunnel] & Has(ItemName.GrappleBeam),
+            can_thorns,
+        ),
+        can_escape_nest_network_bottom_to_center,
+    ),
+)
+can_escape_queen_arena = And(
+    can_combat_queen,
+    HasAll(ItemName.SpaceJump, ItemName.ScrewAttack) | Has(ItemName.Hatchling),
+)
 
 area_8_data = AreaData(
     area=Area.Area8,
@@ -7,92 +63,755 @@ area_8_data = AreaData(
         RoomData(
             Area8.TransportSurface,
             id="collision_camera_007",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Bottom",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.Hatchling,
+                            access_rule=Has(ItemName.Hatchling),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Thorns"),
+                            access_rule=And(
+                                Has(ItemName.Hatchling),
+                                can_fly_vertical,
+                                Has(ItemName.SpaceJump) | can_thorns,
+                            ),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Thorns",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Subregion("Bottom"),
+                            access_rule=Has(ItemName.Hatchling),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Bridge"),
+                            access_rule=HasAll(ItemName.Hatchling, ItemName.ScrewAttack),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Left",
+                            access_rule=HasAll(
+                                ItemName.MorphBall,
+                                ItemName.LightningArmor,
+                            ),
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Bridge",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Subregion("Thorns"),
+                            HasAll(ItemName.Hatchling, ItemName.ScrewAttack),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Elevator"),
+                            HasAll(ItemName.Hatchling),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Right",
+                            access_rule=And(
+                                Has(ItemName.MorphBall),
+                                Or(
+                                    Has(ItemName.PhaseDrift),
+                                    And(
+                                        can_high_ledge | can_movement(Movement.option_intermediate),  # Morph extend
+                                        can_spider_boost,
+                                    ),
+                                ),
+                            ),
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Elevator",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Subregion("Bridge"),
+                            access_rule=Has(ItemName.Hatchling),
+                        ),
+                        # ExitData(
+                        #     Door.Elevator,
+                        #     SurfaceWest.TransportArea8,  # TODO: Area 8
+                        # ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
             Area8.NestHallwayS,
             id="collision_camera_008",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Left",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Area8.NestTeleporter,
+                        ),
+                        ExitData(
+                            Door.Locked,
+                            Subregion("Right"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Subregion("Right"),
+                            access_rule=Has(ItemName.ScrewAttack),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Right",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestSmallShaft,
+                            access_rule=can_combat_metroid_larva,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Subregion("Left"),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
             Area8.Amphitheater,
             id="collision_camera_009",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Bottom",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestNetwork.subregion("Top"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Overhang"),
+                            access_rule=can_climb_wall,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Upper Left",
+                            access_rule=can_climb_wall,
+                        ),
+                        PickupData(
+                            "Upper Right",
+                            access_rule=And(
+                                can_climb_wall,
+                                can_power_bomb,
+                                Has(ItemName.LightningArmor),
+                                Or(
+                                    can_spider,
+                                    Has(ItemName.PhaseDrift),
+                                    can_movement(Movement.option_simple),
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Overhang",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Subregion("Bottom"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Subregion("Overhang Tunnel"),
+                            access_rule=can_fly_vertical,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Overhang Tunnel",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Subregion("Overhang"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Subregion("Crossway"),
+                            access_rule=can_climb_wall,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Spikes",
+                            access_rule=Or(
+                                can_spider_boost,
+                                And(
+                                    can_movement(Movement.option_simple),  # Regrab to jump over
+                                    Or(
+                                        can_power_bomb,
+                                        can_spider & can_bomb,
+                                    ),
+                                ),
+                            ),
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Crossway",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Subregion("Overhang Tunnel"),
+                            access_rule=Or(
+                                can_spider & can_bomb_block,
+                                can_climb_wall & can_power_bomb,
+                            ),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Subregion("Center"),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Maze",
+                            access_rule=And(
+                                Has(ItemName.ScrewAttack),
+                                Has(ItemName.HighJumpBoots) | can_wall_jump(WallJump.option_simple),
+                                can_bomb_block,
+                            ),
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Center",
+                    exits=[
+                        ExitData(
+                            Door.MorphTunnel,
+                            Subregion("Crossway"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Subregion("Overhang"),
+                            access_rule=Has(ItemName.GrappleBeam),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Top"),
+                            access_rule=Or(
+                                can_climb_wall,
+                                can_high_ledge & can_movement(Movement.option_intermediate),  # Morph extend
+                            ),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Top",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestTeleporter,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Subregion("Center"),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Grapple Block",
+                            access_rule=HasAll(ItemName.GrappleBeam, ItemName.MorphBall) & can_high_ledge,
+                        )
+                    ],
+                ),
+            ],
         ),
         RoomData(
             Area8.NestNetwork,
             id="collision_camera_010",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Bottom",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.EntranceTeleporter.subregion("Upper"),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestNodule.subregion("Bottom"),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Center",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestNodule.subregion("Top"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Top"),
+                            access_rule=can_climb_nest_network,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Tunnels"),
+                            access_rule=Has(ItemName.ScrewAttack) & can_escape_nest_network_tunnels,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Bottom"),
+                            access_rule=can_escape_nest_network_bottom_to_center,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Area8.NestNodule.subregion("Pickup"),
+                            access_rule=And(
+                                Has(ItemName.ScrewAttack),
+                                can_escape_nest_network_bottom_to_center,
+                            ),
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Tunnels",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Subregion("Center"),
+                            access_rule=can_climb_nest_network_tunnels,
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Area8.EntranceTeleporter.subregion("Upper"),
+                            access_rule=Has(ItemName.GrappleBeam),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Bottom"),
+                            access_rule=can_thorns,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Hallway",
+                            access_rule=can_spider_boost | can_thorns,
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Top",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.Amphitheater.subregion("Bottom"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Center"),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Crystals",
+                            access_rule=Has(ItemName.Hatchling),
+                        )
+                    ],
+                ),
+            ],
         ),
         RoomData(
             Area8.EntranceTeleporter,
             id="collision_camera_011",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Lower",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestVestibule,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Upper"),
+                            access_rule=Has(ItemName.ScrewAttack) & can_high_ledge,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=And(
+                                Has(ItemName.MorphBall),
+                                can_short_shaft,
+                                can_any_missile,
+                                HasAny(ItemName.LightningArmor, ItemName.Hatchling),
+                            )
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Upper",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestNetwork.subregion("Bottom"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Lower"),
+                            access_rule=Has(ItemName.ScrewAttack),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
             Area8.NestNodule,
             id="collision_camera_012",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Bottom",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestNetwork.subregion("Bottom"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Top"),
+                            access_rule=can_climb_nest_nodule,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Top",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestNetwork.subregion("Center"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Bottom"),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Crystals",
+                            access_rule=And(
+                                Has(ItemName.MorphBall),
+                                Or(
+                                    And(
+                                        Has(ItemName.Hatchling),
+                                        # Need a way to stand still so it breaks the blocks
+                                        can_power_bomb | can_spider,
+                                        can_thorns | can_spider,
+                                    ),
+                                    And(
+                                        can_power_bomb,
+                                        Has(ItemName.LightningArmor),
+                                        can_spider | Has(ItemName.PhaseDrift),
+                                    ),
+                                ),
+                            ),
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Pickup",
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestNetwork.subregion("Bottom"),
+                            access_rule=Has(ItemName.ScrewAttack),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Bottom"),
+                            access_rule=can_bomb_block,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Tunnel",
+                            access_rule=Has(ItemName.MorphBall),
+                        ),
+                    ],
+                ),
+            ],
         ),
         RoomData(
             Area8.NestSmallShaft,
             id="collision_camera_013",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestHallwayS.subregion("Right"),
+                            access_rule=can_combat_metroid_larva,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestShaftE,
+                            access_rule=can_combat_metroid_larva,
+                        ),
+                    ]
+                )
+            ],
         ),
         RoomData(
             Area8.NestShaftE,
             id="collision_camera_014",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestSmallShaft,
+                            access_rule=can_combat_metroid_larva & Has(ItemName.MorphBall),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestHallwayNe,
+                            access_rule=can_combat_metroid_larva & Has(ItemName.MorphBall),
+                        ),
+                    ]
+                )
+            ],
         ),
         RoomData(
             Area8.NestHallwayNe,
             id="collision_camera_015",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestShaftE,
+                            access_rule=can_combat_metroid_larva,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestRechargeStations,
+                            access_rule=can_combat_metroid_larva,
+                        ),
+                    ]
+                )
+            ],
         ),
         RoomData(
             Area8.NestHallwayNw,
             id="collision_camera_016",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestRechargeStations,
+                            access_rule=can_combat_metroid_larva,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestShaftW,
+                            access_rule=can_combat_metroid_larva,
+                        ),
+                    ]
+                )
+            ],
         ),
         RoomData(
             Area8.NestRechargeStations,
             id="collision_camera_017",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestHallwayNe,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestHallwayNw,
+                        ),
+                    ]
+                )
+            ],
         ),
         RoomData(
             Area8.NestShaftW,
             id="collision_camera_018",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestHallwayNw,
+                            access_rule=can_navigate_metroid_nest_shaft_west,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Area8.QueenAccess,
+                            access_rule=can_navigate_metroid_nest_shaft_west,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=can_navigate_metroid_nest_shaft_west,
+                        )
+                    ],
+                )
+            ],
         ),
         RoomData(
             Area8.QueenAccess,
             id="collision_camera_019",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestShaftW,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Area8.Queen,
+                            access_rule=can_escape_queen_arena,
+                        ),
+                    ]
+                )
+            ],
         ),
         RoomData(
             Area8.Queen,
             id="collision_camera_020",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Area8.QueenAccess,
+                            access_rule=HasAll(ItemName.SpaceJump, ItemName.ScrewAttack),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Area8.Hatchling,
+                        ),
+                    ]
+                )
+            ],
         ),
         RoomData(
             Area8.TransportArea7,
             id="collision_camera_021",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Elevator,
+                            Area7.TransportArea8,
+                            access_rule=HasAny(ItemName.MorphBall, ItemName.ScrewAttack),
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Area8.NestVestibule,
+                            access_rule=And(
+                                Has(ItemName.ScrewAttack),
+                                Or(Has(ItemName.SpaceJump), can_wall_jump(WallJump.option_intermediate) & can_spider),
+                            ),
+                        ),
+                    ]
+                )
+            ],
         ),
         RoomData(
             Area8.Hatchling,
             id="collision_camera_022",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Area8.Queen,
+                            access_rule=can_escape_queen_arena,
+                        ),
+                        # There's a wall preventing reverse Area 8 traversal
+                        # ExitData(
+                        #     Door.Open,
+                        #     Area8.TransportSurface.subregion("Bottom"),
+                        #     access_rule=Has(ItemName.Hatchling),
+                        # ),
+                    ],
+                    pickups=[
+                        PickupData(),
+                    ],
+                )
+            ],
         ),
         RoomData(
             Area8.NestVestibule,
             id="collision_camera_023",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.TransportArea7,
+                        ),
+                        ExitData(
+                            Door.Normal,
+                            Area8.EntranceTeleporter.subregion("Lower"),
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            access_rule=And(
+                                HasAll(ItemName.ScrewAttack, ItemName.MorphBall),
+                                Or(
+                                    Has(ItemName.SpaceJump),
+                                    Has(ItemName.HighJumpBoots) & can_wall_jump(WallJump.option_intermediate),
+                                ),
+                                Has(ItemName.SpiderBall) | can_movement(Movement.option_simple),
+                            )
+                        )
+                    ],
+                )
+            ],
         ),
         RoomData(
             Area8.NestTeleporter,
             id="collision_camera_024",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    exits=[
+                        ExitData(
+                            Door.Normal,
+                            Area8.Amphitheater.subregion("Top"),
+                        ),
+                        ExitData(
+                            Door.MorphTunnel,
+                            Area8.NestHallwayS.subregion("Left"),
+                            access_rule=can_high_ledge,
+                        ),
+                    ]
+                )
+            ],
         ),
     ],
 )

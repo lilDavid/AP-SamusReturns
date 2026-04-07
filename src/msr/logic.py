@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
 # TODO: Ammo logic
 # TODO: Go through all the high-jump requirements to separate out High Jump/DBJ from super jump
+# TODO: Separate out midair morph tricks (morph extends probably still with super jumps though?)
 
 
 @dataclass
@@ -120,10 +121,7 @@ can_tunnel_steel_orb = Or(
 can_thorns = Has(ItemName.LightningArmor) | can_damage_boost(DamageBoost.option_static)
 
 # TODO: Proper combat logic. SJ seems required for no damage
-can_combat_omega = And(
-    can_damage_metroid,
-    Has(ItemName.SpaceJump),
-)
+can_combat_omega = can_damage_metroid & Has(ItemName.SpaceJump)
 
 door_rules = {
     Door.Open: True_(),

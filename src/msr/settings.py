@@ -31,7 +31,7 @@ class TargetSystem(StrEnum):
     EMULATOR = "emulator"
 
 
-class ConsoleSdPath(settings.UserFolderPath):
+class ConsoleSdPath(settings.FolderPath):
     """
     3DS SD card root. If set, the patcher can automatically place randomizer
     files into <SD>/luma/titles/<game id>.
@@ -47,7 +47,7 @@ class ConsoleIp(str):
     """
 
 
-class EmulatorUserPath(settings.UserFolderPath):
+class EmulatorUserPath(settings.FolderPath):
     """
     Azahar user path. If set, the patcher can automatically place randomizer
     files into <Azahar path>/load/mods/<game id>.

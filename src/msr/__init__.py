@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any, ClassVar
 
 import Utils
-from BaseClasses import ItemClassification
+from BaseClasses import ItemClassification, Tutorial
 from Options import DeathLink, Option
 from rule_builder.rules import Has
 from worlds import LauncherComponents as Launcher
@@ -25,10 +25,25 @@ LOCATION_COUNT = 211
 class SamusReturnsWebWorld(WebWorld):
     theme = "ice"
     option_groups = msr_option_groups
+    tutorials = [  # noqa: RUF012
+        Tutorial(
+            "Multiworld Setup Guide",
+            "A guide to setting up the Samus Returns randomizer connected to an Archipelago Multiworld.",
+            "English",
+            "setup_en.md",
+            "setup/en",
+            ["lil David"],
+        )
+    ]
 
 
 class SamusReturnsWorld(World):
-    """TODO"""
+    """
+    Metroid: Samus Returns is a complete reimagining of the Game Boy title Metroid II: Return of
+    Samus. In the randomizer, you must locate power-ups and collect Metroid DNA scattered across
+    SR388. Additionally, the hazardous liquid throughout the planet is drained from the start so
+    you can explore the areas freely, and the Chozo seals provide hints instead.
+    """
 
     game = GAME_NAME
     settings: ClassVar[SamusReturnsSettings]  # pyright: ignore[reportIncompatibleVariableOverride]

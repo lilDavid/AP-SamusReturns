@@ -54,10 +54,7 @@ The following are required to play *Metroid: Samus Returns* in Archipelago:
 * A North American *Metroid: Samus Returns* ROM file.
   * You can use [GodMode9](https://3ds.hacks.guide/dumping-titles-and-game-cartridges.html) to dump
   your copy of the game.
-  * Only the decrypted `.3ds`/`.cci` format is supported.
-    * Be sure to dump the full image and not the `.trim.3ds` version.
-    * Only dumps from the cartridge are supported right now.
-  * The correct file has the MD5 hash `d5c4ea950c46a5344e07c9108828142a`.
+  * Only decrypted formats are supported.
 
 ### APWorld installation
 

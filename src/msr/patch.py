@@ -27,8 +27,9 @@ if TYPE_CHECKING:
     from . import SamusReturnsWorld
 
 
-GAME_ID_US = "00040000001BB200"
-MD5_US_DECRYPTED = "d5c4ea950c46a5344e07c9108828142a"
+TITLE_ID_US = "00040000001BB200"
+TITLE_ID_PAL = "00040000001BFB00"
+TITLE_ID_JP = "00040000001BFC00"
 
 MOD_FILES = {"romfs", "code.bin", "exheader.bin", "archipelago.json"}
 
@@ -62,7 +63,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
         rom_path = self.get_path(SamusReturnsWorld.settings.rom_file)
         output_path = target if isinstance(target, Path) else Path(target)
         output_path.mkdir(exist_ok=True)
-        output_path /= GAME_ID_US
+        output_path /= TITLE_ID_US
         self.verify_file_structure(output_path)
         output_path.mkdir(exist_ok=True)
 

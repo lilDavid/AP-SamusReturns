@@ -1,23 +1,48 @@
+import shutil
 from collections.abc import Sequence
 from enum import StrEnum
-from typing import ClassVar, Self
+from pathlib import Path
+from typing import Self
 
 import settings
 
-from .patch import MD5_US_DECRYPTED
+from . import patch
 
 
 class RomFile(settings.UserFilePath):
     """File name of the Metroid: Samus Returns ROM."""
 
     description = "Metroid: Samus Returns ROM file (decrypted format)"
-    copy_to = "Metroid Samus Returns.cci"
-    md5s: ClassVar[list[str | bytes]] = [MD5_US_DECRYPTED]
 
     def browse(self, filetypes: Sequence[tuple[str, Sequence[str]]] | None = None, **kwargs) -> Self | None:
+        # Pared down from FilePath.browse() just so we can support multiple file types
         if filetypes is None:
-            filetypes = (("3DS ROM image", (".3ds", ".cci")),)
-        return super().browse(filetypes, **kwargs)
+            filetypes = (("3DS ROM image", (".cia", ".3ds", ".cci", ".app", ".cxi")),)
+        result = super().browse(filetypes, **kwargs)
+        if result is None:
+            return None
+        destination = self.__class__(f"Metroid Samus Returns{Path(result).suffix}")
+        shutil.copy(result, destination.resolve(), follow_symlinks=True)
+        return destination
+
+    @classmethod
+    def validate(cls, path: str):
+        from open_samus_returns_rando.romfs import rom3ds
+
+        with open(path, "rb") as stream:
+            try:
+                parsed_rom = rom3ds.Rom3DS(rom3ds.parse_rom_file(Path(path), stream), stream)
+            except ValueError as e:
+                raise e from None  # Clear cause data
+            match parsed_rom.get_title_id():
+                case patch.TITLE_ID_US:
+                    pass
+                case patch.TITLE_ID_PAL:
+                    raise ValueError("The PAL version of Metroid: Samus Returns is not supported")
+                case patch.TITLE_ID_JP:
+                    raise ValueError("The JP version of Metroid: Samus Returns is not supported")
+                case title_id:
+                    raise ValueError(f"Invalid title ID: expected {patch.TITLE_ID_US}, got {title_id}")
 
 
 class TargetSystem(StrEnum):

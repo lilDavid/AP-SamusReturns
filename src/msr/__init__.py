@@ -1,6 +1,6 @@
 from collections import Counter
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import ClassVar
 
 import Utils
 from BaseClasses import ItemClassification, Tutorial
@@ -69,23 +69,26 @@ class SamusReturnsWorld(World):
     def generate_early(self):
         self.topology_present = self.is_debug()
 
-        if self.options.dna_available.value < self.options.dna_required.value:
-            self.options.dna_available.value = self.options.dna_required.value
+        if self.is_universal_tracker():
+            self.set_options_from_slot_data()
+        else:
+            if self.options.dna_available.value < self.options.dna_required.value:
+                self.options.dna_available.value = self.options.dna_required.value
 
-        self.ammo_amounts = {
-            ItemName.EnergyTank: 100,
-            ItemName.MissileLauncher: 24,
-            ItemName.MissileTank: 3,
-            ItemName.SuperMissile: 5,
-            ItemName.SuperMissileTank: 1,
-            ItemName.PowerBomb: 5,
-            ItemName.PowerBombTank: 1,
-            ItemName.AeionTank: 50,
-            ItemName.ScanPulse: 0,
-            ItemName.LightningArmor: 150,
-            ItemName.BeamBurst: 150,
-            ItemName.PhaseDrift: 150,
-        }
+            self.ammo_amounts = {
+                ItemName.EnergyTank: 100,
+                ItemName.MissileLauncher: 24,
+                ItemName.MissileTank: 3,
+                ItemName.SuperMissile: 5,
+                ItemName.SuperMissileTank: 1,
+                ItemName.PowerBomb: 5,
+                ItemName.PowerBombTank: 1,
+                ItemName.AeionTank: 50,
+                ItemName.ScanPulse: 0,
+                ItemName.LightningArmor: 150,
+                ItemName.BeamBurst: 150,
+                ItemName.PhaseDrift: 150,
+            }
 
         starting_items = Counter([ItemName.MissileLauncher])
         if self.options.starting_scan_pulse.value:
@@ -207,14 +210,23 @@ class SamusReturnsWorld(World):
     def is_universal_tracker(self):
         return hasattr(self.multiworld, "generation_is_fake")
 
-    def interpret_slot_data(self, slot_data: dict[str, Any]):
-        options: dict = slot_data["options"]
-        for key, value in options.items():
+    @staticmethod
+    def interpret_slot_data(slot_data):
+        # Trigger a re-gen instead
+        return slot_data
+
+    def set_options_from_slot_data(self):
+        re_gen_passthrough = getattr(self.multiworld, "re_gen_passthrough", {})
+        if not re_gen_passthrough or self.game not in re_gen_passthrough:
+            return
+        slot_data = re_gen_passthrough[self.game]
+
+        for key, value in slot_data["options"].items():
             option: Option | None = getattr(self.options, key, None)
             if option is not None:
                 setattr(self.options, key, option.from_any(value))
 
-        return slot_data
+        self.ammo_amounts = slot_data["ammo_amounts"]
 
 
 def launch_client(*args):

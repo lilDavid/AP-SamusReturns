@@ -12,7 +12,7 @@ from worlds.AutoWorld import WebWorld, World
 from . import lib as lib  # Set up module importer for open-samus-returns-rando
 from .data import GAME_NAME
 from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, item_groups, major_items, reserve_tanks
-from .locations import SamusReturnsLocation, location_groups, location_table
+from .locations import location_groups, location_table
 from .options import MetroidDnaRequired, SamusReturnsOptions, msr_option_groups
 from .patch import SamusReturnsPatch
 from .regions import connect_entrances, create_regions, set_location_rules
@@ -104,21 +104,6 @@ class SamusReturnsWorld(World):
         set_starting_room(self)
 
         self.set_completion_rule(Has(VICTORY))
-
-        # TODO: Temporary fix so the locations can all be present
-        from BaseClasses import Region
-
-        region = Region("Placeholder", self.player, self.multiworld)
-        locations = {location.name for location in self.get_locations()}
-        region.add_locations(
-            {name: data.ap_id for name, data in location_table.items() if name not in locations}, SamusReturnsLocation
-        )
-        self.multiworld.regions.append(region)
-        self.create_entrance(
-            self.get_region(self.origin_region_name),
-            region,
-            Has(ItemName.MetroidDna, self.options.dna_required.value),
-        )
 
     def create_items(self):
         prefilled_locations = place_starting_loadout(self)

@@ -1,4 +1,4 @@
-from rule_builder.rules import And, Has, HasAll, Or
+from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import VICTORY, ItemName
 from ...logic import (
@@ -9,14 +9,18 @@ from ...logic import (
     can_climb_wall,
     can_damage_metroid,
     can_fly_vertical,
+    can_high_jump,
     can_high_ledge,
+    can_ibj,
     can_power_bomb,
     can_spider,
+    can_spider_boost,
+    can_thorns,
     can_wall_jump,
     door_rules,
 )
-from ...options import WallJump
-from ..room_names import Area, Area1
+from ...options import IBJ, WallJump
+from ..room_names import Area, Area1, Area8
 from ..room_names import SurfaceEast as East
 from ..room_names import SurfaceWest as West
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
@@ -24,6 +28,17 @@ from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomD
 can_escape_cavern_cavity = can_climb_shaft
 can_escape_energy_recharge_shaft = can_high_ledge
 can_escape_charge_chamber = Or(can_high_ledge & door_rules[Door.Missile], door_rules[Door.Charge])
+
+can_escape_transport_area_8 = can_climb_shaft
+can_cross_transport_area_8 = And(
+    Has(ItemName.Hatchling),
+    can_escape_transport_area_8,
+    Or(Has(ItemName.SpaceJump), can_spider_boost, can_thorns),
+)
+can_combat_ridley = And(
+    Has(ItemName.SpaceJump),  # Get over tail slide attack
+    HasAll(ItemName.SpazerBeam, ItemName.PlasmaBeam),  # Courtesy to the player until I add actual combat logic
+)
 
 surface_east_data = AreaData(
     area=Area.SurfaceEast,
@@ -64,19 +79,21 @@ surface_east_data = AreaData(
                             East.SurfaceCrumbleChallenge,
                             access_rule=can_climb_wall & can_power_bomb,
                         ),
-                        # TODO
-                        # ExitData(
-                        #     Door.Open,
-                        #     West.TransportArea8,
-                        #     access_rule=Has(ItemName.Hatchling),
-                        # ),
+                        ExitData(
+                            Door.Open,
+                            West.TransportArea8.subregion("Exit"),
+                            access_rule=Has(ItemName.Hatchling),
+                        ),
                     ],
                     events=[
                         EventData(
                             "Proteus Ridley",
                             VICTORY,
-                            # TODO
-                            access_rule=Has(ItemName.Hatchling) & HasDna(),
+                            access_rule=And(
+                                HasAll(ItemName.Hatchling, "Ridley's attention"),
+                                HasDna(),
+                                can_combat_ridley,
+                            ),
                         )
                     ],
                 ),
@@ -648,7 +665,99 @@ surface_west_data = AreaData(
         RoomData(
             West.TransportArea8,
             id="collision_camera_017",
-            regions=[],  # TODO
+            regions=[
+                RegionData(
+                    "Elevator",
+                    exits=[
+                        ExitData(
+                            Door.Elevator,
+                            Area8.TransportSurface.subregion("Elevator"),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Left Shaft"),
+                            access_rule=Has(ItemName.Hatchling) & can_escape_transport_area_8,
+                        ),
+                    ],
+                ),
+                RegionData(
+                    "Left Shaft",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Subregion("Elevator"),
+                            access_rule=Has(ItemName.Hatchling),
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Hallway"),
+                            access_rule=can_cross_transport_area_8,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Left",
+                            access_rule=And(
+                                HasAll(ItemName.Hatchling, ItemName.LightningArmor, ItemName.MorphBall),
+                                can_climb_wall,
+                            ),
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Hallway",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Subregion("Left Shaft"),
+                            access_rule=can_cross_transport_area_8,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            Subregion("Exit"),
+                            access_rule=HasAny(ItemName.Hatchling, ItemName.MorphBall) & can_escape_transport_area_8,
+                        ),
+                    ],
+                    pickups=[
+                        PickupData(
+                            "Right",
+                            access_rule=And(
+                                HasAll(ItemName.Hatchling, ItemName.MorphBall),
+                                Or(
+                                    Has(ItemName.SpaceJump),
+                                    And(
+                                        can_high_jump,
+                                        Has(ItemName.LightningArmor) | can_spider,
+                                    ),
+                                    can_ibj(IBJ.option_diagonal),
+                                ),
+                            ),
+                        )
+                    ],
+                ),
+                RegionData(
+                    "Exit",
+                    exits=[
+                        ExitData(
+                            Door.Open,
+                            Subregion("Hallway"),
+                            access_rule=HasAny(ItemName.Hatchling, ItemName.MorphBall) & can_escape_transport_area_8,
+                        ),
+                        ExitData(
+                            Door.Open,
+                            East.LandingSite.subregion("West"),
+                            access_rule=HasAny(ItemName.Hatchling, ItemName.MorphBall) & can_escape_transport_area_8,
+                        ),
+                    ],
+                    events=[
+                        EventData(
+                            "Exit",
+                            item_name="Ridley's attention",
+                            access_rule=HasDna(),
+                        ),
+                    ],
+                ),
+            ],
         ),
     ],
 )

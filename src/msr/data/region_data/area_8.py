@@ -19,7 +19,7 @@ from ...logic import (
     door_rules,
 )
 from ...options import Movement, WallJump
-from ..room_names import Area, Area7, Area8
+from ..room_names import Area, Area7, Area8, SurfaceWest
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
 # TODO: Bombless Metroid combat trick
@@ -145,10 +145,10 @@ area_8_data = AreaData(
                             Subregion("Bridge"),
                             access_rule=Has(ItemName.Hatchling),
                         ),
-                        # ExitData(
-                        #     Door.Elevator,
-                        #     SurfaceWest.TransportArea8,  # TODO: Area 8
-                        # ),
+                        ExitData(
+                            Door.Elevator,
+                            SurfaceWest.TransportArea8.subregion("Elevator"),
+                        ),
                     ],
                 ),
             ],

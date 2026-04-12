@@ -32,6 +32,15 @@ class MetroidDnaRequired(Range):
 
 
 # Item pool
+class LocalDna(Range):
+    """Minimum percentage of Metroid DNA that will be in your game"""
+
+    display_name = "Local Metroid DNA"
+    range_start = 0
+    range_end = 100
+    default = 0
+
+
 class ReserveTankShuffle(Toggle):
     """
     Include the Energy, Missile, and Aeion Reserve Tanks in the item pool.
@@ -169,6 +178,7 @@ msr_option_groups = [
     OptionGroup(
         "Item Pool",
         [
+            LocalDna,
             ReserveTankShuffle,
             ScanPulseStart,
         ],
@@ -208,6 +218,7 @@ class SamusReturnsOptions(PerGameCommonOptions):
     death_link: DeathLink
 
     # Item pool
+    local_dna: LocalDna
     shuffle_reserve_tanks: ReserveTankShuffle
     starting_scan_pulse: ScanPulseStart
 

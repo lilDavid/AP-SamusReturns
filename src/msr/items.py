@@ -54,6 +54,7 @@ class ItemName(StrEnum):
     MissileReserve = "Missile Reserve Tank"
 
     MetroidDna = "Metroid DNA"
+    MetroidDnaLocal = "Local Metroid DNA"
     Hatchling = "Metroid Hatchling"
 
     Nothing = "Nothing"

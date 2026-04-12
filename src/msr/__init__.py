@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import ClassVar
 
 import Utils
-from BaseClasses import ItemClassification, Tutorial
+from BaseClasses import ItemClassification, MultiWorld, Tutorial
 from Options import DeathLink, Option
 from rule_builder.rules import Has
 from worlds import LauncherComponents as Launcher
@@ -13,7 +13,7 @@ from . import lib as lib  # Set up module importer for open-samus-returns-rando
 from .data import GAME_NAME
 from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, item_groups, major_items, reserve_tanks
 from .locations import location_groups, location_table
-from .options import MetroidDnaRequired, SamusReturnsOptions, msr_option_groups
+from .options import LocalDna, MetroidDnaRequired, SamusReturnsOptions, msr_option_groups
 from .patch import SamusReturnsPatch
 from .regions import connect_entrances, create_regions, set_location_rules
 from .settings import SamusReturnsSettings
@@ -75,6 +75,8 @@ class SamusReturnsWorld(World):
             if self.options.dna_available.value < self.options.dna_required.value:
                 self.options.dna_available.value = self.options.dna_required.value
 
+            self.options.local_items.value.add(ItemName.MetroidDnaLocal)
+
             self.ammo_amounts = {
                 ItemName.EnergyTank: 100,
                 ItemName.MissileLauncher: 24,
@@ -116,9 +118,12 @@ class SamusReturnsWorld(World):
 
         # Major items
         major_item_pool.update(major_items.keys())
-        major_item_pool[ItemName.MetroidDna] = self.options.dna_available.value
         if self.options.shuffle_reserve_tanks:
             major_item_pool.update(reserve_tanks.keys())
+
+        local_dna_count = get_local_dna_count(self)
+        major_item_pool[ItemName.MetroidDna] = self.options.dna_available.value - local_dna_count
+        major_item_pool[ItemName.MetroidDnaLocal] = local_dna_count
 
         # Tanks
         major_item_pool[ItemName.EnergyTank] = 10  # E-tanks should be immune to tank displacement
@@ -145,6 +150,17 @@ class SamusReturnsWorld(World):
 
         self.multiworld.itempool += [self.create_item(name) for name in major_item_pool.elements()]
         self.multiworld.itempool += [self.create_item(name) for name in minor_item_pool.elements()]
+
+    @classmethod
+    def stage_finalize_multiworld(cls, multiworld: MultiWorld):
+        # Hide the use of item names to implement forced-local Metroid DNA amounts
+        for location in multiworld.get_locations():
+            assert location.item
+            if location.item.game == cls.game and location.item.name == ItemName.MetroidDnaLocal:
+                location.item.name = ItemName.MetroidDna
+        for world in multiworld.worlds.values():
+            if world.game == cls.game:
+                world.options.local_items.value.discard(ItemName.MetroidDnaLocal)
 
     def generate_output(self, output_directory: str):
         patch = SamusReturnsPatch(player=self.player, player_name=self.player_name)
@@ -194,9 +210,7 @@ class SamusReturnsWorld(World):
         if self.is_universal_tracker() and name == self.glitches_item_name:
             return SamusReturnsItem(name, ItemClassification.progression, None, self.player)
 
-        # Convert to ItemName to check validity, then to string to prevent subclassing shenanigans
-        # (Both are acceptable to pass in and fortunately one of these conversions will be a no-op)
-        data = item_data_table[ItemName(name)]
+        data = item_data_table[ItemName.MetroidDna if name == ItemName.MetroidDnaLocal else ItemName(name)]
         return SamusReturnsItem(name, data.classification(), data.ap_id, self.player)
 
     def visualize_regions(self):
@@ -227,6 +241,22 @@ class SamusReturnsWorld(World):
                 setattr(self.options, key, option.from_any(value))
 
         self.ammo_amounts = slot_data["ammo_amounts"]
+
+
+def get_local_dna_count(world: SamusReturnsWorld):
+    dna_available = world.options.dna_available.value
+    local_dna = world.options.local_dna.value
+    if world.multiworld.players == 1 or dna_available == 0 or local_dna == 0:
+        return 0
+    if local_dna == 100:
+        return dna_available
+
+    local_dna_amount = dna_available * local_dna / LocalDna.range_end
+    local_dna_count = int(local_dna_amount)
+    if world.random.random() < (local_dna_amount - local_dna_count):
+        local_dna_count += 1
+    assert local_dna_count <= dna_available
+    return local_dna_count
 
 
 def launch_client(*args):

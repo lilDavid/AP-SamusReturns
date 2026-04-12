@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from rule_builder.options import OptionFilter
-from rule_builder.rules import And, False_, Has, HasAll, HasAny, Or, Rule, True_
+from rule_builder.rules import And, False_, Has, HasAll, HasAny, HasFromList, Or, Rule, True_
 from typing_extensions import override
 
 from .data import GAME_NAME
@@ -24,7 +24,11 @@ if TYPE_CHECKING:
 class HasDna(Rule["SamusReturnsWorld"], game=GAME_NAME):
     @override
     def _instantiate(self, world: SamusReturnsWorld) -> Rule.Resolved:
-        return Has(ItemName.MetroidDna, world.options.dna_required.value).resolve(world)
+        return HasFromList(
+            ItemName.MetroidDna,
+            ItemName.MetroidDnaLocal,
+            count=world.options.dna_required.value,
+        ).resolve(world)
 
 
 @dataclass

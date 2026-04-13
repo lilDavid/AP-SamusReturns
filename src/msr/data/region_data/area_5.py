@@ -1133,6 +1133,7 @@ area_5_exterior_data = AreaData(
                         PickupData(
                             "Gamma Metroid",
                             access_rule=And(
+                                can_damage_metroid,
                                 can_climb_wall,
                                 can_bomb_block,
                             ),

@@ -480,13 +480,13 @@ class SamusReturnsContext(BaseContext):
             return
 
     async def give_items(self, msg: str, items: Sequence[tuple[str, int]], index: int):
+        from open_samus_returns_rando.misc_patches.lua_util import lua_convert
         from open_samus_returns_rando.pickups.multiworld_integration import get_lua_for_item
 
-        scenario = '""'
         self.game_state.received_item_index = None
-        await self.connector.run_lua(
-            f"RL.ReceivePickup('{msg}', '{get_lua_for_item([create_resource(items)], scenario)}', {index})"
-        )
+        message = lua_convert(msg, wrap_strings=True)
+        item_code = get_lua_for_item([create_resource(items)], '""')
+        await self.connector.run_lua(f"RL.ReceivePickup({message}, '{item_code}', {index})")
 
     async def give_item_if_not_owned(self, current_inventory: Counter[str], network_item: NetworkItem):
         received_item_index = self.game_state.received_item_index
@@ -626,7 +626,9 @@ class SamusReturnsContext(BaseContext):
             logger.exception(str(e))
 
     async def display_hud_message(self, text: str):
-        await self.run_lua(f"Scenario.QueueAsyncPopup({text!r})")
+        from open_samus_returns_rando.misc_patches.lua_util import lua_convert
+
+        await self.run_lua(f"Scenario.QueueAsyncPopup({lua_convert(text)})")
 
 
 def launch_game():

@@ -51,8 +51,12 @@ function RL.GivePendingPickup()
         return
     end
 
-    Scenario.QueueAsyncPopup(RL.PendingPickup.msg, 5.0)
-    Game.AddSF(5.5, RL.GetReceivedPickupsAndSend, "b", true)
+    if RL.PendingPickup.msg == nil then
+        Game.AddSF(0.5, RL.GetReceivedPickupsAndSend, "b", true)
+    else
+        Scenario.QueueAsyncPopup(RL.PendingPickup.msg, 5.0)
+        Game.AddSF(5.5, RL.GetReceivedPickupsAndSend, "b", true)
+    end
     RL.PendingPickup.code()
     Scenario.WriteToPlayerBlackboard("ReceivedPickups", "f", RL.ReceivedPickups() + 1)
 end

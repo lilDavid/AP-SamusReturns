@@ -479,7 +479,7 @@ class SamusReturnsContext(BaseContext):
         if await self.handle_aeion_capacity(current_inventory):
             return
 
-    async def give_items(self, msg: str, items: Sequence[tuple[str, int]], index: int):
+    async def give_items(self, msg: str | None, items: Sequence[tuple[str, int]], index: int):
         from open_samus_returns_rando.misc_patches.lua_util import lua_convert
         from open_samus_returns_rando.pickups.multiworld_integration import get_lua_for_item
 
@@ -506,10 +506,13 @@ class SamusReturnsContext(BaseContext):
             resources.append((ammo_id, ammo_amount))
             current_inventory[ammo_id] += ammo_amount
 
-        message = f"{item_name} "
-        message += "acquired" if item_name == ItemName.Hatchling else "online"
-        if network_item.player != self.slot:
-            message += f" ({self.player_names[network_item.player]})"
+        if self.has_collected_item(network_item):
+            message = None
+        else:
+            message = f"{item_name} "
+            message += "acquired" if item_name == ItemName.Hatchling else "online"
+            if network_item.player != self.slot:
+                message += f" ({self.player_names[network_item.player]})"
 
         await self.give_items(message, resources, received_item_index)
         return True
@@ -521,28 +524,34 @@ class SamusReturnsContext(BaseContext):
 
         item_data = tanks[item]
         current_capacity = current_inventory[item]
-        new_capacity = 0
-        sender = None
-        new_capacity, sender = self.get_count_and_sender(item, self.ammo_amounts[item])
+        new_capacity, last_item = self.get_received_count(item, self.ammo_amounts[item])
         new_capacity += self.ammo_amounts[launcher] * current_inventory[launcher]
 
         diff = new_capacity - current_capacity
-        if diff > 0:
-            message = f"{item[: -len(' Tank')]} capacity increased by {diff}"
-            if diff == self.ammo_amounts[item] and sender is not None:
-                message += f" ({sender})"
-            await self.give_items(message, [(item_data.item_id, diff)], received_item_index)
-            return True
-        return False
+        if diff <= 0:
+            return False
+
+        assert last_item is not None
+        message = f"{item[: -len(' Tank')]} capacity increased by {diff}"
+        if diff == self.ammo_amounts[item]:
+            if self.has_collected_item(last_item):
+                message = None
+            elif last_item.player != self.slot:
+                message += f" ({self.player_names[last_item.player]})"
+        await self.give_items(message, [(item_data.item_id, diff)], received_item_index)
+        return True
 
     async def give_e_tank(self, network_item: NetworkItem):
         received_item_index = self.game_state.received_item_index
         if received_item_index is None:
             return False
 
-        message = f"{ItemName.EnergyTank} acquired"
-        if network_item.player != self.slot:
-            message += f" ({self.player_names[network_item.player]})"
+        if self.has_collected_item(network_item):
+            message = None
+        else:
+            message = f"{ItemName.EnergyTank} acquired"
+            if network_item.player != self.slot:
+                message += f" ({self.player_names[network_item.player]})"
 
         await self.give_items(message, [(tanks[ItemName.EnergyTank].item_id, 1)], received_item_index)
         self.game_state.received_item_index = None
@@ -553,18 +562,24 @@ class SamusReturnsContext(BaseContext):
         if received_item_index is None:
             return False
 
-        current_capacity = 1000 + current_inventory[ItemName.AeionTank]
-        new_capacity, sender = self.get_count_and_sender(ItemName.AeionTank, self.ammo_amounts[ItemName.AeionTank])
+        current_capacity = current_inventory[ItemName.AeionTank]
+        new_capacity, last_item = self.get_received_count(ItemName.AeionTank, self.ammo_amounts[ItemName.AeionTank])
         for upgrade in (ItemName.ScanPulse, ItemName.LightningArmor, ItemName.BeamBurst, ItemName.PhaseDrift):
             new_capacity += self.ammo_amounts[upgrade] * current_inventory[upgrade]
+        new_capacity += 1000
         diff = new_capacity - current_capacity
-        if diff > 0:
-            message = f"Aeion capacity increased by {diff}"
-            if diff == self.ammo_amounts[ItemName.AeionTank] and sender is not None:
-                message += f" ({sender})"
-            await self.give_items(message, [(tanks[ItemName.AeionTank].item_id, diff)], received_item_index)
-            return True
-        return False
+        if diff <= 0:
+            return False
+
+        assert last_item is not None
+        message = f"Aeion capacity increased by {diff}"
+        if diff == self.ammo_amounts[ItemName.AeionTank]:
+            if self.has_collected_item(last_item):
+                message = None
+            elif last_item.player != self.slot:
+                message += f" ({self.player_names[last_item.player]})"
+        await self.give_items(message, [(tanks[ItemName.AeionTank].item_id, diff)], received_item_index)
+        return True
 
     async def handle_metroid_dna(self, current_inventory: Counter[str]):
         received_item_index = self.game_state.received_item_index
@@ -572,32 +587,35 @@ class SamusReturnsContext(BaseContext):
             return False
 
         current_amount = self.dna_required - current_inventory[ItemName.MetroidDna]
-        new_amount, sender = self.get_count_and_sender(ItemName.MetroidDna)
+        new_amount, last_item = self.get_received_count(ItemName.MetroidDna)
         diff = min(new_amount, self.dna_required) - current_amount
-        if diff > 0:
-            message = "Metroid DNA received"
-            if diff > 1:
-                message += f" x{diff}"
-            elif sender is not None:
-                message += f" ({sender})"
-            # TODO: Work out a way to increment area counts when receiving local DNAs
-            await self.give_items(message, [("ITEM_RANDO_DNA", diff)], received_item_index)
-            return True
-        return False
+        if diff <= 0:
+            return False
 
-    def get_count_and_sender(self, item: ItemName, amount_per_item: int = 1):
+        assert last_item is not None
+        message = "Metroid DNA acquired"
+        if diff > 1:
+            message += f" x{diff}"
+        elif self.has_collected_item(last_item):
+            message = None
+        elif last_item.player != self.slot:
+            message += f" ({self.player_names[last_item.player]})"
+        # TODO: Work out a way to increment area counts when receiving local DNAs
+        await self.give_items(message, [("ITEM_RANDO_DNA", diff)], received_item_index)
+        return True
+
+    def get_received_count(self, item: ItemName, amount_per_item: int = 1):
         amount = 0
-        sender = None
+        last_item = None
         for network_item in self.items_received:
             if network_item.item != item_data_table[item].ap_id:
                 continue
             amount += 1
-            sender = network_item.player
-        if amount > 1 or sender == self.slot:
-            sender_name = None
-        else:
-            sender_name = None if sender is None else self.player_names[sender]
-        return amount * amount_per_item, sender_name
+            last_item = network_item
+        return amount * amount_per_item, last_item
+
+    def has_collected_item(self, item: NetworkItem):
+        return item.player == self.slot and item.location in self.game_state.locations
 
     async def handle_death_link(self):
         if not self.death_link:

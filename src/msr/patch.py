@@ -193,22 +193,20 @@ class SamusReturnsPatch(APAutoPatchInterface):
         self.placed_dna = 0
         pickups = []
         for location in world.get_locations():
-            assert location.item is not None
             if location.address is None:
                 continue
+            assert location.item is not None
+            item = location.item
 
             pickup = location_table[location.name].to_pickup()
-            pickup["model"] = [self.get_pickup_model(world, location.item)]
-            if location.item.player == world.player:
-                item_data = item_data_table[location.item.name]
-                pickup["resources"] = self.create_resources(world, ItemName(location.item.name))
-                pickup["caption"] = f"{location.item.name} acquired."
+            pickup["model"] = [self.get_pickup_model(world, item)]
+            pickup["resources"] = [create_resource([(ItemId.NOTHING, 1)])]
+            if item.player == world.player:
+                item_data = item_data_table[item.name]
+                pickup["caption"] = f"{item.name} acquired."
                 pickup["sound"] = item_data.pickup_sound()
             else:
-                pickup["resources"] = [create_resource([(ItemId.NOTHING, 1)])]
-                pickup["caption"] = (
-                    f"{world.multiworld.player_name[location.item.player]}'s {location.item.name} acquired."
-                )
+                pickup["caption"] = f"{world.multiworld.player_name[item.player]}'s {item.name} acquired."
                 pickup["sound"] = PickupSound.TANK
             pickups.append(pickup)
         return pickups
@@ -243,6 +241,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
                     return ItemModel.OffworldGeneric
                 return ItemModel.ItemSphere
 
+    # Currently unused since items are completely remote
     def create_resources(self, world: SamusReturnsWorld, item: ItemName):
         data = item_data_table[item]
         match data:

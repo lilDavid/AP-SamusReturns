@@ -253,7 +253,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
             case TankData(_, item_id):
                 return [create_resource([(item_id, world.ammo_amounts[item])])]
             case UniqueItemData(_, item_id) | OtherItemData(_, item_id):
-                ammo_id = launcher_to_ammo.get(item.name)
+                ammo_id = launcher_to_ammo.get(item)
                 if ammo_id is None:
                     return [create_resource([(item_id, 1)])]
                 else:  # noqa: RET505

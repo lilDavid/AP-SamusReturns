@@ -656,8 +656,11 @@ def launch_game():
 
     from . import SamusReturnsWorld
 
-    # In 3DS modding, we supply a patch to the loader, so we actually need to launch the original rom
     settings: SamusReturnsSettings = SamusReturnsWorld.settings
+    if settings.target_system == TargetSystem.CONSOLE:
+        return
+
+    # In 3DS modding, we supply a patch to the loader, so we actually need to launch the original rom
     auto_start = settings.emulator_settings.rom_start
     rom_file = settings.rom_file
 

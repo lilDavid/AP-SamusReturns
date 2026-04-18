@@ -663,6 +663,11 @@ surface_west_data = AreaData(
     Area.SurfaceWest,
     rooms=[
         RoomData(
+            West.LandingSite,
+            id="collision_camera_000",
+            regions=[],  # Logic is handled by Surface East Landing Site. This is only here so the room name appears.
+        ),
+        RoomData(
             West.TransportArea8,
             id="collision_camera_017",
             regions=[

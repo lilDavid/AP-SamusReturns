@@ -650,6 +650,7 @@ class SamusReturnsContext(BaseContext):
 
 
 def launch_game():
+    import shlex
     import subprocess
     import webbrowser
 
@@ -661,7 +662,7 @@ def launch_game():
     rom_file = settings.rom_file
 
     if isinstance(auto_start, str):
-        subprocess.Popen([auto_start, rom_file], close_fds=True)
+        subprocess.Popen([*shlex.split(auto_start), rom_file], close_fds=True)
     elif auto_start:
         webbrowser.open(rom_file)
 

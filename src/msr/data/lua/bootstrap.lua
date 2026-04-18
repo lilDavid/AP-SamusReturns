@@ -69,6 +69,10 @@ function RL.SendPlayerDeath()
     RL.SendNewGameState("player_death:")
 end
 
+function RL.SendGameBeaten()
+    RL.SendNewGameState("game_beaten:")
+end
+
 function RL.GetGameStateAndSend()
     local game_mode = Game.GetCurrentGameModeID()
     local scenario
@@ -97,6 +101,9 @@ function RL.UpdateRDVClient(new_scenario)
         if RL.PendingPickup == nil then
             Game.AddSF(0.05, RL.GetReceivedPickupsAndSend, "b", false)
         end
+    end
+    if Init.bBeatenSinceLastReboot then
+        RL.SendGameBeaten()
     end
 end
 

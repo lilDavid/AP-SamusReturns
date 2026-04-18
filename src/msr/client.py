@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import Utils
-from CommonClient import ClientCommandProcessor, get_base_parser, gui_enabled, logger, server_loop
+from CommonClient import ClientCommandProcessor, ClientStatus, get_base_parser, gui_enabled, logger, server_loop
 from NetUtils import NetworkItem
 from worlds._bizhawk.context import AuthStatus
 from worlds.Files import AutoPatchRegister
@@ -143,6 +143,7 @@ class SamusReturnsState:
     locations: frozenset[int] = frozenset()
     inventory: Counter[str] | None = None
     received_item_index: int | None = None
+    game_beaten: bool = False
     last_death: float = 0
 
     def is_in_game(self):
@@ -345,6 +346,8 @@ class SamusReturnsContext(BaseContext):
                 operations=[{"operation": "replace", "value": self.game_state.scenario}],
             )
             self.current_area = self.game_state.scenario
+        if self.game_state.game_beaten and not self.finished_game:
+            await self.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
         await self.handle_death_link()
 
     async def send_msg(self, **kwargs):
@@ -404,6 +407,8 @@ class SamusReturnsContext(BaseContext):
                                     self.game_state.scenario = None
                             case "player_death":
                                 self.game_state.last_death = time.time()
+                            case "game_beaten":
+                                self.game_state.game_beaten = True
                             case _:
                                 logger.debug("Unrecognized game state key: %s", key)
                     case PacketType.COLLECTED_INDICES:

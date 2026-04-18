@@ -32,13 +32,9 @@ can_cross_crumbling_bridge = Has(ItemName.PhaseDrift) | can_spider_boost
 can_navigate_hideout_sprawl_tunnels = And(
     HasAll(ItemName.ScrewAttack, ItemName.SuperMissile, ItemName.GrappleBeam),
     can_bomb_block,
-    Or(
-        HasAny(ItemName.HighJumpBoots, ItemName.ScrewAttack),
-        can_wall_jump(WallJump.option_simple),
-    ),
+    # Screw attack is necessary to do this and sufficient to access the save station
 )
 can_combat_diggernaut = And(
-    can_spider,
     HasAny(ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst),
     HasAll(ItemName.MorphBall, ItemName.Bomb, ItemName.SpiderBall, ItemName.SpaceJump),
 )

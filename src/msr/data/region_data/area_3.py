@@ -1616,8 +1616,10 @@ area_3_interior_data = AreaData(
                                         HasAny(ItemName.Bomb, ItemName.SpiderBall, ItemName.SpringBall),
                                     ),
                                 ),
-                                Has(ItemName.GrappleBeam),
-                                # Feels like there's supposed to be a block but it isn't there, you can just fall in
+                                Or(
+                                    Has(ItemName.Hatchling),
+                                    can_bomb_block & Has(ItemName.GrappleBeam),
+                                ),
                             )
                         )
                     ],

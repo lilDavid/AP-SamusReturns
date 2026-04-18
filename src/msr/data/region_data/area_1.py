@@ -253,7 +253,7 @@ area_1_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Area1.SpiderBall.subregion("Tunnel"),
-                            access_rule=can_bomb,
+                            access_rule=can_bomb_block,
                         ),
                     ],
                     pickups=[
@@ -467,7 +467,7 @@ area_1_data = AreaData(
                             Area1.CavernsAlphaSwAccess,
                         ),
                         ExitData(
-                            Door.Open,
+                            Door.Normal,
                             Area1.CavernsAlphaSe,
                         ),
                     ],
@@ -768,11 +768,6 @@ area_1_data = AreaData(
                             Door.Open,
                             Area1.CavernsHub,
                         ),
-                        # ExitData(
-                        #     Door.MorphTunnel,
-                        #     Area1.WaterMaze.subregion("Pickup"),
-                        #     Grapple block
-                        # ),
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Pickup tunnel"),

@@ -124,8 +124,8 @@ can_tunnel_steel_orb = Or(
 # Brief contact at least
 can_thorns = Has(ItemName.LightningArmor) | can_damage_boost(DamageBoost.option_static)
 
-# TODO: Proper combat logic. SJ seems required for no damage
-can_combat_omega = can_damage_metroid & Has(ItemName.SpaceJump)
+# TODO: Proper combat logic. SJ and morph both seem required for no damage
+can_combat_omega = can_damage_metroid & HasAll(ItemName.SpaceJump, ItemName.MorphBall)
 
 door_rules = {
     Door.Open: True_(),

@@ -154,7 +154,7 @@ reserve_tanks = {
 
 other_items: dict[ItemName, OtherItemData] = {
     ItemName.MetroidDna: OtherItemData(
-        91, ItemId.DNA, ItemModel.Dna, ItemClassification.progression_skip_balancing, sound=PickupSound.DNA
+        91, ItemId.DNA, ItemModel.Dna, ItemClassification.progression_skip_balancing, sound=PickupSound.AEION
     ),
     ItemName.Nothing: OtherItemData(
         100, ItemId.NOTHING, ItemModel.ItemSphere, ItemClassification.filler, sound=PickupSound.TANK

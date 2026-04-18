@@ -64,8 +64,11 @@ class TankData(NamedTuple):
     ap_id: int
     item_id: ItemId
     model: ItemModel
+    is_useful: bool = False
 
     def classification(self):
+        if self.is_useful:
+            return ItemClassification.useful
         # return ItemClassification.progression_deprioritized_skip_balancing
         return ItemClassification.filler
 
@@ -109,7 +112,7 @@ tanks = {
     ItemName.MissileTank: TankData(1, ItemId.MISSILE_TANKS, ItemModel.MissileTank),
     ItemName.SuperMissileTank: TankData(2, ItemId.SUPER_MISSILE_TANKS, ItemModel.SuperMissileTank),
     ItemName.PowerBombTank: TankData(3, ItemId.POWER_BOMB_TANKS, ItemModel.PowerBombTank),
-    ItemName.EnergyTank: TankData(4, ItemId.ENERGY_TANKS, ItemModel.EnergyTank),
+    ItemName.EnergyTank: TankData(4, ItemId.ENERGY_TANKS, ItemModel.EnergyTank, is_useful=True),
     ItemName.AeionTank: TankData(5, ItemId.MAX_AEION, ItemModel.AeionTank),
 }
 

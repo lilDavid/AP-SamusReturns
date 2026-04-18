@@ -87,7 +87,7 @@ class SamusReturnsCommandProcessor(ClientCommandProcessor):
             logger.info(self.ctx.ip_address or "<unset>")
         else:
             self.ctx.ip_address = ip_address
-            self.ctx.force_client_dc = True
+            self.ctx.connector.disconnect()
 
     def _cmd_death_link(self):
         """Toggle Death Link from client. Overrides default setting."""
@@ -182,7 +182,6 @@ class SamusReturnsContext(BaseContext):
     ip_address: str
     connector: SamusReturnsConnector
     game_state: SamusReturnsState
-    force_client_dc: bool
 
     # Slot data
     ammo_amounts: dict[str, int]
@@ -211,7 +210,6 @@ class SamusReturnsContext(BaseContext):
         self.ip_address = self.get_default_ip_address()
         self.connector = SamusReturnsConnector()
         self.game_state = SamusReturnsState()
-        self.force_client_dc = False
         self.killing_player = False
 
         self.ammo_amounts = {}
@@ -263,10 +261,6 @@ class SamusReturnsContext(BaseContext):
         logger.debug("Starting Samus Returns connector, attempting to connect to game")
         while not self.exit_event.is_set():
             try:
-                if self.force_client_dc:
-                    self.connector.disconnect()
-                    self.force_client_dc = False
-
                 if not self.connector.is_connected():
                     if not self.ip_address:
                         logger.error("Client IP address is unset. Use /console_ip to connect to the game.")
@@ -278,18 +272,7 @@ class SamusReturnsContext(BaseContext):
                         await asyncio.sleep(BACKOFF_LONG)
                         continue
 
-                    await self.connector.send_msg(
-                        PacketType.HANDSHAKE,
-                        struct.pack("<B", Subscription.LOGGING | Subscription.MULTIWORLD),
-                    )
-                    await self._read_msg()
-
-                    await self.load_rando_code()
-
-                    await self.connector.run_lua('Game.AddSF(0.5, RL.SendRandoIdentifier, "")')
-                    await self._read_msg()
-                    await self.connector.run_lua('Game.AddSF(1.0, RL.UpdateRDVClient, "")')
-                    await self._read_msg()
+                    await asyncio.wait_for(self.setup_game(), 5)
 
                     self.game_reader_task = asyncio.create_task(self.handle_messages(), name="Samus Returns Messages")
 
@@ -319,7 +302,7 @@ class SamusReturnsContext(BaseContext):
 
                 await asyncio.sleep(POLL_COOLDOWN)
 
-            except (SRConnectorError, ConnectionResetError) as e:
+            except (SRConnectorError, ConnectionResetError, OSError) as e:
                 self.connector.disconnect()
                 logger.debug(e, exc_info=True)
                 logger.info("Unable to connect to game")
@@ -333,6 +316,20 @@ class SamusReturnsContext(BaseContext):
         self.connector.disconnect()
         if self.game_reader_task:
             await self.game_reader_task
+
+    async def setup_game(self):
+        await self.connector.send_msg(
+            PacketType.HANDSHAKE,
+            struct.pack("<B", Subscription.LOGGING | Subscription.MULTIWORLD),
+        )
+        await self._read_msg()
+
+        await self.load_rando_code()
+
+        await self.connector.run_lua('Game.AddSF(0.5, RL.SendRandoIdentifier, "")')
+        await self._read_msg()
+        await self.connector.run_lua('Game.AddSF(1.0, RL.UpdateRDVClient, "")')
+        await self._read_msg()
 
     async def handle_game_ready(self):
         await self.check_locations(self.game_state.locations)

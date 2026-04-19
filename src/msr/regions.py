@@ -59,7 +59,12 @@ def create_regions(world: SamusReturnsWorld):
     regions: list[Region] = []
     for room, subregion in walk_region_graph():
         name = room.name.subregion(subregion.name)
-        region = Region(name, world.player, multiworld=world.multiworld)  # TODO: Hint text
+        region = Region(
+            name,
+            world.player,
+            multiworld=world.multiworld,
+            hint=f"in {room.name.area().short_name}: {room.name}",
+        )
 
         for pickup in subregion.pickups:
             pickup_name = room.name.location(pickup.name)

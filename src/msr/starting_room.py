@@ -5,7 +5,7 @@ from collections import Counter
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, NamedTuple
 
-from BaseClasses import CollectionState, Item, ItemClassification
+from BaseClasses import CollectionState, Item, ItemClassification, Location
 from Fill import fill_restrictive
 
 from .data import GAME_NAME
@@ -43,11 +43,11 @@ def set_starting_room(world: SamusReturnsWorld):
     world.origin_region_name = starting_region
 
 
-def place_starting_loadout(world: SamusReturnsWorld):
+def place_starting_loadout(world: SamusReturnsWorld) -> set[Location]:
     precollected = Counter(ItemName(item.name) for item in world.multiworld.precollected_items[world.player])
     loadout = Counter(landing_site_data.loadout) - precollected
     if loadout.total() == 0:
-        return 0
+        return set()
 
     # Determine the maximal set of locations we could put these items in
     # The result will contain locations that go unused because they're only reachable with all and that's ok
@@ -58,7 +58,7 @@ def place_starting_loadout(world: SamusReturnsWorld):
         state.collect(item, prevent_sweep=True)
     state.sweep_for_advancements(locations=world_locations)
     locations = [loc for loc in world_locations if loc.item is None and loc.can_reach(state)]
-    initial_location_count = len(locations)
+    initial_locations = set(locations)
 
     state = CollectionState(world.multiworld)
     state.sweep_for_advancements(locations=world_locations)
@@ -82,4 +82,4 @@ def place_starting_loadout(world: SamusReturnsWorld):
         logging.debug("Added %s to starting equipment", world.multiworld.get_name_string_for_object(item))
 
     world.skipped_items.update(loadout)
-    return initial_location_count - len(locations)
+    return initial_locations.difference(locations)

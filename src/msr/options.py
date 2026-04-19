@@ -31,6 +31,10 @@ class MetroidDnaRequired(Range):
     default = 10
 
 
+class Hints(DefaultOnToggle):
+    """Makes DNA statues give hints about your items and locations"""
+
+
 # Item pool
 class LocalDna(Range):
     """Minimum percentage of Metroid DNA that will be in your game"""
@@ -215,6 +219,7 @@ class SamusReturnsOptions(PerGameCommonOptions):
     # Game options
     dna_available: MetroidDnaAvailable
     dna_required: MetroidDnaRequired
+    hints: Hints
     death_link: DeathLink
 
     # Item pool

@@ -54,6 +54,12 @@ def create_resource(resources: Sequence[tuple[str, int]]):
     return [{"item_id": item_id, "quantity": quantity} for item_id, quantity in resources]
 
 
+def sentence_case(string: str):
+    if string == "":
+        return ""
+    return string[0].upper() + string[1:]
+
+
 class SamusReturnsPatch(APAutoPatchInterface):
     game = GAME_NAME
     patch_file_ending = ".apmsr"
@@ -141,7 +147,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
             "starting_location": landing_site_data.to_config(),
             "starting_items": self.create_starting_items(world),
             "pickups": self.create_pickups(world),
-            "hints": [],
+            "hints": self.create_hints(world),
             "objective": {
                 "final_boss": "Ridley",
                 "total_dna": world.options.dna_available.value,
@@ -224,6 +230,51 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 pickup["sound"] = PickupSound.TANK
             pickups.append(pickup)
         return pickups
+
+    def create_hints(self, world: SamusReturnsWorld):
+        hints = []
+        for hint, placements in world.hints.items():
+            lines = []
+            for placement in placements:
+                if isinstance(placement, Location):
+                    assert placement.item
+                    item_name = self.get_item_name(world, placement.item)
+                    location_name = self.get_location_name(world, placement)
+                    lines.append(sentence_case(f"{location_name} contains {item_name}."))
+                elif isinstance(placement, Item):
+                    assert placement.location
+                    item_name = self.get_item_name(world, placement)
+                    location_name = self.get_location_name(world, placement.location)
+                    lines.append(sentence_case(f"{item_name} can be found at {location_name}."))
+            if lines:
+                hints.append(hint.get_config(lines))
+        return hints
+
+    @staticmethod
+    def get_item_name(world: SamusReturnsWorld, item: Item):
+        if world.multiworld.players > 1:
+            if item.player == world.player:
+                return f"your {item.name}"
+            return f"{world.multiworld.player_name[item.player]}'s {item.name}"
+
+        item_data = item_data_table[ItemName(item.name)]
+        if item.name in (ItemName.EnergyTank, ItemName.AeionTank):
+            return f"an {item.name}"
+        if type(item_data) is TankData:
+            return f"a {item.name}"
+        if type(item_data) is UniqueItemData:
+            return f"the {item.name}"
+        if type(item_data) is OtherItemData:
+            return item.name
+        raise TypeError(type(item_data))
+
+    @staticmethod
+    def get_location_name(world: SamusReturnsWorld, location: Location):
+        if world.multiworld.players == 1:
+            return location.name
+        if location.player == world.player:
+            return f"your {location.name}"
+        return f"{world.multiworld.player_name[location.player]}'s {location.name}"
 
     @staticmethod
     def metroids_after_actors(location: Location):

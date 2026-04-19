@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 import Utils
 from CommonClient import ClientCommandProcessor, ClientStatus, get_base_parser, gui_enabled, logger, server_loop
-from NetUtils import NetworkItem
+from NetUtils import HintStatus, NetworkItem
 from worlds._bizhawk.context import AuthStatus
 from worlds.Files import AutoPatchRegister
 
@@ -143,6 +143,7 @@ class SamusReturnsState:
     locations: frozenset[int] = frozenset()
     inventory: Counter[str] | None = None
     received_item_index: int | None = None
+    hints_seen: frozenset[str] = frozenset()
     game_beaten: bool = False
     last_death: float = 0
 
@@ -173,6 +174,7 @@ class SamusReturnsContext(BaseContext):
     log_filter: SamusReturnsFilter
 
     current_area: AreaId | None
+    hints_seen: frozenset[str]
     last_death: float
     killing_player: bool
 
@@ -186,6 +188,7 @@ class SamusReturnsContext(BaseContext):
     # Slot data
     ammo_amounts = default_ammo_amounts
     dna_required: int
+    hints: dict[str, list[tuple[int, int]]] | None
     death_link: bool | None
 
     def __init__(self, server_address: str | None, password: str | None):
@@ -205,6 +208,7 @@ class SamusReturnsContext(BaseContext):
         self.password_requested = False
 
         self.current_area = None
+        self.hints_seen = frozenset()
         self.last_death = 0
 
         self.ip_address = self.get_default_ip_address()
@@ -256,8 +260,11 @@ class SamusReturnsContext(BaseContext):
             try:
                 self.ammo_amounts = slot_data["ammo_amounts"]
                 self.dna_required = slot_data["options"]["dna_required"]
+                self.hints = slot_data.get("hints", None)
                 if self.death_link is None:
                     self.death_link = slot_data["options"].get("death_link", None)
+
+                self.hints_seen = frozenset()
             except KeyError as e:
                 message = f'Missing slot data key: "{e}"'
                 logger.exception(message)
@@ -359,6 +366,7 @@ class SamusReturnsContext(BaseContext):
                 operations=[{"operation": "replace", "value": self.game_state.scenario}],
             )
             self.current_area = self.game_state.scenario
+        await self.handle_hints()
         if self.game_state.game_beaten and not self.finished_game:
             await self.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
         await self.handle_death_link()
@@ -376,6 +384,8 @@ class SamusReturnsContext(BaseContext):
 
     async def load_rando_code(self):
         await self.connector.run_lua(get_lua_file("bootstrap.lua"))
+        logger.debug(await self._read_msg())
+        await self.connector.run_lua(get_lua_file("hooks.lua"))
         logger.debug(await self._read_msg())
 
         location_data = [
@@ -418,6 +428,8 @@ class SamusReturnsContext(BaseContext):
                                     self.game_state.scenario = AreaId(value)
                                 except ValueError:
                                     self.game_state.scenario = None
+                            case "hint":
+                                self.game_state.hints_seen = self.game_state.hints_seen.union((value,))
                             case "player_death":
                                 self.game_state.last_death = time.time()
                             case "game_beaten":
@@ -634,6 +646,20 @@ class SamusReturnsContext(BaseContext):
 
     def has_collected_item(self, item: NetworkItem):
         return item.player == self.slot and item.location in self.game_state.locations
+
+    async def handle_hints(self):
+        if self.hints is None or self.hints_seen == self.game_state.hints_seen:
+            return
+
+        new_hints = self.game_state.hints_seen.difference(self.hints_seen)
+        await self.send_msgs(
+            [
+                {"cmd": "CreateHints", "locations": [location], "player": player, "status": HintStatus.HINT_UNSPECIFIED}
+                for statue in new_hints
+                for location, player in self.hints.get(statue, [])
+            ]
+        )
+        self.hints_seen = self.game_state.hints_seen
 
     async def handle_death_link(self):
         if not self.death_link:

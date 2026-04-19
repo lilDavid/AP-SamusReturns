@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import ClassVar
 
 import Utils
-from BaseClasses import ItemClassification, MultiWorld, Tutorial
+from BaseClasses import Item, ItemClassification, Location, MultiWorld, Tutorial
 from Options import DeathLink, Option
 from rule_builder.rules import Has
 from worlds import LauncherComponents as Launcher
@@ -11,6 +11,7 @@ from worlds.AutoWorld import WebWorld, World
 
 from . import lib as lib  # Set up module importer for open-samus-returns-rando
 from .data import GAME_NAME
+from .hints import HintData, create_hints
 from .items import (
     VICTORY,
     ItemName,
@@ -68,8 +69,11 @@ class SamusReturnsWorld(World):
 
     ammo_amounts: dict[str, int]
     skipped_items: Counter[ItemName]
+    prefilled_locations: set[Location]
 
     displaced_filler: list[ItemName]
+
+    hints: dict[HintData, list[Location | Item]]
 
     @classmethod
     def is_debug(cls):
@@ -107,7 +111,7 @@ class SamusReturnsWorld(World):
         self.set_completion_rule(Has(VICTORY))
 
     def create_items(self):
-        prefilled_locations = place_starting_loadout(self)
+        self.prefilled_locations = place_starting_loadout(self)
 
         major_item_pool: Counter[ItemName] = Counter()
         minor_item_pool: Counter[ItemName] = Counter()
@@ -133,7 +137,7 @@ class SamusReturnsWorld(World):
         assert all(count >= 0 for count in major_item_pool.values()), major_item_pool
 
         item_count = major_item_pool.total() + minor_item_pool.total()
-        location_count = LOCATION_COUNT - prefilled_locations
+        location_count = LOCATION_COUNT - len(self.prefilled_locations)
         if item_count < location_count:
             minor_item_pool[self.get_filler_item_name()] = location_count - item_count
         elif item_count > location_count:
@@ -157,6 +161,12 @@ class SamusReturnsWorld(World):
         for world in multiworld.worlds.values():
             if world.game == cls.game:
                 world.options.local_items.value.discard(ItemName.MetroidDnaLocal)
+
+    def pre_output(self):
+        if self.options.hints.value:
+            self.hints = create_hints(self)
+        else:
+            self.hints = {}
 
     def generate_output(self, output_directory: str):
         patch = SamusReturnsPatch(player=self.player, player_name=self.player_name)
@@ -188,8 +198,23 @@ class SamusReturnsWorld(World):
                     options.extend(resolve_group(type_or_group))
             return self.options.as_dict(*options)
 
+        def create_hints():
+            hint_mapping = {}
+            for hint, placements in self.hints.items():
+                hints = []
+                for placement in placements:
+                    if isinstance(placement, Location):
+                        assert placement.item
+                        hints.append((placement.address, placement.player))
+                    if isinstance(placement, Item):
+                        assert placement.location
+                        hints.append((placement.location.address, placement.location.player))
+                hint_mapping[f"{hint.scenario},{hint.actor}"] = hints
+            return hint_mapping
+
         return {
             "ammo_amounts": self.ammo_amounts,
+            "hints": create_hints(),
             "options": get_options(
                 MetroidDnaRequired,
                 MetroidDnaAvailable,

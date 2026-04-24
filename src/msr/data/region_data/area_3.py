@@ -22,7 +22,6 @@ from ...logic import (
     can_spider,
     can_spider_boost,
     can_spider_boost_underwater,
-    can_tunnel_steel_orb,
     can_underwater_high_jump,
     can_wall_jump,
     has_knowledge,
@@ -482,14 +481,13 @@ area_3_exterior_data = AreaData(
                             Door.MorphTunnel,
                             Subregion("Upper"),
                             access_rule=Or(
-                                can_tunnel_steel_orb,
+                                HasAll(ItemName.WaveBeam, ItemName.BeamBurst),
+                                can_power_bomb,
                                 And(
                                     can_bomb_block,
                                     can_short_shaft,
                                     Or(
-                                        HasAll(ItemName.WaveBeam, ItemName.BeamBurst),
                                         can_spider,
-                                        can_power_bomb,
                                         can_damage_boost(DamageBoost.option_static),
                                     ),
                                 ),
@@ -508,7 +506,8 @@ area_3_exterior_data = AreaData(
                             Door.MorphTunnel,
                             Subregion("Transport"),
                             access_rule=Or(
-                                can_tunnel_steel_orb,
+                                HasAll(ItemName.WaveBeam, ItemName.BeamBurst),
+                                can_power_bomb,
                                 And(
                                     can_spider | can_damage_tough_enemy,
                                     can_bomb_block,
@@ -1211,7 +1210,7 @@ area_3_caverns_data = AreaData(
                         PickupData(
                             access_rule=And(
                                 Has(ItemName.GrappleBeam) | can_fly_vertical,
-                                HasAll(ItemName.BeamBurst, ItemName.WaveBeam) | can_power_bomb,
+                                HasAll(ItemName.WaveBeam, ItemName.BeamBurst) | can_power_bomb,
                                 Has(ItemName.MorphBall),
                             ),
                         )
@@ -1300,7 +1299,7 @@ area_3_caverns_data = AreaData(
                     "Pickup",
                     exits=[
                         ExitData(
-                            Door.Normal,
+                            Door.Gigadora,
                             Caverns.LonelyLoop.subregion("Top"),
                         ),
                     ],

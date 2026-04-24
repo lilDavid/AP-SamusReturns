@@ -75,6 +75,8 @@ def can_ibj(ibj: int):
     return Trick(IBJ, ibj) & can_bomb
 
 
+can_beam_burst = Has(ItemName.BeamBurst) & HasAny(ItemName.WaveBeam, ItemName.SpazerBeam, ItemName.PlasmaBeam)
+
 can_beam_block_through_tunnel = Or(Has(ItemName.WaveBeam), can_bomb_block, can_movement(Movement.option_simple))
 can_beam_block_through_fan_tunnel = Or(Has(ItemName.WaveBeam), can_power_bomb, can_movement(Movement.option_simple))
 
@@ -107,19 +109,17 @@ can_climb_shaft = can_wall_jump(WallJump.option_simple) | can_climb_wall
 
 can_any_missile = HasAny(ItemName.MissileLauncher, ItemName.SuperMissile)
 can_damage_tough_enemy_ranged = Or(
-    HasAny(ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst),
+    can_any_missile,
+    can_beam_burst,
     can_power_bomb,
 )
 can_damage_tough_enemy = Or(
     can_damage_tough_enemy_ranged,
     Has(ItemName.ScrewAttack),
 )
-can_damage_metroid = HasAny(ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst, ItemName.IceBeam)
-can_blobthrower = Has(ItemName.BeamBurst) | can_power_bomb
-can_tunnel_steel_orb = Or(
-    Has(ItemName.BeamBurst) & can_beam_block_through_tunnel,
-    can_power_bomb,
-)
+can_damage_metroid = Or(HasAny(ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.IceBeam), can_beam_burst)
+can_blobthrower = can_beam_burst | can_power_bomb
+can_tunnel_steel_orb = Or(can_beam_burst & can_beam_block_through_tunnel, can_power_bomb)
 
 # Brief contact at least
 can_thorns = Has(ItemName.LightningArmor) | can_damage_boost(DamageBoost.option_static)
@@ -130,7 +130,7 @@ can_combat_omega = can_damage_metroid & HasAll(ItemName.SpaceJump, ItemName.Morp
 door_rules = {
     Door.Open: True_(),
     Door.Normal: True_(),  # Player always has a weapon to open this with (power beam can't be randomized)
-    Door.Charge: Or(Has(ItemName.ChargeBeam), has_knowledge(Knowledge.option_simple) & Has(ItemName.BeamBurst)),
+    Door.Charge: Or(Has(ItemName.ChargeBeam), has_knowledge(Knowledge.option_simple) & can_beam_burst),
     Door.Missile: can_any_missile,
     Door.Super: Has(ItemName.SuperMissile),
     Door.PowerBomb: can_power_bomb,

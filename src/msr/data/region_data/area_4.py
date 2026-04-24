@@ -62,6 +62,22 @@ can_escape_pink_crystals = Or(
     ),
 )
 can_escape_evolved_gamma = can_high_ledge
+can_escape_sj_chamber_top = can_fly_vertical
+can_escape_diggernaut_tunnels_top = HasAll(ItemName.SpaceJump, ItemName.MorphBall) | can_ibj(IBJ.option_vertical)
+can_sj_chamber_to_diggernaut_tunnels_maze = And(
+    # Has you fall through a pitfall block and navigate some obstacles in DET
+    Has(ItemName.SuperMissile),
+    can_bomb,
+    can_spider,
+    can_escape_diggernaut_tunnels_top,
+)
+can_escape_sj_chamber_bottom = can_fly_vertical | can_sj_chamber_to_diggernaut_tunnels_maze
+
+can_escape_diggernaut_tunnels_side = Has(ItemName.GrappleBeam) & can_escape_sj_chamber_top
+can_escape_diggernaut_tunnels_bottom = Or(
+    can_escape_diggernaut_tunnels_top,
+    can_escape_diggernaut_tunnels_side,
+)
 
 area_4_caves_data = AreaData(
     area=Area.Area4Caves,
@@ -489,7 +505,7 @@ area_4_caves_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_traverse_transit_tunnel,
+                            access_rule=can_traverse_transit_tunnel & can_bomb_block,
                         )
                     ],
                 ),
@@ -1492,27 +1508,24 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Mines.MinesIntersectionTerminal.subregion("Bottom"),
-                            access_rule=can_fly_vertical,
+                            access_rule=can_escape_sj_chamber_top,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Mines.DiggernautExcavationTunnels.subregion("Sublevel 1"),
-                            access_rule=can_fly_vertical & Has(ItemName.SuperMissile),
+                            access_rule=can_escape_sj_chamber_top & Has(ItemName.SuperMissile),
                         ),
                         # Excavation tunnels Sublevel 2 - reverse grapple block
                         ExitData(
                             Door.MorphTunnel,
                             Mines.DiggernautExcavationTunnels.subregion("Sublevel 3"),
-                            access_rule=And(
-                                # Has you fall through a pitfall block and navigate some obstacles in DET
-                                Has(ItemName.SuperMissile),
-                                can_bomb,
-                                can_spider,
-                            ),
+                            access_rule=can_sj_chamber_to_diggernaut_tunnels_maze,
                         ),
                     ],
                     pickups=[
-                        PickupData(),
+                        PickupData(
+                            access_rule=can_escape_sj_chamber_bottom,
+                        ),
                     ],
                 )
             ],
@@ -1540,11 +1553,12 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Entrance"),
-                            access_rule=Has(ItemName.SpaceJump) | can_ibj(IBJ.option_vertical),
+                            access_rule=can_escape_diggernaut_tunnels_top,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Sublevel 2"),
+                            access_rule=can_escape_diggernaut_tunnels_bottom,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1571,16 +1585,17 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Sublevel 1"),
-                            access_rule=can_climb_shaft,
+                            access_rule=can_escape_diggernaut_tunnels_top,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Sublevel 3"),
+                            access_rule=can_escape_diggernaut_tunnels_bottom,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Mines.SpaceJump,
-                            access_rule=Has(ItemName.GrappleBeam),
+                            access_rule=can_escape_diggernaut_tunnels_side,
                         ),
                     ],
                     pickups=[
@@ -1601,7 +1616,7 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Sublevel 2"),
-                            access_rule=can_climb_shaft,
+                            access_rule=can_escape_diggernaut_tunnels_bottom,
                         ),
                         # There's an entrance from SJ chamber that goes through this little backdoor area
                     ],

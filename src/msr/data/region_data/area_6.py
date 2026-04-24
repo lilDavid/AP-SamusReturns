@@ -3,6 +3,7 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 from ...items import ItemName
 from ...logic import (
     can_any_missile,
+    can_beam_burst,
     can_bomb_block,
     can_bomb_block_near_ceiling,
     can_climb_shaft,
@@ -35,7 +36,7 @@ can_navigate_hideout_sprawl_tunnels = And(
     # Screw attack is necessary to do this and sufficient to access the save station
 )
 can_combat_diggernaut = And(
-    HasAny(ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.BeamBurst),
+    HasAny(ItemName.MissileLauncher, ItemName.SuperMissile) | can_beam_burst,
     HasAll(ItemName.MorphBall, ItemName.Bomb, ItemName.SpiderBall, ItemName.SpaceJump),
 )
 can_cross_swarm_square = Or(

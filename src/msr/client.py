@@ -276,16 +276,17 @@ class SamusReturnsContext(BaseContext):
 
                     self.game_reader_task = asyncio.create_task(self.handle_messages(), name="Samus Returns Messages")
 
-                if self.auth is None:
-                    config_id = self.game_state.config_id
-                    if config_id is None:
-                        await asyncio.sleep(BACKOFF_SHORT)
-                        continue
-                    self.seed_name, self.auth = SamusReturnsPatch.parse_config_identifier(config_id)
-                    logger.debug(f"Connected to {self.seed_name} as {self.auth}")
+                    if self.server is None:
+                        logger.info("Connected to game, waiting for player to connect to server")
+                    else:
+                        logger.info("Connected to game")
 
-                if self.server is None:
-                    logger.info("Waiting for player to connect to server")
+                config_id = self.game_state.config_id
+                if config_id is None:
+                    await asyncio.sleep(BACKOFF_SHORT)
+                    continue
+                self.seed_name, self.auth = SamusReturnsPatch.parse_config_identifier(config_id)
+                logger.debug(f"Connected to {self.seed_name} as {self.auth}")
 
                 if self.server is not None and not self.server.socket.closed:
                     if self.auth_status == AuthStatus.NOT_AUTHENTICATED:

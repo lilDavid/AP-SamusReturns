@@ -1836,9 +1836,14 @@ area_3_interior_data = AreaData(
                             Subregion("Top"),
                             access_rule=And(
                                 Has(ItemName.VariaSuit),
-                                HasAny(ItemName.GrappleBeam, ItemName.GravitySuit) | can_spider_boost,
-                                HasAny(ItemName.GravitySuit) | can_spider,
-                                can_fly,
+                                Or(
+                                    Has(ItemName.GrappleBeam) & can_spider,
+                                    can_spider_boost,
+                                    And(
+                                        Has(ItemName.GravitySuit),
+                                        Has(ItemName.GrappleBeam) | can_fly_vertical,  # Looks like HJB SJ
+                                    ),
+                                ),
                             ),
                         ),
                     ],
@@ -1856,9 +1861,12 @@ area_3_interior_data = AreaData(
                             Subregion("Bottom"),
                             access_rule=And(
                                 Has(ItemName.VariaSuit),
-                                can_climb_wall,
-                                HasAny(ItemName.GrappleBeam, ItemName.GravitySuit) | can_spider_boost,
-                                HasAny(ItemName.GravitySuit) | can_spider,
+                                can_climb_wall,  # Easy HJB SJ if a HJ doesn't do it
+                                Or(
+                                    Has(ItemName.GrappleBeam) & can_spider,
+                                    can_spider_boost,
+                                    Has(ItemName.GravitySuit),
+                                ),
                             ),
                         ),
                     ],

@@ -9,6 +9,7 @@ from ...logic import (
     can_climb_wall,
     can_damage_boost,
     can_damage_metroid,
+    can_fleech_swarm,
     can_fly,
     can_fly_vertical,
     can_high_bomb_block,
@@ -540,7 +541,7 @@ area_4_caves_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=HasAll(ItemName.MorphBall, ItemName.LightningArmor),
+                            access_rule=Has(ItemName.MorphBall) & can_fleech_swarm,
                         )
                     ],
                 )
@@ -1006,11 +1007,11 @@ area_4_mines_data = AreaData(
                     exits=[
                         ExitData(
                             Door.Missile,
-                            Mines.MinesIntersectionTerminal.subregion("Accessway"),
+                            Mines.MinesIntersectionTerminal.subregion("Middle"),
                         ),
                         ExitData(
                             Door.Super,
-                            Mines.MinesIntersectionTerminal.subregion("Middle"),
+                            Mines.MinesIntersectionTerminal.subregion("Accessway"),
                             access_rule=Or(
                                 can_climb_wall,
                                 can_high_jump & can_climb_shaft,
@@ -1337,7 +1338,7 @@ area_4_mines_data = AreaData(
                             Mines.TransportCentralCaves,
                         ),
                         ExitData(
-                            Door.Charge,
+                            Door.Missile,
                             Mines.DiggernautExcavationTunnels.subregion("Entrance"),
                         ),
                         ExitData(

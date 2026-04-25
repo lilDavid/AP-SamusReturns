@@ -13,6 +13,7 @@ from ...logic import (
     can_damage_boost,
     can_damage_metroid,
     can_damage_tough_enemy,
+    can_fleech_swarm,
     can_fly_vertical,
     can_high_jump,
     can_high_ledge,
@@ -48,7 +49,7 @@ can_escape_wave_chamber = can_high_jump | can_spider_boost
 can_escape_wave_to_varia = can_beam_block_through_tunnel
 can_escape_interior_teleporter = can_short_shaft
 can_escape_hi_jump_access = can_climb_wall
-can_escape_fleech_fire_containment = Has(ItemName.LightningArmor) & can_climb_shaft
+can_escape_fleech_fire_containment = can_fleech_swarm & can_climb_shaft
 
 can_escape_transport_access = Or(
     can_spider,
@@ -1722,7 +1723,7 @@ area_2_entryway_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=Has(ItemName.LightningArmor),
+                            access_rule=can_fleech_swarm,
                         ),
                     ],
                 )

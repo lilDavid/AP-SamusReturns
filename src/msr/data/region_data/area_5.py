@@ -12,6 +12,7 @@ from ...logic import (
     can_damage_boost,
     can_damage_metroid,
     can_damage_tough_enemy,
+    can_fleech_swarm,
     can_fly,
     can_fly_vertical,
     can_fly_vertical_underwater,
@@ -515,7 +516,7 @@ area_5_lobby_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Upper"),
-                            access_rule=Has(ItemName.LightningArmor),
+                            access_rule=can_fleech_swarm,
                         ),
                     ],
                 ),
@@ -525,7 +526,7 @@ area_5_lobby_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Lower"),
-                            access_rule=Has(ItemName.LightningArmor),
+                            access_rule=can_fleech_swarm,
                         ),
                         ExitData(
                             Door.MorphTunnel,

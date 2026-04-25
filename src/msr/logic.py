@@ -123,6 +123,8 @@ can_tunnel_steel_orb = Or(can_beam_burst & can_beam_block_through_tunnel, can_po
 
 # Brief contact at least
 can_thorns = Has(ItemName.LightningArmor) | can_damage_boost(DamageBoost.option_static)
+# Fleech swarms deactivate if you have Gravity Suit
+can_fleech_swarm = HasAny(ItemName.LightningArmor, ItemName.GravitySuit)
 
 # TODO: Proper combat logic. SJ and morph both seem required for no damage
 can_combat_omega = can_damage_metroid & HasAll(ItemName.SpaceJump, ItemName.MorphBall)

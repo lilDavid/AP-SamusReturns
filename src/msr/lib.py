@@ -1,4 +1,5 @@
 import importlib.util
+import logging
 import shutil
 import sys
 import zipfile
@@ -41,8 +42,10 @@ class SamusReturnsLibFinder(MetaPathFinder):
             try:
                 with open(cached_lib / "VERSION.txt") as version:
                     cache_version = Utils.tuplize_version(version.read())
+                logging.debug("Checking cached libraries at %s", cached_lib)
                 if cache_version == SamusReturnsWorld.world_version:
                     self.loaded = True
+                    logging.debug("Cached libraries valid, adding to sys.path")
                     sys.path.append(str(cached_lib))
                     return importlib.util.find_spec(fullname)
             except FileNotFoundError:
@@ -69,6 +72,7 @@ class SamusReturnsLibFinder(MetaPathFinder):
             pass
         cached_lib.mkdir(parents=True, exist_ok=True)
 
+        logging.debug("Installing libraries at %s", cached_lib)
         apworld.extractall(
             Utils.cache_path(),
             [name for name in apworld.namelist() if name.startswith(f"{world.name}/lib/")],

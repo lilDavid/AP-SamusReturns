@@ -285,8 +285,10 @@ class SamusReturnsContext(BaseContext):
                 if config_id is None:
                     await asyncio.sleep(BACKOFF_SHORT)
                     continue
-                self.seed_name, self.auth = SamusReturnsPatch.parse_config_identifier(config_id)
-                logger.debug(f"Connected to {self.seed_name} as {self.auth}")
+                seed_name, auth = SamusReturnsPatch.parse_config_identifier(config_id)
+                if (seed_name, auth) != (self.seed_name, self.auth):
+                    self.seed_name, self.auth = seed_name, auth
+                    logger.debug(f"Connected to {seed_name} as {auth}")
 
                 if self.server is not None and not self.server.socket.closed:
                     if self.auth_status == AuthStatus.NOT_AUTHENTICATED:

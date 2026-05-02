@@ -27,7 +27,7 @@ from .connector import (
 )
 from .data import GAME_NAME
 from .data.internal_names import AreaId, ItemId
-from .items import ItemName, item_data_table, launcher_to_ammo, tanks, unique_items
+from .items import ItemName, default_ammo_amounts, item_data_table, launcher_to_ammo, tanks, unique_items
 from .locations import location_table
 from .patch import SamusReturnsPatch, create_resource
 from .settings import SamusReturnsSettings, TargetSystem
@@ -184,7 +184,7 @@ class SamusReturnsContext(BaseContext):
     game_state: SamusReturnsState
 
     # Slot data
-    ammo_amounts: dict[str, int]
+    ammo_amounts = default_ammo_amounts
     dna_required: int
     death_link: bool | None
 

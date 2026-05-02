@@ -11,7 +11,16 @@ from worlds.AutoWorld import WebWorld, World
 
 from . import lib as lib  # Set up module importer for open-samus-returns-rando
 from .data import GAME_NAME
-from .items import VICTORY, ItemName, SamusReturnsItem, item_data_table, item_groups, major_items, reserve_tanks
+from .items import (
+    VICTORY,
+    ItemName,
+    SamusReturnsItem,
+    default_ammo_amounts,
+    item_data_table,
+    item_groups,
+    major_items,
+    reserve_tanks,
+)
 from .locations import location_groups, location_table
 from .options import LocalDna, MetroidDnaRequired, SamusReturnsOptions, msr_option_groups
 from .patch import SamusReturnsPatch
@@ -77,20 +86,7 @@ class SamusReturnsWorld(World):
 
             self.options.local_items.value.add(ItemName.MetroidDnaLocal)
 
-            self.ammo_amounts = {
-                ItemName.EnergyTank: 100,
-                ItemName.MissileLauncher: 24,
-                ItemName.MissileTank: 3,
-                ItemName.SuperMissile: 5,
-                ItemName.SuperMissileTank: 1,
-                ItemName.PowerBomb: 5,
-                ItemName.PowerBombTank: 1,
-                ItemName.AeionTank: 50,
-                ItemName.ScanPulse: 0,
-                ItemName.LightningArmor: 150,
-                ItemName.BeamBurst: 150,
-                ItemName.PhaseDrift: 150,
-            }
+            self.ammo_amounts = default_ammo_amounts
 
         starting_items = Counter([ItemName.MissileLauncher])
         if self.options.starting_scan_pulse.value:

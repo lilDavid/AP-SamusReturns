@@ -185,6 +185,22 @@ launcher_to_ammo: dict[str, ItemId] = {
 }
 
 
+default_ammo_amounts: dict[str, int] = {
+    ItemName.EnergyTank: 100,
+    ItemName.MissileLauncher: 24,
+    ItemName.MissileTank: 3,
+    ItemName.SuperMissile: 5,
+    ItemName.SuperMissileTank: 1,
+    ItemName.PowerBomb: 5,
+    ItemName.PowerBombTank: 1,
+    ItemName.AeionTank: 50,
+    ItemName.ScanPulse: 0,
+    ItemName.LightningArmor: 150,
+    ItemName.BeamBurst: 150,
+    ItemName.PhaseDrift: 150,
+}
+
+
 def item_group(*items: ItemName):
     return {item.value for item in items}
 

@@ -47,7 +47,7 @@ jobs:
         run: |
           mv AP-SamusReturns/src/msr worlds/msr
           python -m pip install -r AP-SamusReturns/requirements.txt
-          rm -f AP-SamusReturns
+          rm -rf AP-SamusReturns
         shell: bash
 
       - name: Run Fuzzer

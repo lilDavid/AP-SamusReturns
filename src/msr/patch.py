@@ -31,7 +31,7 @@ TITLE_ID_US = "00040000001BB200"
 TITLE_ID_PAL = "00040000001BFB00"
 TITLE_ID_JP = "00040000001BFC00"
 
-MOD_FILES = {"romfs", "code.bin", "exheader.bin", "archipelago.json"}
+MOD_FILES = {"romfs", "code.bin", "code.bps", "exheader.bin", "archipelago.json", "patcher.json"}
 
 PATCH_SCHEMA = "https://raw.githubusercontent.com/randovania/open-samus-returns-rando/refs/heads/main/src/open_samus_returns_rando/files/schema.json"
 

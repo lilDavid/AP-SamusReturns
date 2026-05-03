@@ -177,7 +177,7 @@ class SamusReturnsContext(BaseContext):
     killing_player: bool
 
     # Game info
-    game_sync_task: asyncio.Task
+    game_sync_task: asyncio.Task | None
     game_reader_task: asyncio.Task | None
     ip_address: str
     connector: SamusReturnsConnector
@@ -215,6 +215,9 @@ class SamusReturnsContext(BaseContext):
         self.ammo_amounts = {}
         self.death_link = None
 
+        self.game_sync_task = None
+        self.game_reader_task = None
+
     @staticmethod
     def get_default_ip_address():
         from . import SamusReturnsWorld
@@ -237,6 +240,14 @@ class SamusReturnsContext(BaseContext):
         await super().server_auth(password_requested)
         await self.send_connect()
         self.auth_status = AuthStatus.PENDING
+
+    async def shutdown(self):
+        await super().shutdown()
+        self.connector.disconnect()
+        if self.game_sync_task:
+            self.game_sync_task.cancel()
+        if self.game_reader_task:
+            self.game_reader_task.cancel()
 
     def on_package(self, cmd: str, args: dict):
         super().on_package(cmd, args)
@@ -729,7 +740,6 @@ def launch(*launch_args: str):
 
         await ctx.exit_event.wait()
         await ctx.shutdown()
-        await ctx.game_sync_task
 
     import logging
 

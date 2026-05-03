@@ -20,7 +20,7 @@ from ...logic import (
 )
 from ...options import Movement, WallJump
 from ..room_names import Area, Area7, Area8, SurfaceWest
-from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
+from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
 
 # TODO: Bombless Metroid combat trick
 can_combat_metroid_larva = Has(ItemName.IceBeam) & can_any_missile & can_bomb_block
@@ -712,8 +712,16 @@ area_8_data = AreaData(
                         ExitData(
                             Door.Open,
                             Area8.Hatchling,
+                            access_rule=can_combat_queen,
                         ),
-                    ]
+                    ],
+                    events=[
+                        EventData(
+                            name=None,
+                            item_name="Queen Metroid",
+                            access_rule=can_combat_queen,
+                        )
+                    ],
                 )
             ],
         ),
@@ -733,7 +741,16 @@ area_8_data = AreaData(
                             Area8.NestVestibule,
                             access_rule=And(
                                 Has(ItemName.ScrewAttack),
-                                Or(Has(ItemName.SpaceJump), can_wall_jump(WallJump.option_intermediate) & can_spider),
+                                Or(
+                                    Has(ItemName.SpaceJump),
+                                    And(
+                                        Or(
+                                            can_wall_jump(WallJump.option_intermediate),
+                                            can_wall_jump(WallJump.option_simple) & Has(ItemName.HighJumpBoots),
+                                        ),
+                                        can_climb_wall,
+                                    ),
+                                ),
                             ),
                         ),
                     ]
@@ -746,20 +763,22 @@ area_8_data = AreaData(
             regions=[
                 RegionData(
                     exits=[
-                        ExitData(
-                            Door.Open,
-                            Area8.Queen,
-                            access_rule=can_escape_queen_arena,
-                        ),
                         # There's a wall preventing reverse Area 8 traversal
                         # ExitData(
                         #     Door.Open,
-                        #     Area8.TransportSurface.subregion("Bottom"),
-                        #     access_rule=Has(ItemName.Hatchling),
+                        #     Area8.Queen,
+                        #     access_rule=can_escape_queen_arena,
                         # ),
+                        ExitData(
+                            Door.Open,
+                            Area8.TransportSurface.subregion("Bottom"),
+                            access_rule=Has(ItemName.Hatchling),
+                        ),
                     ],
                     pickups=[
-                        PickupData(),
+                        PickupData(
+                            access_rule=Has("Queen Metroid"),
+                        ),
                     ],
                 )
             ],

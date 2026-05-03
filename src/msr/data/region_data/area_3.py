@@ -50,6 +50,7 @@ can_escape_factory_exterior_access = Or(
     can_spider,
     can_fly,
 )
+can_escape_factory_exterior_crevice = can_climb_wall
 
 can_escape_evolved_alpha_north_to_gamma = can_climb_wall & can_bomb_block
 
@@ -164,7 +165,14 @@ area_3_exterior_data = AreaData(
                     pickups=[
                         PickupData(
                             access_rule=And(
+                                # Enter
                                 Or(
+                                    Has(ItemName.Hatchling),
+                                    can_power_bomb & can_climb_wall,
+                                ),
+                                # Access pickup
+                                Or(
+                                    # Over top
                                     And(
                                         Has(ItemName.Hatchling),
                                         Or(
@@ -254,6 +262,7 @@ area_3_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Crevice"),
+                            access_rule=can_escape_factory_exterior_crevice,
                         ),
                         ExitData(
                             Door.Open,
@@ -275,7 +284,7 @@ area_3_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Platform"),
-                            access_rule=can_climb_wall,
+                            access_rule=can_escape_factory_exterior_crevice,
                         ),
                         ExitData(
                             Door.Missile,
@@ -701,7 +710,15 @@ area_3_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Exterior.BeamBurst.subregion("Pickup"),
-                            access_rule=Has(ItemName.GrappleBeam),
+                            access_rule=And(
+                                Has(ItemName.GrappleBeam),
+                                # Escape
+                                Or(
+                                    can_bomb_block & can_blobthrower,
+                                    HasAll(ItemName.MorphBall, ItemName.LightningArmor),
+                                    can_wall_jump(WallJump.option_intermediate),
+                                ),
+                            ),
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1148,10 +1165,16 @@ area_3_caverns_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=And(
-                                HasAll(ItemName.GravitySuit, ItemName.SpaceJump) | can_spider_boost_underwater,
-                                can_any_missile,
-                                can_bomb_block,
+                            access_rule=Or(
+                                And(
+                                    can_power_bomb,
+                                    can_spider | can_movement(Movement.option_simple),
+                                ),
+                                And(
+                                    HasAll(ItemName.GravitySuit, ItemName.SpaceJump) | can_spider_boost_underwater,
+                                    can_any_missile,
+                                    can_bomb,
+                                ),
                             )
                         )
                     ],
@@ -1190,7 +1213,10 @@ area_3_caverns_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Upper"),
-                            access_rule=can_climb_wall,
+                            access_rule=Or(
+                                Has(ItemName.HighJumpBoots) & can_wall_jump(WallJump.option_simple),
+                                can_climb_wall,
+                            ),
                         ),
                     ],
                 ),
@@ -1490,6 +1516,7 @@ area_3_caverns_data = AreaData(
                     pickups=[
                         PickupData(
                             access_rule=And(
+                                Has(ItemName.VariaSuit),
                                 can_bomb_block,
                                 can_spider | Has(ItemName.GravitySuit),
                                 can_damage_metroid,

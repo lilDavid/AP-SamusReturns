@@ -58,7 +58,7 @@ can_escape_lobby_teleporter_east_pickup_right = HasAll(ItemName.MorphBall, ItemN
 can_escape_phase_drift_chamber = can_bomb_block
 
 # A super jump does it too but logic doesn't account for those yet
-can_escape_exerior_zeta_arena = can_high_jump
+can_escape_exterior_zeta_arena = can_high_jump
 can_escape_gravity_chamber_access = HasAny(ItemName.HighJumpBoots, ItemName.GravitySuit) | can_spider
 can_escape_gravity_chamber = HasAny(ItemName.HighJumpBoots, ItemName.GravitySuit) | can_spider_boost_underwater
 
@@ -774,12 +774,12 @@ area_5_exterior_data = AreaData(
                             Exterior.RedPlantMaze,
                         ),
                         ExitData(
-                            Door.Gryncore,
+                            Door.Open,
                             Subregion("Top"),
                             access_rule=can_climb_wall,
                         ),
                         ExitData(
-                            Door.Open,
+                            Door.Gryncore,
                             Exterior.ZetaAccess.subregion("Right"),
                             access_rule=can_climb_wall,
                         ),
@@ -969,7 +969,7 @@ area_5_exterior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Exterior.Zeta,
-                            access_rule=can_escape_exerior_zeta_arena,
+                            access_rule=can_escape_exterior_zeta_arena,
                         ),
                     ],
                 ),
@@ -1021,7 +1021,7 @@ area_5_exterior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Exterior.ZetaAccess.subregion("Left"),
-                            access_rule=can_escape_exerior_zeta_arena,
+                            access_rule=can_escape_exterior_zeta_arena,
                         )
                     ],
                     pickups=[

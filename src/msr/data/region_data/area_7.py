@@ -102,7 +102,13 @@ area_7_data = AreaData(
                                 # Get to the area with the fan
                                 Or(
                                     # Through the screw blocks
-                                    HasAll(ItemName.MorphBall, ItemName.SpaceJump, ItemName.ScrewAttack),
+                                    And(
+                                        HasAll(ItemName.MorphBall, ItemName.ScrewAttack),
+                                        Or(
+                                            Has(ItemName.SpaceJump),
+                                            Has(ItemName.HighJumpBoots) & can_wall_jump(WallJump.option_simple),
+                                        ),
+                                    ),
                                     # Into the morph tunnel
                                     can_climb_wall & can_bomb_block,
                                     # Up from the teleporter

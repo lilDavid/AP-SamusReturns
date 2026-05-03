@@ -50,6 +50,7 @@ can_escape_wave_to_varia = can_beam_block_through_tunnel
 can_escape_interior_teleporter = can_short_shaft
 can_escape_hi_jump_access = can_climb_wall
 can_escape_fleech_fire_containment = can_fleech_swarm & can_climb_shaft
+can_escape_interior_gamma_arena_to_intersection_terminal = And(can_any_missile, can_bomb_block, can_spider)
 
 can_escape_transport_access = Or(
     can_spider,
@@ -88,9 +89,12 @@ area_2_exterior_data = AreaData(
                         ),
                     ],
                     pickups=[
-                        # Spider boost as a solution is a little obscure but not too bad?
                         PickupData(
-                            access_rule=can_fly_vertical,
+                            access_rule=Or(
+                                Has(ItemName.SpaceJump),
+                                can_spider_boost,  # A little obscure but not too bad?
+                                can_ibj(IBJ.option_vertical) & Has(ItemName.LightningArmor),  # Needed for gulluggs
+                            ),
                         ),
                     ],
                 ),
@@ -388,12 +392,13 @@ area_2_exterior_data = AreaData(
                     pickups=[
                         PickupData(
                             access_rule=And(
-                                can_spider | Has(ItemName.SpaceJump),
                                 Or(
-                                    Has(ItemName.Hatchling),
-                                    Has(ItemName.SuperMissile),
-                                    can_bomb_block,
+                                    can_spider,
+                                    Has(ItemName.PhaseDrift),
+                                    can_movement(Movement.option_simple),
                                 ),
+                                HasAny(ItemName.Hatchling, ItemName.SuperMissile),
+                                can_bomb_block,
                             )
                         )
                     ],
@@ -997,6 +1002,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("South"),
+                            access_rule=can_escape_interior_gamma_arena_to_intersection_terminal,
                         ),
                         ExitData(
                             Door.Open,
@@ -1059,11 +1065,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("South tunnel"),
-                            access_rule=And(
-                                Has(ItemName.MissileLauncher),
-                                can_bomb_block,
-                                can_spider,
-                            ),
+                            access_rule=can_escape_interior_gamma_arena_to_intersection_terminal,
                         ),
                         ExitData(
                             Door.Normal,
@@ -1538,11 +1540,11 @@ area_2_entryway_data = AreaData(
                     pickups=[
                         PickupData(
                             "Plants",
-                            access_rule=Has(ItemName.MorphBall) & HasAny(ItemName.Hatchling, ItemName.PowerBomb),
+                            access_rule=Has(ItemName.LightningArmor) & can_bomb_block,
                         ),
                         PickupData(
                             "Tunnel",
-                            access_rule=can_bomb_block,
+                            access_rule=Has(ItemName.MorphBall) & HasAny(ItemName.Hatchling, ItemName.PowerBomb),
                         ),
                     ],
                 ),

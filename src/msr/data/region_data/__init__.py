@@ -57,7 +57,7 @@ class PickupData(NamedTuple):
 
 
 class EventData(NamedTuple):
-    name: str
+    name: str | None
     item_name: str | None = None
     access_rule: Rule[SamusReturnsWorld] = True_()
     show_in_spoiler: bool = False

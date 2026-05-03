@@ -584,7 +584,10 @@ area_6_data = AreaData(
                             Area6.HideoutSprawl.subregion("Main"),
                             access_rule=can_high_jump,
                         ),
-                        ExitData(Door.PowerBomb, Area6.HideoutSprawl.subregion("Tunnels")),
+                        ExitData(
+                            Door.PowerBomb,
+                            Area6.HideoutSprawl.subregion("Tunnels"),
+                        ),
                         ExitData(
                             Door.Open,
                             Area6.Omega,

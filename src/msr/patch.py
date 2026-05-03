@@ -11,14 +11,14 @@ from typing import TYPE_CHECKING
 from zipfile import ZipFile
 
 import Utils
-from BaseClasses import Item
+from BaseClasses import Item, Location
 from worlds.Files import APAutoPatchInterface
 
 from .data import GAME_NAME
 from .data.internal_names import RANDO_DNA_TEMPLATE, AreaId, ItemId, ItemModel, PickupSound
 from .data.remote_items import REMOTE_ITEM_MAPPING
 from .items import ItemName, OtherItemData, TankData, UniqueItemData, item_data_table, launcher_to_ammo
-from .locations import location_table
+from .locations import MetroidLocationData, location_table
 from .options import ApItemModels, PickupModels
 from .regions import all_areas_data
 from .starting_room import landing_site_data
@@ -192,7 +192,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
     def create_pickups(self, world: SamusReturnsWorld):
         self.placed_dna = 0
         pickups = []
-        for location in world.get_locations():
+        for location in sorted(world.get_locations(), key=self.metroids_after_actors):
             if location.address is None:
                 continue
             assert location.item is not None
@@ -210,6 +210,16 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 pickup["sound"] = PickupSound.TANK
             pickups.append(pickup)
         return pickups
+
+    @staticmethod
+    def metroids_after_actors(location: Location):
+        # OSSR currently has a bug where any pickup that gets placed on a Metroid first breaks when
+        # later placed as an actor. The fix is to sort all Metroid pickups after all actor pickups.
+        match location_table.get(location.name):
+            case MetroidLocationData(_):
+                return 1
+            case _:
+                return 0
 
     @staticmethod
     def get_pickup_model(world: SamusReturnsWorld, item: Item):

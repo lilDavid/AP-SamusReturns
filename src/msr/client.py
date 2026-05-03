@@ -301,11 +301,13 @@ class SamusReturnsContext(BaseContext):
                     self.seed_name, self.auth = seed_name, auth
                     logger.debug(f"Connected to {seed_name} as {auth}")
 
-                if self.server is not None and not self.server.socket.closed:
-                    if self.auth_status == AuthStatus.NOT_AUTHENTICATED:
-                        Utils.async_start(self.server_auth(self.password_requested))
-                else:
+                if self.server is None or self.server.socket.closed:
                     self.auth_status = AuthStatus.NOT_AUTHENTICATED
+                    await asyncio.sleep(BACKOFF_SHORT)
+                    continue
+
+                if self.auth_status == AuthStatus.NOT_AUTHENTICATED:
+                    await self.server_auth(self.password_requested)
                     await asyncio.sleep(BACKOFF_SHORT)
                     continue
 

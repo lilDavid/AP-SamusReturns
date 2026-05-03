@@ -49,7 +49,7 @@ jobs:
         shell: bash
 
       - name: Run Fuzzer
-        uses: pyrox0/apworld-test-action@v1.1
+        uses: pyrox0/apworld-test-action@v1
         with:
           enable_test: "false"
           enable_fuzz: "true"

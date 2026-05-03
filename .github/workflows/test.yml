@@ -38,7 +38,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: $${ matrix.pyversion }
+          python-version: $${{ matrix.pyversion }}
           cache: pip
 
       - name: Install AP world

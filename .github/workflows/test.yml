@@ -27,7 +27,7 @@ jobs:
       - name: Checkout Archipelago
         uses: actions/checkout@v6
         with:
-          repository: https://github.com/ArchipelagoMW/Archipelago.git
+          repository: ArchipelagoMW/Archipelago
           fetch-depth: 0
           path: .
           

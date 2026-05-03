@@ -1,0 +1,64 @@
+name: "Test and Fuzz AP World"
+
+on:
+  - "push"
+  - "pull_request"
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: "ubuntu-latest"
+            name: "Linux"
+            pyversion: "3.12"
+          - os: "macos-latest"
+            name: "macOS"
+            pyversion: "3.11"
+          - os: "windows-latest"
+            name: "windows"
+            pyversion: "3.12"
+
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.name }}
+
+    steps:          
+      - name: Checkout Archipelago
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          
+      - name: Checkout AP world
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          path: AP-SamusReturns
+          
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: $${ matrix.pyversion }
+          cache: pip
+
+      - name: Install AP world
+        run: |
+          mv AP-SamusReturns/src/msr worlds/msr
+          python -m pip install -r AP-SamusReturns/requirements.txt
+          rm -f AP-SamusReturns
+        shell: bash
+
+      - name: Run Fuzzer
+        uses: pyrox0/apworld-test-action@v1.1
+        with:
+          enable_test: "false"
+          enable_fuzz: "true"
+          world: "msr"
+          
+      - name: Run AP tests
+        uses: dariocurr/pytest-summary@v2.4
+        with:
+          extensions: pytest-subtests pytest-xdist
+          options: -n auto
+          show: "all"
+  

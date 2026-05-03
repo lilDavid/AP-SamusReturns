@@ -1,1 +1,2 @@
-open-samus-returns-rando==3.4.2
+mercury-engine-data-structures==0.35.0
+open-samus-returns-rando==3.4.1

@@ -258,7 +258,18 @@ area_1_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=HasAny(ItemName.SpaceJump, ItemName.IceBeam) | can_spider,
+                            access_rule=Or(
+                                HasAny(ItemName.SpaceJump, ItemName.IceBeam),
+                                And(
+                                    can_spider,
+                                    Or(
+                                        can_bomb_block,
+                                        # You have just enough time to shoot the block and spider up to it.
+                                        # Softlock risk, but you can avoid if you don't go all the way in.
+                                        can_movement(Movement.option_intermediate),
+                                    ),
+                                ),
+                            ),
                         ),
                     ],
                 )

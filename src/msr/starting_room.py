@@ -52,15 +52,16 @@ def place_starting_loadout(world: SamusReturnsWorld):
     # Determine the maximal set of locations we could put these items in
     # The result will contain locations that go unused because they're only reachable with all and that's ok
     items: list[Item] = [world.create_item(name) for name in loadout.elements()]
+    world_locations = list(world.get_locations())
     state = CollectionState(world.multiworld)
     for item in items:
         state.collect(item, prevent_sweep=True)
-    state.sweep_for_advancements()
-    locations = [loc for loc in world.get_locations() if loc.item is None and loc.can_reach(state)]
+    state.sweep_for_advancements(locations=world_locations)
+    locations = [loc for loc in world_locations if loc.item is None and loc.can_reach(state)]
     initial_location_count = len(locations)
 
     state = CollectionState(world.multiworld)
-    state.sweep_for_advancements()
+    state.sweep_for_advancements(locations=world_locations)
     if state.has(VICTORY, world.player):
         state.remove(SamusReturnsItem(VICTORY, ItemClassification.progression, None, world.player))
     world.random.shuffle(items)

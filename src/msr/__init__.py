@@ -22,7 +22,7 @@ from .items import (
     reserve_tanks,
 )
 from .locations import location_groups, location_table
-from .options import LocalDna, MetroidDnaRequired, SamusReturnsOptions, msr_option_groups
+from .options import LocalDna, MetroidDnaAvailable, MetroidDnaRequired, SamusReturnsOptions, msr_option_groups
 from .patch import SamusReturnsPatch
 from .regions import connect_entrances, create_regions, set_location_rules
 from .settings import SamusReturnsSettings
@@ -192,6 +192,7 @@ class SamusReturnsWorld(World):
             "ammo_amounts": self.ammo_amounts,
             "options": get_options(
                 MetroidDnaRequired,
+                MetroidDnaAvailable,
                 DeathLink,
                 "Logic",
             ),

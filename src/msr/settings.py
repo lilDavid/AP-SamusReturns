@@ -35,14 +35,14 @@ class RomFile(settings.UserFilePath):
             except ValueError as e:
                 raise e from None  # Clear cause data
             match parsed_rom.get_title_id():
-                case patch.TITLE_ID_US:
+                case patch.TITLE_ID_US | patch.TITLE_ID_EU:
                     pass
-                case patch.TITLE_ID_PAL:
-                    raise ValueError("The PAL version of Metroid: Samus Returns is not supported")
                 case patch.TITLE_ID_JP:
                     raise ValueError("The JP version of Metroid: Samus Returns is not supported")
                 case title_id:
-                    raise ValueError(f"Invalid title ID: expected {patch.TITLE_ID_US}, got {title_id}")
+                    raise ValueError(
+                        f"Invalid title ID: expected {patch.TITLE_ID_US} or {patch.TITLE_ID_EU}, got {title_id}"
+                    )
 
 
 class TargetSystem(StrEnum):

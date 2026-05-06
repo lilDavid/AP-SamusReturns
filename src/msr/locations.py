@@ -180,7 +180,7 @@ area_3_caverns_location_table: dict[str, LocationData] = {
     Area3Caverns.Alpha2W.location(): MetroidLocationData(313, AreaId.AREA_3_CAVERNS, "SG_Alpha_002"),
     Area3Caverns.GammaC.location(): MetroidLocationData(314, AreaId.AREA_3_CAVERNS, "SG_Gamma_001"),
     Area3Caverns.GammaS.location("Tunnels"): ActorLocationData(315, AreaId.AREA_3_CAVERNS, "LE_Item_001"),
-    Area3Caverns.GammaS.location("Gamma Metroid"): MetroidLocationData(316, AreaId.AREA_3_CAVERNS, "SG_Gamma_001"),
+    Area3Caverns.GammaS.location("Gamma Metroid"): MetroidLocationData(316, AreaId.AREA_3_CAVERNS, "SG_Gamma_002"),
     Area3Caverns.GravittGarden.location(): ActorLocationData(317, AreaId.AREA_3_CAVERNS, "HiddenPowerup002"),
     Area3Caverns.AscendingAlleyway.location(): ActorLocationData(318, AreaId.AREA_3_CAVERNS, "LE_Item_007"),
     Area3Caverns.RamulkenRollway.location(): ActorLocationData(319, AreaId.AREA_3_CAVERNS, "LE_Item_002"),

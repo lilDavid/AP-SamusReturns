@@ -2,6 +2,9 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    can_almost_high_jump,
+    can_almost_high_ledge,
+    can_almost_higher_jump,
     can_any_missile,
     can_bomb,
     can_bomb_block,
@@ -12,20 +15,22 @@ from ...logic import (
     can_fleech_swarm,
     can_fly,
     can_fly_vertical,
-    can_high_jump,
     can_high_ledge,
     can_ibj,
     can_movement,
     can_power_bomb,
     can_short_shaft,
+    can_shorter_shaft,
     can_spider,
     can_spider_boost,
     can_spider_boost_underwater,
+    can_super_jump,
     can_thorns,
+    can_wall_jump,
     door_rules,
     has_knowledge,
 )
-from ...options import IBJ, DamageBoost, Knowledge, Movement
+from ...options import IBJ, DamageBoost, Knowledge, Movement, SuperJump, WallJump
 from ..room_names import Area
 from ..room_names import Area3Exterior as Area3
 from ..room_names import Area4Caves as Caves
@@ -40,14 +45,14 @@ can_cross_purple_puddle = Or(
     can_damage_boost(DamageBoost.option_static),
 )
 can_traverse_transit_tunnel = can_spider | can_thorns
-can_escape_evolved_alpha = can_high_jump | Has(ItemName.GravitySuit)
+can_escape_evolved_alpha = can_almost_high_jump | Has(ItemName.GravitySuit)
 can_cross_caves_gamma_hazards = Or(
     Has(ItemName.GrappleBeam),
     can_spider_boost,
     can_thorns,
 )
 
-can_escape_spazer_chamber = door_rules[Door.Gigadora] & can_high_ledge
+can_escape_spazer_chamber = door_rules[Door.Gigadora] & can_almost_high_ledge
 can_escape_pink_crystals = Or(
     Has(ItemName.SpaceJump),
     can_ibj(IBJ.option_vertical),
@@ -61,7 +66,7 @@ can_escape_pink_crystals = Or(
         ),
     ),
 )
-can_escape_evolved_gamma = can_high_ledge
+can_escape_evolved_gamma = can_almost_high_ledge
 can_escape_sj_chamber_top = can_fly_vertical
 can_escape_diggernaut_tunnels_top = HasAll(ItemName.SpaceJump, ItemName.MorphBall) | can_ibj(IBJ.option_vertical)
 can_sj_chamber_to_diggernaut_tunnels_maze = And(
@@ -189,7 +194,7 @@ area_4_caves_data = AreaData(
                         ExitData(
                             Door.Gigadora,
                             Caves.AmethystAltars,
-                            access_rule=can_high_ledge,
+                            access_rule=can_escape_spazer_chamber,
                         ),
                     ],
                     pickups=[
@@ -382,6 +387,7 @@ area_4_caves_data = AreaData(
                             Door.MorphTunnel,
                             Subregion("Mines Transport"),
                             # Grapple block is already moved for us
+                            access_rule=can_short_shaft,
                         ),
                         # ExitData(
                         #     Door.Charge,
@@ -457,7 +463,7 @@ area_4_caves_data = AreaData(
                     pickups=[
                         PickupData(
                             "Missile",
-                            access_rule=can_short_shaft | can_escape_evolved_alpha,
+                            access_rule=can_climb_shaft | can_escape_evolved_alpha,
                         ),
                         PickupData(
                             "Evolved Alpha Metroid",
@@ -708,7 +714,7 @@ area_4_caves_data = AreaData(
                                 Or(
                                     Has(ItemName.IceBeam),
                                     # Drop down and shoot the block in midair
-                                    can_fly_vertical & can_movement(Movement.option_simple),
+                                    can_almost_higher_jump & can_movement(Movement.option_simple),
                                 ),
                             ),
                         )
@@ -904,7 +910,7 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Save Station"),
-                            access_rule=can_high_ledge,
+                            access_rule=can_almost_high_ledge,
                         ),
                     ],
                     pickups=[
@@ -928,7 +934,12 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Middle"),
-                            access_rule=Has(ItemName.HighJumpBoots) | can_climb_wall,
+                            access_rule=Or(
+                                Has(ItemName.HighJumpBoots),
+                                can_climb_wall,
+                                can_super_jump(SuperJump.option_easy),
+                                # Diagonal DBJ
+                            ),
                         ),
                         ExitData(
                             Door.Super,
@@ -968,7 +979,7 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
-                            access_rule=can_short_shaft,
+                            access_rule=can_shorter_shaft,
                         ),
                         ExitData(
                             Door.Super,
@@ -986,7 +997,7 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.Open,
                             Mines.GreenCrystalDugout,
-                            access_rule=can_high_ledge,
+                            access_rule=can_almost_high_ledge,
                         ),
                     ],
                     pickups=[
@@ -1022,13 +1033,16 @@ area_4_mines_data = AreaData(
                             Mines.MinesIntersectionTerminal.subregion("Accessway"),
                             access_rule=Or(
                                 can_climb_wall,
-                                can_high_jump & can_climb_shaft,
+                                can_almost_high_jump & can_climb_shaft,
                             ),
                         ),
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_climb_wall,
+                            access_rule=Or(
+                                can_climb_wall,
+                                can_almost_higher_jump & can_wall_jump(WallJump.option_simple),
+                            ),
                         )
                     ],
                 )
@@ -1065,7 +1079,7 @@ area_4_mines_data = AreaData(
                             Door.Normal,
                             Mines.Zeta,
                             access_rule=Or(
-                                can_high_jump,
+                                can_almost_high_jump,
                                 And(
                                     can_spider,
                                     # Spider around the opposite wall with either a ball jump or midair morph
@@ -1179,6 +1193,10 @@ area_4_mines_data = AreaData(
                                             HasAny(ItemName.GravitySuit, ItemName.HighJumpBoots),
                                             # Spider up and unmorph to grab ledge
                                             can_spider & can_movement(Movement.option_simple),
+                                            And(
+                                                can_super_jump(SuperJump.option_medium),
+                                                can_wall_jump(WallJump.option_simple),
+                                            ),
                                         ),
                                         HasAny(ItemName.SpaceJump, ItemName.HighJumpBoots),
                                     ),
@@ -1265,7 +1283,7 @@ area_4_mines_data = AreaData(
                             access_rule=And(
                                 Has(ItemName.VariaSuit),
                                 Or(
-                                    can_high_ledge,
+                                    can_almost_high_ledge,
                                     can_movement(Movement.option_simple),  # Slightly tricky jump around the ledge
                                 ),
                             ),
@@ -1481,7 +1499,7 @@ area_4_mines_data = AreaData(
                             access_rule=And(
                                 HasAll(ItemName.SuperMissile, ItemName.VariaSuit),
                                 can_bomb_block,
-                                can_high_ledge,
+                                can_almost_high_ledge,
                             ),
                         ),
                     ],

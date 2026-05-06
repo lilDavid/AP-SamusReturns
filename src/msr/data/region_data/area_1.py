@@ -2,33 +2,40 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    can_almost_high_jump,
+    can_almost_high_ledge,
+    can_almost_higher_jump,
+    can_almost_higher_ledge,
     can_any_missile,
     can_beam_block_through_tunnel,
     can_bomb,
     can_bomb_block,
+    can_climb_elevated_shaft,
     can_climb_shaft,
     can_climb_wall,
     can_damage_metroid,
-    can_fly_vertical,
-    can_high_jump,
-    can_high_ledge,
+    can_high_super_jump_or_climb,
+    can_higher_jump,
     can_ibj,
+    can_morph_extend,
     can_movement,
     can_power_bomb,
     can_spider,
+    can_super_jump,
+    can_super_jump_morph_extend,
     can_wall_jump,
 )
-from ...options import IBJ, Movement, WallJump
+from ...options import IBJ, MorphExtend, Movement, SuperJump, WallJump
 from ..room_names import Area, Area1
 from ..room_names import Area2Entryway as Area2
 from ..room_names import SurfaceEast as Surface
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
-can_escape_ice_chamber_access = Has(ItemName.IceBeam) | can_high_jump
+can_escape_ice_chamber_access = Has(ItemName.IceBeam) | can_almost_high_jump
 can_escape_inner_temple_west_hall = Or(
     # Either up to Inner Temple Save Station or down to Caverns Hub
     # Both should be trivially accessible from each other
-    can_climb_wall,
+    can_almost_higher_ledge,
     # Right to Inner Temple Teleporter. Covers morph tunnel rule for subregion traversal
     can_bomb_block,
 )
@@ -99,7 +106,7 @@ area_1_data = AreaData(
                             Area1.TransportCache,
                             access_rule=And(
                                 HasAny(ItemName.ScrewAttack, ItemName.MorphBall),
-                                can_high_jump,
+                                can_almost_high_jump,
                                 can_beam_block_through_tunnel,
                             ),
                         ),
@@ -217,6 +224,12 @@ area_1_data = AreaData(
                             access_rule=Or(
                                 can_climb_wall,
                                 Has(ItemName.HighJumpBoots) & can_climb_shaft,
+                                can_super_jump_morph_extend,
+                                And(
+                                    can_super_jump(SuperJump.option_beginner),
+                                    can_wall_jump(WallJump.option_simple),
+                                    can_morph_extend(MorphExtend.option_easy),
+                                ),
                             ),
                         ),
                         ExitData(
@@ -235,7 +248,7 @@ area_1_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Upper"),
-                            access_rule=Has(ItemName.IceBeam) | can_climb_wall,
+                            access_rule=Has(ItemName.IceBeam) | can_higher_jump,
                         ),
                         ExitData(
                             Door.Charge,
@@ -353,7 +366,7 @@ area_1_data = AreaData(
                         PickupData("Alpha Metroid", access_rule=can_damage_metroid),
                         PickupData(
                             "Above Arena",
-                            access_rule=can_bomb_block & can_high_ledge,
+                            access_rule=can_bomb_block & can_almost_high_ledge,
                         ),
                     ],
                 )
@@ -392,7 +405,7 @@ area_1_data = AreaData(
                     pickups=[
                         PickupData(
                             "Crevice",
-                            access_rule=can_high_ledge,
+                            access_rule=can_almost_high_ledge,
                         ),
                     ],
                 ),
@@ -476,7 +489,7 @@ area_1_data = AreaData(
                             Area1.CavernsEnergyRecharge,
                             access_rule=And(
                                 Or(
-                                    can_high_ledge,
+                                    can_almost_high_ledge,
                                     # Go through the topmost beam block and unmorph to regrab the ledge in the tunnel
                                     can_movement(Movement.option_simple),
                                 ),
@@ -509,7 +522,7 @@ area_1_data = AreaData(
                             Door.MorphTunnel,
                             Area1.CavernsAlphaSw,
                             access_rule=And(
-                                can_high_ledge | Has(ItemName.IceBeam),
+                                can_almost_high_ledge | Has(ItemName.IceBeam),
                                 can_any_missile,
                                 HasAny(ItemName.IceBeam, ItemName.SpaceJump),
                             ),
@@ -589,7 +602,7 @@ area_1_data = AreaData(
                                 Or(
                                     And(
                                         Has(ItemName.PhaseDrift),
-                                        Has(ItemName.GravitySuit) | can_spider,
+                                        Has(ItemName.GravitySuit) | can_high_super_jump_or_climb(),
                                     ),
                                     HasAll(ItemName.Hatchling, ItemName.GravitySuit),
                                 ),
@@ -691,23 +704,7 @@ area_1_data = AreaData(
                                     ItemName.SuperMissile,
                                     ItemName.MorphBall,
                                 ),
-                                Or(
-                                    can_fly_vertical,
-                                    And(
-                                        can_high_jump,
-                                        Or(
-                                            can_spider,
-                                            And(
-                                                can_climb_shaft,
-                                                Or(
-                                                    Has(ItemName.HighJumpBoots),
-                                                    # DBJ and then unmorph
-                                                    can_movement(Movement.option_simple),
-                                                ),
-                                            ),
-                                        ),
-                                    ),
-                                ),
+                                can_almost_higher_jump | can_climb_elevated_shaft,
                             ),
                         ),
                     ],

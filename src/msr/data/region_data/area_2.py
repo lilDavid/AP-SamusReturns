@@ -2,6 +2,10 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    can_almost_high_jump,
+    can_almost_high_ledge,
+    can_almost_higher_jump,
+    can_almost_higher_ledge,
     can_any_missile,
     can_beam_block_through_fan_tunnel,
     can_beam_block_through_tunnel,
@@ -15,14 +19,17 @@ from ...logic import (
     can_damage_tough_enemy,
     can_fleech_swarm,
     can_fly_vertical,
-    can_high_jump,
+    can_high_jump_no_grip,
     can_high_ledge,
+    can_higher_jump,
     can_ibj,
     can_movement,
     can_power_bomb,
     can_short_shaft,
+    can_shorter_shaft,
     can_spider,
     can_spider_boost,
+    can_super_jump_morph_extend,
     can_thorns,
     can_wall_jump,
 )
@@ -42,22 +49,20 @@ can_escape_arachnus_loop = And(
     HasAll(ItemName.SpringBall, ItemName.Bomb) | Has(ItemName.PowerBomb),
     # Maintenance Tunnel to Dam Exterior
 )
-can_escape_caverns_alpha_east = can_high_ledge & can_bomb_block
+can_escape_caverns_alpha_east = Or(And(can_high_jump_no_grip | can_spider, can_bomb), can_power_bomb)
 
-can_escape_wave_chamber = can_high_jump | can_spider_boost
+can_escape_transport_dam_exterior_west = can_almost_high_jump | can_spider_boost
 # Only via the tunnel. The path through Generator Access works both ways
 can_escape_wave_to_varia = can_beam_block_through_tunnel
 can_escape_interior_teleporter = can_short_shaft
-can_escape_hi_jump_access = can_climb_wall
+can_escape_hi_jump_access = can_almost_higher_ledge
 can_escape_fleech_fire_containment = can_fleech_swarm & can_climb_shaft
 can_escape_interior_gamma_arena_to_intersection_terminal = And(can_any_missile, can_bomb_block, can_spider)
+can_escape_whimsical_waterwheels = can_almost_high_ledge  # Either to transport or the teleporter
 
 can_escape_transport_access = Or(
     can_spider,
-    And(
-        can_short_shaft,
-        can_thorns,
-    ),
+    can_shorter_shaft & can_thorns,
 )
 
 area_2_exterior_data = AreaData(
@@ -300,7 +305,7 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
-                            access_rule=can_climb_wall,
+                            access_rule=can_climb_wall | can_higher_jump,
                         ),
                         ExitData(
                             Door.Open,
@@ -332,7 +337,7 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Pickup"),
-                            access_rule=can_climb_wall & can_bomb_block,
+                            access_rule=can_higher_jump & can_bomb_block,
                         ),
                     ],
                 ),
@@ -657,7 +662,10 @@ area_2_exterior_data = AreaData(
                             access_rule=And(
                                 # Missile block
                                 can_any_missile,
-                                HasAny(ItemName.HighJumpBoots, ItemName.SpaceJump),
+                                Or(
+                                    HasAny(ItemName.HighJumpBoots, ItemName.SpaceJump),
+                                    can_super_jump_morph_extend,
+                                ),
                                 # Magma pool
                                 HasAny(ItemName.IceBeam, ItemName.SpaceJump) | can_spider,
                             ),
@@ -866,7 +874,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("South"),
-                            access_rule=can_escape_wave_chamber,
+                            access_rule=can_escape_transport_dam_exterior_west,
                         ),
                     ],
                 ),
@@ -876,7 +884,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Northwest"),
-                            access_rule=can_escape_wave_chamber,
+                            access_rule=can_escape_transport_dam_exterior_west,
                         ),
                         ExitData(
                             Door.Charge,
@@ -891,7 +899,7 @@ area_2_interior_data = AreaData(
                             Subregion("Northeast"),
                             access_rule=And(
                                 Has(ItemName.LightningArmor) | can_damage_tough_enemy,
-                                can_climb_wall,
+                                can_almost_higher_jump,
                             ),
                         ),
                         ExitData(
@@ -969,6 +977,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Southeast"),
+                            access_rule=can_escape_whimsical_waterwheels,
                         ),
                         ExitData(
                             Door.Taramarga,
@@ -987,7 +996,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Side tunnel"),
-                            access_rule=can_high_ledge,
+                            access_rule=can_escape_whimsical_waterwheels,
                         ),
                         ExitData(
                             Door.Normal,
@@ -1130,9 +1139,10 @@ area_2_interior_data = AreaData(
                                         Or(
                                             can_power_bomb,
                                             can_ibj(IBJ.option_double),
+                                            # Midair morph with some height to get a bomb against the ceiling
                                             And(
                                                 can_movement(Movement.option_simple),
-                                                can_wall_jump(WallJump.option_simple) | can_high_jump,
+                                                can_wall_jump(WallJump.option_simple) | can_almost_high_jump,
                                             ),
                                         ),
                                     ),
@@ -1309,7 +1319,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.DamBasement.subregion("Upper"),
-                            access_rule=can_high_jump,
+                            access_rule=can_almost_high_jump,
                         ),
                     ],
                 )
@@ -1580,7 +1590,7 @@ area_2_entryway_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Upper"),
-                            access_rule=can_high_ledge,
+                            access_rule=can_almost_high_ledge,
                         ),
                     ],
                 ),
@@ -1704,7 +1714,10 @@ area_2_entryway_data = AreaData(
                         ExitData(
                             Door.Open,
                             Entryway.FleechSwarmFloodway,
-                            access_rule=can_high_ledge,
+                            access_rule=Or(
+                                can_escape_transport_access,
+                                can_high_ledge,
+                            ),
                         ),
                         ExitData(
                             Door.Open,

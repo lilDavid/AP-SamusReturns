@@ -2,6 +2,10 @@ from rule_builder.rules import And, False_, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    can_almost_high_jump,
+    can_almost_high_jump_gap,
+    can_almost_high_ledge,
+    can_almost_higher_ledge,
     can_any_missile,
     can_blobthrower,
     can_bomb_block,
@@ -19,8 +23,12 @@ from ...logic import (
     can_high_bomb_block,
     can_high_jump,
     can_high_ledge,
+    can_high_super_jump,
     can_high_underwater_ledge,
+    can_higher_jump,
     can_ibj,
+    can_jump_underwater,
+    can_morph_extend,
     can_movement,
     can_power_bomb,
     can_short_shaft,
@@ -28,10 +36,13 @@ from ...logic import (
     can_spider_boost,
     can_spider_boost_through_pitfalls,
     can_spider_boost_underwater,
+    can_super_jump,
+    can_super_jump_morph_extend,
     can_thorns,
+    can_underwater_almost_high_ledge,
     can_wall_jump,
 )
-from ...options import IBJ, DamageBoost, Movement, WallJump
+from ...options import IBJ, DamageBoost, MorphExtend, Movement, SuperJump, WallJump
 from ..room_names import Area, Area6
 from ..room_names import Area4Caves as Area4
 from ..room_names import Area5Exterior as Exterior
@@ -57,6 +68,15 @@ can_wall_jump_to_interior_gamma_access = And(
 # can_grip_jump_to_interior_gamma_access = Has(ItemName.PhaseDrift) & can_movement(Movement.option_simple)
 can_grip_jump_to_interior_gamma_access = False_()
 
+can_cross_tower_exterior_blobthrower = Or(
+    can_blobthrower,
+    can_high_jump,
+    And(
+        can_super_jump(SuperJump.option_easy),
+        # Aim well to avoid damage
+        can_movement(Movement.option_simple) | can_damage_boost(DamageBoost.option_static),
+    ),
+)
 
 # To main area
 can_escape_lobby_teleporter_east_pickup_left = And(
@@ -71,14 +91,13 @@ can_escape_lobby_teleporter_east_pickup_left = And(
 can_escape_lobby_teleporter_east_pickup_right = HasAll(ItemName.MorphBall, ItemName.GrappleBeam)
 can_escape_phase_drift_chamber = can_bomb_block
 
-# A super jump does it too but logic doesn't account for those yet
-can_escape_exterior_zeta_arena = can_high_jump
-can_escape_gravity_chamber_access = HasAny(ItemName.HighJumpBoots, ItemName.GravitySuit) | can_spider
-can_escape_gravity_chamber = HasAny(ItemName.HighJumpBoots, ItemName.GravitySuit) | can_spider_boost_underwater
+can_escape_exterior_zeta_arena = can_almost_high_jump
+can_escape_gravity_chamber_access = can_jump_underwater | can_spider
+can_escape_gravity_chamber = can_jump_underwater | can_spider_boost_underwater
 can_escape_screw_attack_chamber = Has(ItemName.ScrewAttack) & can_climb_shaft
 
-can_escape_interior_save_station_water = Or(can_spider, Has(ItemName.GravitySuit) & can_high_ledge)
-can_escape_evolved_zeta_arena = can_high_jump
+can_escape_interior_save_station_water = can_high_underwater_ledge
+can_escape_evolved_zeta_arena = can_almost_high_jump
 
 area_5_lobby_data = AreaData(
     area=Area.Area5Lobby,
@@ -184,7 +203,7 @@ area_5_lobby_data = AreaData(
                         ExitData(
                             Door.Elevator,
                             Area4.TransportArea5.subregion("Lower"),
-                            access_rule=can_high_ledge,
+                            access_rule=can_almost_high_ledge,
                         ),
                         ExitData(
                             Door.Open,
@@ -252,7 +271,7 @@ area_5_lobby_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Upper"),
-                            access_rule=can_climb_wall,
+                            access_rule=can_almost_higher_ledge,
                         ),
                         ExitData(
                             Door.Open,
@@ -367,19 +386,16 @@ area_5_lobby_data = AreaData(
                             Door.MorphTunnel,
                             Subregion("Upper"),
                             access_rule=And(
-                                can_high_ledge,
+                                can_almost_high_jump_gap | can_spider,
                                 Has(ItemName.PhaseDrift) | can_damage_tough_enemy,
                             ),
                         ),
                         ExitData(
                             Door.Normal,
                             Lobby.Gamma2Access,
-                            access_rule=And(
-                                Or(
-                                    Has(ItemName.GravitySuit) & can_fly_vertical,
-                                    can_spider_boost_underwater & can_damage_boost(DamageBoost.option_static),
-                                ),
-                                can_high_ledge,
+                            access_rule=Or(
+                                Has(ItemName.GravitySuit) & can_fly_vertical,
+                                can_spider_boost_underwater & can_damage_boost(DamageBoost.option_static),
                             ),
                         ),
                         ExitData(
@@ -562,7 +578,7 @@ area_5_lobby_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Lobby.Alpha2,
-                            access_rule=can_high_ledge,
+                            access_rule=can_almost_high_ledge,
                         ),
                     ],
                 ),
@@ -672,7 +688,7 @@ area_5_lobby_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Exit"),
-                            access_rule=Has(ItemName.GravitySuit) | can_high_ledge,
+                            access_rule=Has(ItemName.GravitySuit) | can_almost_high_ledge,
                         ),
                     ],
                     pickups=[
@@ -827,12 +843,12 @@ area_5_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Intersection"),
-                            can_blobthrower | can_high_jump,
+                            access_rule=can_cross_tower_exterior_blobthrower,
                         ),
                         ExitData(
                             Door.Open,
                             Subregion("Southwest"),
-                            can_blobthrower | can_high_jump,
+                            access_rule=can_cross_tower_exterior_blobthrower,
                         ),
                         ExitData(
                             Door.Super,
@@ -975,7 +991,10 @@ area_5_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Exterior.ParabyParlor,
-                            access_rule=can_climb_wall_underwater & can_bomb_block,
+                            access_rule=And(
+                                can_bomb_block,
+                                can_climb_wall_underwater | can_high_super_jump(SuperJump.option_easy),
+                            ),
                         ),
                     ],
                 ),
@@ -1147,7 +1166,13 @@ area_5_exterior_data = AreaData(
                         PickupData(
                             "Maze",
                             access_rule=And(
-                                can_climb_wall,
+                                Or(
+                                    can_climb_wall,
+                                    Has(ItemName.HighJumpBoots),
+                                    # This one's trickier than most because of the overhang but stil not terrible
+                                    can_super_jump_morph_extend,
+                                    # Diagonal DBJ
+                                ),
                                 can_bomb_block,
                                 can_blobthrower,
                             ),
@@ -1248,7 +1273,7 @@ area_5_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Save Station"),
-                            access_rule=can_climb_shaft,
+                            access_rule=can_climb_shaft | can_higher_jump,
                         ),
                     ],
                 ),
@@ -1279,15 +1304,28 @@ area_5_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Exit"),
-                            access_rule=Or(
-                                Has(ItemName.SpaceJump),
-                                can_ibj(IBJ.option_diagonal),
-                                can_spider & can_movement(Movement.option_simple),  # Drop off the ceiling into the gap
-                                And(
-                                    Has(ItemName.HighJumpBoots),
-                                    Or(
-                                        can_damage_boost(DamageBoost.option_static),
-                                        can_movement(Movement.option_simple),  # Jump with good timing to avoid damage
+                            access_rule=And(
+                                # Climb
+                                Or(
+                                    can_high_ledge,
+                                    can_wall_jump(WallJump.option_simple) & can_morph_extend(MorphExtend.option_easy),
+                                ),
+                                # Spike tunnel
+                                Or(
+                                    Has(ItemName.SpaceJump),
+                                    can_ibj(IBJ.option_diagonal),
+                                    # Drop off the ceiling into the gap
+                                    can_spider & can_movement(Movement.option_simple),
+                                    can_high_super_jump(SuperJump.option_easy),
+                                    # Jump with good timing to get the damage boost
+                                    can_damage_boost(DamageBoost.option_static) & can_movement(Movement.option_simple),
+                                    And(
+                                        Has(ItemName.HighJumpBoots) | can_super_jump(SuperJump.option_easy),
+                                        Or(
+                                            can_damage_boost(DamageBoost.option_static),
+                                            # Jump with good timing to avoid damage
+                                            can_movement(Movement.option_simple),
+                                        ),
                                     ),
                                     # Diagonal DBJ with HJB
                                 ),
@@ -1360,7 +1398,10 @@ area_5_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
-                            access_rule=can_damage_tough_enemy & can_climb_shaft,
+                            access_rule=And(
+                                can_damage_tough_enemy,
+                                can_climb_shaft | can_higher_jump,
+                            ),
                         ),
                     ],
                 ),
@@ -1480,7 +1521,16 @@ area_5_interior_data = AreaData(
                                 can_bomb_block,
                                 Or(
                                     can_spider & can_damage_tough_enemy,
-                                    HasAll(ItemName.SpaceJump, ItemName.PhaseDrift),
+                                    And(
+                                        Has(ItemName.PhaseDrift),
+                                        Or(
+                                            HasAny(ItemName.SpaceJump, ItemName.HighJumpBoots),
+                                            And(
+                                                can_wall_jump(WallJump.option_simple),
+                                                can_super_jump(SuperJump.option_beginner),
+                                            ),
+                                        ),
+                                    ),
                                 ),
                             ),
                         ),
@@ -1627,7 +1677,7 @@ area_5_interior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Interior.TransportTowerExtE.subregion("Top"),
-                            access_rule=can_high_underwater_ledge,
+                            access_rule=can_underwater_almost_high_ledge,
                         ),
                     ]
                 )
@@ -1814,7 +1864,7 @@ area_5_interior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Interior.GrappleShuffler.subregion("Tunnel"),
-                            access_rule=can_high_ledge,
+                            access_rule=can_almost_high_ledge,
                         ),
                         ExitData(
                             Door.Locked,

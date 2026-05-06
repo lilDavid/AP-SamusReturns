@@ -3,12 +3,13 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 from ...items import VICTORY, ItemName
 from ...logic import (
     HasDna,
+    can_almost_high_ledge,
     can_any_missile,
     can_bomb_block,
+    can_climb_elevated_shaft,
     can_climb_shaft,
     can_climb_wall,
     can_damage_metroid,
-    can_fly_vertical,
     can_high_ledge,
     can_ibj,
     can_movement,
@@ -16,18 +17,17 @@ from ...logic import (
     can_spider,
     can_spider_boost,
     can_thorns,
-    can_wall_jump,
     door_rules,
 )
-from ...options import IBJ, Movement, WallJump
+from ...options import IBJ, Movement
 from ..room_names import Area, Area1, Area8
 from ..room_names import SurfaceEast as East
 from ..room_names import SurfaceWest as West
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
 
-can_escape_cavern_cavity = can_climb_shaft
-can_escape_energy_recharge_shaft = can_high_ledge
-can_escape_charge_chamber = Or(can_high_ledge & door_rules[Door.Missile], door_rules[Door.Charge])
+can_escape_cavern_cavity = can_climb_shaft | can_almost_high_ledge
+can_escape_energy_recharge_shaft = can_almost_high_ledge
+can_escape_charge_chamber = Or(can_almost_high_ledge & door_rules[Door.Missile], door_rules[Door.Charge])
 
 can_escape_transport_area_8 = can_climb_shaft
 can_cross_transport_area_8 = And(
@@ -148,7 +148,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Upper"),
-                            access_rule=can_high_ledge,
+                            access_rule=can_almost_high_ledge,
                         ),
                         ExitData(
                             Door.Normal,
@@ -234,7 +234,7 @@ surface_east_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=Has(ItemName.MorphBall) & can_high_ledge,
+                            access_rule=Has(ItemName.MorphBall) & can_almost_high_ledge,
                         ),
                     ],
                 ),
@@ -266,7 +266,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.Missile,
                             East.ChargeBeamAccess,
-                            access_rule=can_high_ledge,
+                            access_rule=can_almost_high_ledge,
                         ),
                         ExitData(
                             Door.Charge,
@@ -431,7 +431,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             East.CavernAlcove,
-                            access_rule=can_climb_shaft,
+                            access_rule=can_climb_shaft | can_almost_high_ledge,
                         ),
                     ],
                 ),
@@ -493,8 +493,7 @@ surface_east_data = AreaData(
                                 can_any_missile,
                                 Has(ItemName.MorphBall),
                                 # Climb the shaft overhead
-                                can_fly_vertical,
-                                Has(ItemName.HighJumpBoots) & can_wall_jump(WallJump.option_simple),
+                                can_climb_elevated_shaft,
                             ),
                         ),
                     ],

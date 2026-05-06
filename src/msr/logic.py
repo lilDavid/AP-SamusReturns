@@ -10,14 +10,15 @@ from typing_extensions import override
 from .data import GAME_NAME
 from .data.region_data import Door
 from .items import ItemName
-from .options import IBJ, DamageBoost, Knowledge, LogicTrick, Movement, WallJump
+from .options import IBJ, DamageBoost, Knowledge, LogicTrick, MorphExtend, Movement, SuperJump, WallJump
 
 if TYPE_CHECKING:
     from . import SamusReturnsWorld
 
 # TODO: Ammo logic
 # TODO: Go through all the high-jump requirements to separate out High Jump/DBJ from super jump
-# TODO: Separate out midair morph tricks (morph extends probably still with super jumps though?)
+# TODO: How much height do you get out of a DBJ with HJB?
+# TODO: Separate out midair morph tricks
 
 
 @dataclass
@@ -66,6 +67,16 @@ def can_wall_jump(wall_jump: int):
     return Trick(WallJump, wall_jump)
 
 
+def can_super_jump(super_jump: int):
+    return Trick(SuperJump, super_jump)
+
+
+def can_morph_extend(morph_extend: int):
+    return Trick(MorphExtend, morph_extend)
+
+
+can_super_jump_morph_extend = can_super_jump(SuperJump.option_medium) & can_morph_extend(MorphExtend.option_medium)
+
 can_bomb = HasAll(ItemName.MorphBall, ItemName.Bomb)
 can_power_bomb = HasAll(ItemName.MorphBall, ItemName.PowerBomb)
 can_bomb_block = can_bomb | can_power_bomb
@@ -92,10 +103,44 @@ can_fly = Or(Has(ItemName.SpaceJump), can_ibj(IBJ.option_diagonal))
 can_climb_wall = can_spider | can_fly_vertical
 can_climb_wall_underwater = Or(can_spider, Has(ItemName.GravitySuit) & can_fly_vertical)
 
-can_high_jump = Or(Has(ItemName.HighJumpBoots), can_ibj(IBJ.option_double), can_fly_vertical)
+# High Jump Boots-ish height
+can_high_jump_no_grip = Or(Has(ItemName.HighJumpBoots), can_ibj(IBJ.option_double), can_fly_vertical)
+can_high_jump = can_high_jump_no_grip | can_super_jump_morph_extend
 can_high_ledge = can_spider | can_high_jump
-can_high_underwater_ledge = Or(can_spider, Has(ItemName.GravitySuit) & can_high_jump)
-can_underwater_high_jump = Or(Has(ItemName.GravitySuit) & can_high_jump, can_spider_boost_underwater)
+can_high_underwater_ledge = Or(Has(ItemName.GravitySuit) & can_high_jump, can_spider)
+
+# Super jumps alone fall just short of other methods
+can_almost_high_jump = can_high_jump | can_super_jump(SuperJump.option_beginner)
+can_almost_high_ledge = can_almost_high_jump | can_spider
+can_almost_high_jump_gap = can_high_jump | can_super_jump(SuperJump.option_easy)
+can_underwater_almost_high_jump = Or(Has(ItemName.GravitySuit) & can_almost_high_jump, can_spider_boost_underwater)
+can_underwater_almost_high_ledge = Or(Has(ItemName.GravitySuit) & can_almost_high_jump, can_spider)
+
+# Basically almost-high-jump but with water added
+can_jump_underwater = HasAny(ItemName.HighJumpBoots, ItemName.GravitySuit) | can_super_jump(SuperJump.option_easy)
+
+
+def can_high_super_jump(super_jump: int = SuperJump.option_beginner):
+    return Has(ItemName.HighJumpBoots) & can_super_jump(super_jump)
+
+
+def can_high_super_jump_or_climb(super_jump: int = SuperJump.option_beginner):
+    return can_high_super_jump(super_jump) | can_spider
+
+
+can_almost_higher_jump = Or(
+    can_high_super_jump(),
+    Has(ItemName.HighJumpBoots) & can_ibj(IBJ.option_double),
+    can_fly_vertical,
+)
+can_almost_higher_ledge = can_almost_higher_jump | can_spider
+
+can_higher_jump = Or(
+    can_high_super_jump(SuperJump.option_easy),
+    Has(ItemName.HighJumpBoots) & can_ibj(IBJ.option_double),
+    can_fly_vertical,
+)
+can_higher_ledge = can_higher_jump | can_spider
 
 # Needs ~hi-jump height to break but not to access the tunnel
 can_high_bomb_block = Or(can_high_ledge & can_bomb, can_power_bomb)
@@ -105,8 +150,14 @@ can_bomb_block_near_ceiling = Or(
     # IBJ alone is possible but super tricky
 )
 
-can_short_shaft = can_high_ledge | can_wall_jump(WallJump.option_simple)
+can_shorter_shaft = can_wall_jump(WallJump.option_simple) | can_almost_high_ledge
+can_short_shaft = can_wall_jump(WallJump.option_simple) | can_high_ledge
 can_climb_shaft = can_wall_jump(WallJump.option_simple) | can_climb_wall
+can_climb_elevated_shaft = Or(
+    can_spider,
+    can_climb_shaft & can_high_jump_no_grip,
+    can_climb_shaft & can_super_jump(SuperJump.option_easy),
+)
 
 can_any_missile = HasAny(ItemName.MissileLauncher, ItemName.SuperMissile)
 can_damage_tough_enemy_ranged = Or(can_any_missile, can_beam_burst, can_power_bomb)

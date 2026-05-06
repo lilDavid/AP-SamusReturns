@@ -2,11 +2,15 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    can_almost_high_jump_gap,
+    can_almost_high_ledge,
+    can_almost_higher_ledge,
     can_any_missile,
     can_blobthrower,
     can_bomb,
     can_bomb_block,
     can_bomb_block_near_ceiling,
+    can_climb_elevated_shaft,
     can_climb_shaft,
     can_climb_wall,
     can_combat_omega,
@@ -14,20 +18,27 @@ from ...logic import (
     can_high_jump,
     can_high_ledge,
     can_ibj,
+    can_jump_underwater,
     can_movement,
     can_power_bomb,
     can_short_shaft,
+    can_shorter_shaft,
     can_spider,
     can_spider_boost,
+    can_super_jump,
     can_thorns,
     can_wall_jump,
 )
-from ...options import IBJ, Movement, WallJump
+from ...options import IBJ, Movement, SuperJump, WallJump
 from ..room_names import Area, Area6, Area7, Area8
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
 can_cross_omega_arena_north_access = Or(Has(ItemName.SpaceJump), can_spider_boost, can_thorns)
 can_cross_wallfire_workstation_top = HasAny(ItemName.LightningArmor, ItemName.PhaseDrift) | can_blobthrower
+can_jump_up_wallfire_workstation = And(
+    HasAny(ItemName.PhaseDrift, ItemName.LightningArmor),
+    HasAny(ItemName.HighJumpBoots, ItemName.SpaceJump) | can_super_jump(SuperJump.option_easy),
+)
 
 can_escape_transport_to_area_6_bottom = can_climb_wall
 can_escape_transport_to_area_6_tunnels = Or(can_power_bomb, can_bomb_block & can_climb_shaft)
@@ -38,7 +49,7 @@ can_escape_robot_regime_bottom = Or(
         can_wall_jump(WallJump.option_intermediate) | can_spider,
     ),
 )
-can_escape_spider_boost_tunnel_s_water = HasAny(ItemName.HighJumpBoots, ItemName.GravitySuit) | can_spider
+can_escape_spider_boost_tunnel_s_water = can_jump_underwater | can_spider
 can_escape_evolved_omega_arena = Or(
     can_climb_shaft & can_cross_wallfire_workstation_top,
     HasAll(ItemName.ScrewAttack, ItemName.MorphBall),
@@ -86,7 +97,8 @@ area_7_data = AreaData(
                                                 Or(
                                                     Has(ItemName.SpaceJump),
                                                     # By grabbing the morph tunnel
-                                                    And(can_high_jump, can_power_bomb | can_ibj(IBJ.option_double)),
+                                                    # Midair morph to use reg bombs
+                                                    can_almost_high_jump_gap & can_bomb_block,
                                                     can_spider & can_bomb_block,
                                                 ),
                                             ),
@@ -110,6 +122,8 @@ area_7_data = AreaData(
                                         ),
                                     ),
                                     # Into the morph tunnel
+                                    # You can super jump in there but that needs thorns contact anyway which
+                                    # the next condition covers
                                     can_climb_wall & can_bomb_block,
                                     # Up from the teleporter
                                     can_thorns & can_bomb_block,
@@ -117,7 +131,11 @@ area_7_data = AreaData(
                                 # Get to the save station
                                 Or(
                                     # Right path
-                                    And(Has(ItemName.ScrewAttack), can_climb_shaft, can_high_jump),
+                                    And(
+                                        Has(ItemName.ScrewAttack),
+                                        can_climb_shaft,
+                                        Has(ItemName.HighJumpBoots) | can_super_jump(SuperJump.option_beginner),
+                                    ),
                                     # Left path
                                     can_power_bomb,
                                 ),
@@ -196,7 +214,7 @@ area_7_data = AreaData(
                             Door.MorphTunnel,
                             Area7.RobotRegime.subregion("Lower"),
                             access_rule=And(
-                                can_short_shaft,
+                                can_shorter_shaft,
                                 Has(ItemName.LightningArmor),
                                 # You need spring ball to jump low enough to not get ejected by the spikes LMAO
                                 # Tougher with high jump but I think still doable with a small enough jump
@@ -295,7 +313,7 @@ area_7_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Upper"),
-                            access_rule=Has(ItemName.ScrewAttack) | can_high_ledge,
+                            access_rule=Has(ItemName.ScrewAttack) | can_almost_high_ledge,
                         ),
                         ExitData(
                             Door.Gigadora,
@@ -313,7 +331,7 @@ area_7_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Lower"),
-                            access_rule=can_short_shaft,
+                            access_rule=can_shorter_shaft,
                         ),
                         ExitData(
                             Door.Charge,
@@ -434,7 +452,7 @@ area_7_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
-                            access_rule=can_short_shaft,
+                            access_rule=can_shorter_shaft,
                         ),
                     ],
                 ),
@@ -452,13 +470,13 @@ area_7_data = AreaData(
                         ExitData(
                             Door.Locked,
                             Area7.WallfireWorkstation.subregion("Bottom"),
-                            access_rule=can_climb_wall,
+                            access_rule=can_almost_higher_ledge,
                         ),
                     ],
                     pickups=[
                         PickupData(
                             "Alcove",
-                            access_rule=can_climb_wall & can_any_missile,
+                            access_rule=can_almost_higher_ledge & can_any_missile,
                         )
                     ],
                 ),
@@ -509,7 +527,7 @@ area_7_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
-                            access_rule=can_high_ledge,
+                            access_rule=can_shorter_shaft,
                         ),
                         ExitData(
                             Door.Open,
@@ -519,7 +537,7 @@ area_7_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Area7.LabTeleporterW,
-                            access_rule=can_high_ledge,
+                            access_rule=can_almost_high_ledge,
                         ),
                     ],
                     pickups=[
@@ -539,8 +557,8 @@ area_7_data = AreaData(
                         ),
                         ExitData(
                             Door.Normal,
-                            Area7.GrapplePuzzleMadness,  # TODO
-                            access_rule=can_high_ledge,
+                            Area7.GrapplePuzzleMadness,
+                            access_rule=can_almost_high_ledge,
                         ),
                     ],
                     pickups=[
@@ -728,13 +746,7 @@ area_7_data = AreaData(
                             Subregion("Top"),
                             access_rule=And(
                                 can_climb_wall,
-                                Or(
-                                    can_damage_tough_enemy_ranged,
-                                    And(
-                                        HasAny(ItemName.PhaseDrift, ItemName.LightningArmor),
-                                        HasAny(ItemName.HighJumpBoots, ItemName.SpaceJump),
-                                    ),
-                                ),
+                                can_damage_tough_enemy_ranged | can_jump_up_wallfire_workstation,
                             ),
                         ),
                     ],
@@ -746,8 +758,7 @@ area_7_data = AreaData(
                                     can_spider & can_damage_tough_enemy_ranged,
                                     And(
                                         Has(ItemName.MorphBall),
-                                        HasAny(ItemName.PhaseDrift, ItemName.LightningArmor),
-                                        HasAny(ItemName.HighJumpBoots, ItemName.SpaceJump),
+                                        can_damage_tough_enemy_ranged | can_jump_up_wallfire_workstation,
                                     ),
                                 ),
                             )
@@ -839,10 +850,7 @@ area_7_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Grapple Block"),
-                            access_rule=Or(
-                                can_climb_wall,
-                                Has(ItemName.HighJumpBoots) & can_climb_shaft,
-                            ),
+                            access_rule=can_climb_wall | can_climb_elevated_shaft,
                         ),
                     ],
                 ),
@@ -895,7 +903,7 @@ area_7_data = AreaData(
                             access_rule=Or(
                                 can_ibj(IBJ.option_double),
                                 can_bomb_block & can_spider,
-                                can_power_bomb & can_high_jump,
+                                can_bomb_block & can_shorter_shaft,  # Midair morph bomb
                             ),
                         ),
                     ],

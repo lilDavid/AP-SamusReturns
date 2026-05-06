@@ -2,6 +2,8 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    can_almost_high_jump,
+    can_almost_high_ledge,
     can_any_missile,
     can_beam_burst,
     can_bomb_block,
@@ -13,23 +15,30 @@ from ...logic import (
     can_damage_metroid,
     can_fly_vertical,
     can_high_bomb_block,
-    can_high_jump,
     can_high_ledge,
+    can_higher_ledge,
     can_ibj,
+    can_morph_extend,
     can_movement,
     can_power_bomb,
-    can_short_shaft,
+    can_shorter_shaft,
     can_spider,
     can_spider_boost,
+    can_super_jump,
     can_thorns,
     can_wall_jump,
     door_rules,
 )
-from ...options import IBJ, DamageBoost, Movement, WallJump
+from ...options import IBJ, DamageBoost, MorphExtend, Movement, SuperJump, WallJump
 from ..room_names import Area, Area6, Area7
 from ..room_names import Area5Lobby as Area5
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
+can_cross_transport_to_area_5 = Or(
+    HasAny(ItemName.HighJumpBoots, ItemName.SpaceJump),
+    can_spider,
+    can_damage_boost(DamageBoost.option_static),
+)
 can_cross_crumbling_bridge = Has(ItemName.PhaseDrift) | can_spider_boost
 can_navigate_hideout_sprawl_tunnels = And(
     HasAll(ItemName.ScrewAttack, ItemName.SuperMissile, ItemName.GrappleBeam),
@@ -51,8 +60,14 @@ can_traverse_poisonous_tunnel = And(can_bomb_block, Has(ItemName.LightningArmor)
 can_escape_chozo_seal_w_bottom = can_high_ledge
 can_escape_chozo_seal_e = Or(
     can_climb_wall,
-    # Can also midair morph-unmorph LMAO
-    Has(ItemName.HighJumpBoots) & can_wall_jump(WallJump.option_simple),
+    And(
+        can_wall_jump(WallJump.option_simple),
+        Or(
+            Has(ItemName.HighJumpBoots),
+            can_super_jump(SuperJump.option_beginner),
+            can_morph_extend(MorphExtend.option_easy),
+        ),
+    ),
 )
 can_escape_omega_arena = Or(
     door_rules[Door.Charge],
@@ -172,7 +187,7 @@ area_6_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Area6.OmegaAccess,
-                            access_rule=Has(ItemName.ScrewAttack) & can_high_ledge,
+                            access_rule=Has(ItemName.ScrewAttack) & can_almost_high_ledge,
                         ),
                     ],
                     pickups=[
@@ -496,20 +511,12 @@ area_6_data = AreaData(
                         ExitData(
                             Door.Elevator,
                             Area5.TransportAreas4And6.subregion("Bottom"),
-                            access_rule=Or(
-                                HasAny(ItemName.HighJumpBoots, ItemName.SpaceJump),
-                                can_spider,
-                                can_damage_boost(DamageBoost.option_static),
-                            ),
+                            access_rule=can_cross_transport_to_area_5,
                         ),
                         ExitData(
                             Door.Normal,
                             Area6.ChozoSealW.subregion("Main"),
-                            access_rule=Or(
-                                HasAny(ItemName.HighJumpBoots, ItemName.SpaceJump),
-                                can_spider,
-                                can_high_ledge & can_damage_boost(DamageBoost.option_static),
-                            ),
+                            access_rule=can_almost_high_ledge & can_cross_transport_to_area_5,
                         ),
                     ]
                 )
@@ -533,7 +540,7 @@ area_6_data = AreaData(
                                 can_bomb_block,
                                 can_any_missile,
                                 Has(ItemName.GrappleBeam),
-                                can_high_ledge,
+                                can_almost_high_ledge,
                                 Or(
                                     HasAny(ItemName.SpaceJump, ItemName.SpiderBall, ItemName.LightningArmor),
                                     can_damage_boost(DamageBoost.option_static),
@@ -582,7 +589,7 @@ area_6_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Area6.HideoutSprawl.subregion("Main"),
-                            access_rule=can_high_jump,
+                            access_rule=can_almost_high_jump,
                         ),
                         ExitData(
                             Door.PowerBomb,
@@ -646,6 +653,7 @@ area_6_data = AreaData(
                                     Has(ItemName.SpaceJump),
                                     Has(ItemName.HighJumpBoots),
                                     can_wall_jump(WallJump.option_simple),
+                                    can_super_jump(SuperJump.option_easy),
                                 ),
                             ),
                         ),
@@ -667,7 +675,7 @@ area_6_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
-                            access_rule=can_climb_wall,
+                            access_rule=can_higher_ledge,
                         ),
                     ],
                 ),
@@ -704,7 +712,7 @@ area_6_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Upper"),
-                            access_rule=can_short_shaft,
+                            access_rule=can_shorter_shaft,
                         ),
                     ],
                 ),

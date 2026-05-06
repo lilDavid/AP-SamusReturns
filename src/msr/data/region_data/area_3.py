@@ -2,6 +2,9 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    can_almost_high_jump,
+    can_almost_high_ledge,
+    can_almost_higher_jump,
     can_any_missile,
     can_beam_block_through_tunnel,
     can_blobthrower,
@@ -14,19 +17,24 @@ from ...logic import (
     can_damage_tough_enemy,
     can_fly,
     can_fly_vertical,
+    can_high_jump,
     can_high_ledge,
+    can_high_super_jump,
+    can_higher_jump,
     can_ibj,
     can_movement,
     can_power_bomb,
     can_short_shaft,
+    can_shorter_shaft,
     can_spider,
     can_spider_boost,
     can_spider_boost_underwater,
-    can_underwater_high_jump,
+    can_super_jump,
+    can_super_jump_morph_extend,
     can_wall_jump,
     has_knowledge,
 )
-from ...options import IBJ, DamageBoost, Knowledge, Movement, WallJump
+from ...options import IBJ, DamageBoost, Knowledge, Movement, SuperJump, WallJump
 from ..room_names import Area
 from ..room_names import Area2Entryway as Area2
 from ..room_names import Area3Caverns as Caverns
@@ -34,13 +42,6 @@ from ..room_names import Area3Exterior as Exterior
 from ..room_names import Area3Interior as Interior
 from ..room_names import Area4Caves as Area4
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
-
-can_climb_ascending_alleyway = And(
-    can_any_missile,
-    Has(ItemName.GrappleBeam) | can_fly_vertical,
-    Has(ItemName.MorphBall),
-)
-can_grapple_tunnel = Has(ItemName.GrappleBeam) | can_fly_vertical
 
 can_escape_factory_exterior_access = Or(
     # Through the grapple blocks
@@ -53,12 +54,18 @@ can_escape_factory_exterior_access = Or(
 can_escape_factory_exterior_crevice = can_climb_wall
 
 can_escape_evolved_alpha_north_to_gamma = can_climb_wall & can_bomb_block
+can_escape_interior_gamma_arena_south = Or(
+    Has(ItemName.GrappleBeam),
+    Has(ItemName.HighJumpBoots) & can_super_jump_morph_extend,
+    Has(ItemName.HighJumpBoots) & can_ibj(IBJ.option_double),
+    can_fly_vertical,
+)
 
 can_escape_paraby_periphery = can_climb_wall
 can_escape_factory_intersection = can_climb_wall
 # Unless you already have access from Metroid caverns, you're locked in lower exterior if you drop down
 can_escape_ramulken_residence = can_climb_shaft
-can_escape_gamma_arena = can_grapple_tunnel
+can_escape_gamma_arena = Or(Has(ItemName.GrappleBeam), can_almost_high_jump, can_fly_vertical)
 can_escape_gamma_arena_caverns_transport = can_escape_gamma_arena & can_climb_wall
 
 area_3_exterior_data = AreaData(
@@ -95,7 +102,7 @@ area_3_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Upper"),
-                            access_rule=can_short_shaft,
+                            access_rule=can_shorter_shaft,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -232,7 +239,7 @@ area_3_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Platform"),
-                            access_rule=can_high_ledge,
+                            access_rule=can_almost_high_ledge,
                         ),
                         # ExitData(
                         #     Door.Open,
@@ -295,7 +302,7 @@ area_3_exterior_data = AreaData(
                             Subregion("Top"),
                             access_rule=And(
                                 # Grapple point is offscreen without high jump
-                                has_knowledge(Knowledge.option_simple) | can_high_ledge,
+                                has_knowledge(Knowledge.option_simple) | can_almost_high_ledge,
                                 Has(ItemName.GrappleBeam),
                                 can_spider,
                             ),
@@ -343,7 +350,7 @@ area_3_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Shaft middle"),
-                            access_rule=can_high_ledge | can_climb_shaft,
+                            access_rule=can_almost_high_ledge | can_climb_shaft,
                         ),
                         ExitData(
                             Door.Normal,
@@ -644,7 +651,7 @@ area_3_exterior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Exterior.Gamma.subregion("Entrance"),
-                            access_rule=Has(ItemName.GrappleBeam) & can_climb_wall,
+                            access_rule=Has(ItemName.GrappleBeam) | can_higher_jump,
                         ),
                     ],
                     pickups=[
@@ -717,6 +724,7 @@ area_3_exterior_data = AreaData(
                                     can_bomb_block & can_blobthrower,
                                     HasAll(ItemName.MorphBall, ItemName.LightningArmor),
                                     can_wall_jump(WallJump.option_intermediate),
+                                    can_almost_higher_jump,
                                 ),
                             ),
                         ),
@@ -727,7 +735,7 @@ area_3_exterior_data = AreaData(
                                 Or(
                                     can_climb_wall,
                                     And(
-                                        can_high_ledge | can_wall_jump(WallJump.option_intermediate),
+                                        can_almost_high_ledge | can_wall_jump(WallJump.option_intermediate),
                                         can_damage_tough_enemy,
                                     ),
                                 ),
@@ -827,7 +835,11 @@ area_3_caverns_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Bottom"),
-                            access_rule=can_underwater_high_jump,
+                            access_rule=Or(
+                                Has(ItemName.GravitySuit) & can_almost_high_jump,
+                                Has(ItemName.HighJumpBoots) & can_super_jump_morph_extend,
+                                can_spider_boost_underwater,
+                            ),
                         ),
                     ],
                     pickups=[
@@ -929,7 +941,10 @@ area_3_caverns_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Maze Junction Access"),
-                            access_rule=can_underwater_high_jump,
+                            access_rule=Or(
+                                Has(ItemName.GravitySuit) & can_high_jump,
+                                can_spider_boost_underwater,
+                            ),
                         ),
                     ],
                 ),
@@ -1062,7 +1077,7 @@ area_3_caverns_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Middle"),
-                            access_rule=Has(ItemName.GrappleBeam) | can_fly_vertical,
+                            access_rule=Has(ItemName.GrappleBeam) | can_almost_higher_jump,
                         ),
                     ],
                     pickups=[
@@ -1116,12 +1131,16 @@ area_3_caverns_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Caverns.QuarryShaft.subregion("Grapple Block"),
-                            access_rule=can_climb_ascending_alleyway & Has(ItemName.GrappleBeam),
+                            access_rule=can_any_missile & Has(ItemName.GrappleBeam),
                         ),
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_climb_ascending_alleyway,
+                            access_rule=And(
+                                can_any_missile,
+                                Has(ItemName.GrappleBeam) | can_almost_higher_jump,
+                                Has(ItemName.MorphBall),
+                            ),
                         )
                     ],
                 ),
@@ -1150,8 +1169,14 @@ area_3_caverns_data = AreaData(
                             access_rule=Or(
                                 can_fly_vertical,
                                 And(
-                                    has_knowledge(Knowledge.option_simple) | can_climb_wall,
                                     Has(ItemName.GrappleBeam),
+                                    Or(
+                                        has_knowledge(Knowledge.option_simple),
+                                        can_climb_wall,
+                                        can_almost_higher_jump,
+                                        # TODO: HJB DBJ + dboost does it but I can't represent it
+                                        # adequately with current logic options
+                                    ),
                                 ),
                             ),
                         ),
@@ -1164,9 +1189,20 @@ area_3_caverns_data = AreaData(
                                     can_spider | can_movement(Movement.option_simple),
                                 ),
                                 And(
-                                    HasAll(ItemName.GravitySuit, ItemName.SpaceJump) | can_spider_boost_underwater,
                                     can_any_missile,
+                                    # Climb where the missile blocks were
+                                    Or(
+                                        Has(ItemName.GravitySuit),
+                                        can_spider_boost_underwater,
+                                        can_high_super_jump(),
+                                    ),
                                     can_bomb,
+                                    # Escape
+                                    Or(
+                                        can_spider,
+                                        can_movement(Movement.option_simple),
+                                        HasAll(ItemName.GravitySuit, ItemName.SpaceJump),
+                                    ),
                                 ),
                             )
                         )
@@ -1228,7 +1264,7 @@ area_3_caverns_data = AreaData(
                     pickups=[
                         PickupData(
                             access_rule=And(
-                                Has(ItemName.GrappleBeam) | can_fly_vertical,
+                                Has(ItemName.GrappleBeam) | can_higher_jump,
                                 HasAll(ItemName.WaveBeam, ItemName.BeamBurst) | can_power_bomb,
                                 Has(ItemName.MorphBall),
                             ),
@@ -1270,7 +1306,15 @@ area_3_caverns_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Caverns.LonelyLoop.subregion("Bottom"),
-                            access_rule=can_climb_wall,
+                            access_rule=Or(
+                                can_climb_wall,
+                                And(
+                                    # It's a little weird but still easy
+                                    # The option just isn't fine-grained enough yet
+                                    Has(ItemName.HighJumpBoots),
+                                    can_wall_jump(WallJump.option_intermediate),
+                                ),
+                            ),
                         ),
                     ],
                 ),
@@ -1342,7 +1386,7 @@ area_3_caverns_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Top"),
-                            access_rule=HasAny(ItemName.GrappleBeam, ItemName.SpaceJump),
+                            access_rule=HasAny(ItemName.GrappleBeam, ItemName.SpaceJump) | can_high_super_jump(),
                         ),
                     ],
                 ),
@@ -1658,7 +1702,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.GammaS,
-                            access_rule=can_grapple_tunnel,
+                            access_rule=can_escape_interior_gamma_arena_south,
                         ),
                     ],
                 )
@@ -1735,7 +1779,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.TransportFactoryExtE,
-                            access_rule=can_short_shaft,
+                            access_rule=can_shorter_shaft,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1928,7 +1972,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.GammaCAccess.subregion("Lower"),
-                            access_rule=can_high_ledge,
+                            access_rule=can_almost_high_ledge,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1950,7 +1994,11 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Southeast"),
-                            access_rule=can_spider_boost | HasAny(ItemName.GravitySuit, ItemName.GrappleBeam),
+                            access_rule=Or(
+                                HasAny(ItemName.GravitySuit, ItemName.GrappleBeam),
+                                can_spider_boost,
+                                Has(ItemName.HighJumpBoots) & can_super_jump(SuperJump.option_beginner),
+                            ),
                         ),
                     ],
                 ),
@@ -2020,7 +2068,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Top"),
-                            access_rule=can_fly_vertical,
+                            access_rule=can_almost_higher_jump,
                         ),
                     ],
                 ),
@@ -2078,12 +2126,12 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.GammaSAccess,
-                            access_rule=can_grapple_tunnel,
+                            access_rule=can_escape_interior_gamma_arena_south,
                         ),
                         ExitData(
                             Door.PowerBomb,
                             Interior.SecuritySite,
-                            access_rule=can_high_ledge,
+                            access_rule=can_almost_high_ledge,
                         ),
                     ],
                     pickups=[

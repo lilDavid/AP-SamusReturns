@@ -2,6 +2,7 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    can_almost_high_ledge,
     can_any_missile,
     can_bomb,
     can_bomb_block,
@@ -9,16 +10,19 @@ from ...logic import (
     can_damage_metroid,
     can_fly_vertical,
     can_high_ledge,
+    can_morph_extend,
     can_movement,
     can_power_bomb,
     can_short_shaft,
+    can_shorter_shaft,
     can_spider,
     can_spider_boost,
+    can_super_jump,
     can_thorns,
     can_wall_jump,
     door_rules,
 )
-from ...options import Movement, WallJump
+from ...options import MorphExtend, Movement, SuperJump, WallJump
 from ..room_names import Area, Area7, Area8, SurfaceWest
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
 
@@ -30,12 +34,23 @@ can_combat_queen = And(
     Has(ItemName.SpaceJump) | can_spider_boost,
 )
 
-can_climb_nest_network = can_climb_wall
+can_climb_nest_network = Or(
+    can_climb_wall,
+    And(
+        Has(ItemName.HighJumpBoots),
+        can_wall_jump(WallJump.option_simple),
+        can_super_jump(SuperJump.option_beginner) | can_morph_extend(MorphExtend.option_easy),
+    ),
+)
 can_climb_nest_network_tunnels = And(
     Has(ItemName.ScrewAttack),
-    Has(ItemName.HighJumpBoots) | can_wall_jump(WallJump.option_simple),
+    Or(
+        Has(ItemName.HighJumpBoots),
+        can_wall_jump(WallJump.option_simple),
+        can_super_jump(SuperJump.option_easy),
+    ),
 )
-can_climb_nest_nodule = can_short_shaft
+can_climb_nest_nodule = can_shorter_shaft
 can_navigate_metroid_nest_shaft_west = And(can_combat_metroid_larva, can_high_ledge, Has(ItemName.MorphBall))
 
 can_escape_nest_network_bottom_to_center = Or(
@@ -124,16 +139,7 @@ area_8_data = AreaData(
                     pickups=[
                         PickupData(
                             "Right",
-                            access_rule=And(
-                                Has(ItemName.MorphBall),
-                                Or(
-                                    Has(ItemName.PhaseDrift),
-                                    And(
-                                        can_high_ledge | can_movement(Movement.option_intermediate),  # Morph extend
-                                        can_spider_boost,
-                                    ),
-                                ),
-                            ),
+                            access_rule=Has(ItemName.PhaseDrift) | can_spider_boost,
                         )
                     ],
                 ),
@@ -318,7 +324,7 @@ area_8_data = AreaData(
                             Subregion("Top"),
                             access_rule=Or(
                                 can_climb_wall,
-                                can_high_ledge & can_movement(Movement.option_intermediate),  # Morph extend
+                                can_almost_high_ledge & can_morph_extend(MorphExtend.option_easy),
                             ),
                         ),
                     ],
@@ -338,7 +344,7 @@ area_8_data = AreaData(
                     pickups=[
                         PickupData(
                             "Grapple Block",
-                            access_rule=HasAll(ItemName.GrappleBeam, ItemName.MorphBall) & can_high_ledge,
+                            access_rule=HasAll(ItemName.GrappleBeam, ItemName.MorphBall) & can_almost_high_ledge,
                         )
                     ],
                 ),
@@ -454,14 +460,18 @@ area_8_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Upper"),
-                            access_rule=Has(ItemName.ScrewAttack) & can_high_ledge,
+                            access_rule=And(
+                                Has(ItemName.ScrewAttack),
+                                can_short_shaft,
+                                can_almost_high_ledge,
+                            ),
                         ),
                     ],
                     pickups=[
                         PickupData(
                             access_rule=And(
                                 Has(ItemName.MorphBall),
-                                can_short_shaft,
+                                can_shorter_shaft,
                                 can_any_missile,
                                 HasAny(ItemName.LightningArmor, ItemName.Hatchling),
                             )
@@ -829,7 +839,7 @@ area_8_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Area8.NestHallwayS.subregion("Left"),
-                            access_rule=can_high_ledge,
+                            access_rule=can_almost_high_ledge,
                         ),
                     ]
                 )

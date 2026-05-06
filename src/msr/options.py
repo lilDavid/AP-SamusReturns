@@ -71,12 +71,40 @@ class WallJump(LogicTrick):
 
     Disable: Wall jumping will not be required by logic
     Simple: Logic can expect wall jumping to high ledges and up shafts
-    Advanced: Logic can expect wall jumping into tight spaces
+    Intermediate: Logic can expect wall jumping into tight spaces
     """
 
     display_name = "Wall Jump"
     option_simple = 1
     option_intermediate = 2
+
+
+class SuperJump(LogicTrick):
+    """
+    Double tap B when jumping up from the ground to gain extra height.
+
+    Beginner: Simple jumps to get more height jumping straight up
+    Easy: Start to tilt the stick on the second B press for a higher spin jump
+    Medium: Tighter jumps that may also require morph extends
+    """
+
+    display_name = "Super Jump"
+    option_beginner = 1
+    option_easy = 2
+    option_medium = 3
+
+
+class MorphExtend(LogicTrick):
+    """
+    Midair morph and unmorph to extend your Power Grip range.
+
+    Easy: Grab ledges that are just out of reach with other movement options
+    Medium: Tighter extends including ones chained out of things like super jumps
+    """
+
+    display_name = "Morph Extend"
+    option_easy = 1
+    option_medium = 2
 
 
 class IBJ(LogicTrick):
@@ -190,10 +218,12 @@ msr_option_groups = [
     OptionGroup(
         "Logic",
         [
-            WallJump,
-            IBJ,
-            DamageBoost,
             Knowledge,
+            WallJump,
+            SuperJump,
+            IBJ,
+            MorphExtend,
+            DamageBoost,
             Movement,
         ],
     ),
@@ -228,10 +258,12 @@ class SamusReturnsOptions(PerGameCommonOptions):
     starting_scan_pulse: ScanPulseStart
 
     # Logic
-    wall_jump: WallJump
-    infinite_bomb_jump: IBJ
-    damage_boost: DamageBoost
     knowledge: Knowledge
+    wall_jump: WallJump
+    super_jump: SuperJump
+    infinite_bomb_jump: IBJ
+    morph_extends: MorphExtend
+    damage_boost: DamageBoost
     movement: Movement
 
     # Game Patches

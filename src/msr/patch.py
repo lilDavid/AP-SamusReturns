@@ -36,6 +36,20 @@ MOD_FILES = {"romfs", "code.bin", "code.bps", "exheader.bin", "archipelago.json"
 PATCH_SCHEMA = "https://raw.githubusercontent.com/randovania/open-samus-returns-rando/refs/heads/main/src/open_samus_returns_rando/files/schema.json"
 
 
+def get_title_id(rom_path: str | Path):
+    from open_samus_returns_rando.romfs import rom3ds
+
+    if not isinstance(rom_path, Path):
+        rom_path = Path(rom_path)
+
+    with open(rom_path, "rb") as stream:
+        try:
+            parsed_rom = rom3ds.Rom3DS(rom3ds.parse_rom_file(rom_path, stream), stream)
+        except ValueError as e:
+            raise e from None  # Clear cause
+        return parsed_rom.get_title_id()
+
+
 def create_resource(resources: Sequence[tuple[str, int]]):
     return [{"item_id": item_id, "quantity": quantity} for item_id, quantity in resources]
 
@@ -63,7 +77,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
         rom_path = self.get_path(SamusReturnsWorld.settings.rom_file)
         output_path = target if isinstance(target, Path) else Path(target)
         output_path.mkdir(exist_ok=True)
-        output_path /= TITLE_ID_US
+        output_path /= get_title_id(rom_path)
         self.verify_file_structure(output_path)
         output_path.mkdir(exist_ok=True)
 

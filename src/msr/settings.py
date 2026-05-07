@@ -27,22 +27,15 @@ class RomFile(settings.UserFilePath):
 
     @classmethod
     def validate(cls, path: str):
-        from open_samus_returns_rando.romfs import rom3ds
-
-        with open(path, "rb") as stream:
-            try:
-                parsed_rom = rom3ds.Rom3DS(rom3ds.parse_rom_file(Path(path), stream), stream)
-            except ValueError as e:
-                raise e from None  # Clear cause data
-            match parsed_rom.get_title_id():
-                case patch.TITLE_ID_US | patch.TITLE_ID_EU:
-                    pass
-                case patch.TITLE_ID_JP:
-                    raise ValueError("The JP version of Metroid: Samus Returns is not supported")
-                case title_id:
-                    raise ValueError(
-                        f"Invalid title ID: expected {patch.TITLE_ID_US} or {patch.TITLE_ID_EU}, got {title_id}"
-                    )
+        match patch.get_title_id(path):
+            case patch.TITLE_ID_US | patch.TITLE_ID_EU:
+                pass
+            case patch.TITLE_ID_JP:
+                raise ValueError("The JP version of Metroid: Samus Returns is not supported")
+            case title_id:
+                raise ValueError(
+                    f"Invalid title ID: expected {patch.TITLE_ID_US} or {patch.TITLE_ID_EU}, got {title_id}"
+                )
 
 
 class TargetSystem(StrEnum):

@@ -49,7 +49,10 @@ area_1_data = AreaData(
                             Subregion("Area 2"),
                             access_rule=And(
                                 Has(ItemName.MorphBall),
-                                HasAny(ItemName.MissileLauncher, ItemName.PowerBomb, ItemName.ScrewAttack),
+                                Or(
+                                    HasAny(ItemName.PowerBomb, ItemName.ScrewAttack),
+                                    Has(ItemName.MissileLauncher) & can_beam_block_through_tunnel,
+                                ),
                             ),
                         ),
                     ],
@@ -305,7 +308,7 @@ area_1_data = AreaData(
                             "Buried Item",
                             access_rule=And(
                                 Has(ItemName.MorphBall),
-                                can_high_ledge,
+                                can_climb_wall,
                             ),
                         )
                     ],

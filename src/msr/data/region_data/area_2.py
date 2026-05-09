@@ -1544,7 +1544,10 @@ area_2_entryway_data = AreaData(
                         ),
                         PickupData(
                             "Tunnel",
-                            access_rule=Has(ItemName.MorphBall) & HasAny(ItemName.Hatchling, ItemName.PowerBomb),
+                            access_rule=Or(
+                                can_power_bomb,
+                                Has(ItemName.Hatchling) & can_bomb,
+                            ),
                         ),
                     ],
                 ),
@@ -1656,7 +1659,7 @@ area_2_entryway_data = AreaData(
                         ),
                         ExitData(
                             Door.Elevator,
-                            Exterior.DamExterior.subregion("West"),
+                            Exterior.DamExterior.subregion("East"),
                         ),
                     ],
                     events=[

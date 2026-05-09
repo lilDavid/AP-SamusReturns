@@ -9,9 +9,9 @@ from ...logic import (
     can_climb_wall,
     can_damage_metroid,
     can_fly_vertical,
-    can_high_jump,
     can_high_ledge,
     can_ibj,
+    can_movement,
     can_power_bomb,
     can_spider,
     can_spider_boost,
@@ -19,7 +19,7 @@ from ...logic import (
     can_wall_jump,
     door_rules,
 )
-from ...options import IBJ, WallJump
+from ...options import IBJ, Movement, WallJump
 from ..room_names import Area, Area1, Area8
 from ..room_names import SurfaceEast as East
 from ..room_names import SurfaceWest as West
@@ -727,14 +727,14 @@ surface_west_data = AreaData(
                         PickupData(
                             "Right",
                             access_rule=And(
-                                HasAll(ItemName.Hatchling, ItemName.MorphBall),
+                                Has(ItemName.Hatchling),
+                                can_spider,  # To attach to the ceiling and get baby to eat the crystals
+                                # To reach said ceiling
                                 Or(
-                                    Has(ItemName.SpaceJump),
-                                    And(
-                                        can_high_jump,
-                                        Has(ItemName.LightningArmor) | can_spider,
-                                    ),
-                                    can_ibj(IBJ.option_diagonal),
+                                    can_spider_boost,
+                                    can_ibj(IBJ.option_vertical),
+                                    # Midair morph into ceiling with spider
+                                    Has(ItemName.SpaceJump) & can_movement(Movement.option_simple),
                                 ),
                             ),
                         )

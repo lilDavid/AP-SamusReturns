@@ -292,7 +292,10 @@ area_8_data = AreaData(
                             "Maze",
                             access_rule=And(
                                 Has(ItemName.ScrewAttack),
-                                Has(ItemName.HighJumpBoots) | can_wall_jump(WallJump.option_simple),
+                                Or(
+                                    HasAny(ItemName.HighJumpBoots, ItemName.SpaceJump),
+                                    can_wall_jump(WallJump.option_simple),
+                                ),
                                 can_bomb_block,
                             ),
                         )

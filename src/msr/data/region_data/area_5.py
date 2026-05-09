@@ -401,12 +401,9 @@ area_5_lobby_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Cave"),
-                            access_rule=Or(
-                                can_spider_boost,
-                                And(
-                                    can_thorns,
-                                    Has(ItemName.Hatchling) | can_power_bomb,
-                                ),
+                            access_rule=And(
+                                can_thorns,
+                                Has(ItemName.Hatchling) | can_power_bomb,
                             ),
                         ),
                         ExitData(
@@ -689,12 +686,12 @@ area_5_lobby_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Lobby.Gamma2Access,
-                            access_rule=can_bomb_block,
+                            access_rule=Has(ItemName.VariaSuit) & can_bomb_block,
                         )
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=Has(ItemName.VariaSuit) & can_damage_metroid,
                         )
                     ],
                 )

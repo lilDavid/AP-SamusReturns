@@ -475,7 +475,7 @@ area_4_caves_data = AreaData(
                             Caves.Alpha2Access.subregion("Upper"),
                         ),
                         ExitData(
-                            Door.Charge,
+                            Door.MorphTunnel,
                             Subregion("Middle"),
                             access_rule=can_traverse_transit_tunnel,
                         ),
@@ -1163,11 +1163,9 @@ area_4_mines_data = AreaData(
                                 can_spider_boost,
                                 Or(
                                     # Spider boost out of the water
-                                    And(
-                                        has_knowledge(Knowledge.option_simple),
-                                        Has(ItemName.GravitySuit),
-                                    ),
-                                    # Jump up the shaft after getting out of the water
+                                    has_knowledge(Knowledge.option_simple),
+                                    Has(ItemName.GravitySuit),
+                                    # Get out some other way and jump up the shaft
                                     And(
                                         Or(
                                             HasAny(ItemName.GravitySuit, ItemName.HighJumpBoots),
@@ -1176,8 +1174,8 @@ area_4_mines_data = AreaData(
                                         ),
                                         HasAny(ItemName.SpaceJump, ItemName.HighJumpBoots),
                                     ),
-                                    # Can grapple or spider boost to get out
                                 ),
+                                # Can grapple or spider boost to get out
                             ),
                         )
                     ],

@@ -951,14 +951,8 @@ area_3_caverns_data = AreaData(
                         PickupData(
                             "Tunnels",
                             access_rule=Or(
-                                And(
-                                    can_any_missile,
-                                    Has(ItemName.GravitySuit),
-                                ),
-                                And(
-                                    Has(ItemName.Hatchling),
-                                    can_spider | Has(ItemName.PhaseDrift),
-                                ),
+                                Has(ItemName.Hatchling) & can_spider,
+                                Has(ItemName.PhaseDrift) & can_any_missile,
                             ),
                         )
                     ],
@@ -1644,7 +1638,7 @@ area_3_interior_data = AreaData(
                                 ),
                                 Or(
                                     Has(ItemName.Hatchling),
-                                    can_bomb_block & Has(ItemName.GrappleBeam),
+                                    can_bomb_block & HasAll(ItemName.MorphBall, ItemName.LightningArmor),
                                 ),
                             )
                         )
@@ -2066,7 +2060,12 @@ area_3_interior_data = AreaData(
                         ),
                         PickupData(
                             "Lava",
-                            access_rule=HasAll(ItemName.VariaSuit, ItemName.GravitySuit, ItemName.GrappleBeam),
+                            access_rule=HasAll(
+                                ItemName.VariaSuit,
+                                ItemName.GravitySuit,
+                                ItemName.GrappleBeam,
+                                ItemName.SuperMissile,
+                            ),
                         ),
                     ],
                 )

@@ -703,7 +703,6 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Super,
                             Exterior.SereneShelter,
-                            access_rule=can_high_ledge,
                         ),
                     ],
                     pickups=[

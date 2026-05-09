@@ -12,7 +12,6 @@ from ...logic import (
     can_fleech_swarm,
     can_fly,
     can_fly_vertical,
-    can_high_bomb_block,
     can_high_jump,
     can_high_ledge,
     can_ibj,
@@ -78,6 +77,15 @@ can_escape_diggernaut_tunnels_side = Has(ItemName.GrappleBeam) & can_escape_sj_c
 can_escape_diggernaut_tunnels_bottom = Or(
     can_escape_diggernaut_tunnels_top,
     can_escape_diggernaut_tunnels_side,
+)
+
+can_escape_basalt_basin = And(
+    Or(
+        Has(ItemName.SpaceJump),
+        can_ibj(IBJ.option_vertical),
+        can_spider_boost & can_movement(Movement.option_simple),  # Timed unmorph to grip
+    ),
+    can_bomb_block,
 )
 
 area_4_caves_data = AreaData(
@@ -1211,12 +1219,15 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
-                            access_rule=Has(ItemName.VariaSuit) & can_high_ledge,
+                            access_rule=And(
+                                Has(ItemName.VariaSuit),
+                                Has(ItemName.IceBeam) | can_high_ledge,
+                            ),
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Arena Left"),
-                            access_rule=HasAll(ItemName.SuperMissile, ItemName.VariaSuit) & can_bomb_block,
+                            access_rule=HasAll(ItemName.SuperMissile, ItemName.VariaSuit) & can_escape_basalt_basin,
                         ),
                     ],
                 ),
@@ -1277,11 +1288,7 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Left"),
-                            access_rule=And(
-                                can_fly_vertical,
-                                can_bomb_block,
-                                HasAll(ItemName.SuperMissile, ItemName.VariaSuit),
-                            ),
+                            access_rule=can_escape_basalt_basin & HasAll(ItemName.SuperMissile, ItemName.VariaSuit),
                         ),
                         ExitData(
                             Door.Open,
@@ -1461,18 +1468,18 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Seal"),
-                            access_rule=can_bomb_block,
+                            access_rule=Has(ItemName.VariaSuit) & can_escape_basalt_basin,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Mines.GawronGroove.subregion("Left"),
-                            access_rule=can_bomb_block,
+                            access_rule=Has(ItemName.VariaSuit) & can_bomb_block,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Mines.GawronGroove.subregion("Right"),
                             access_rule=And(
-                                Has(ItemName.SuperMissile),
+                                HasAll(ItemName.SuperMissile, ItemName.VariaSuit),
                                 can_bomb_block,
                                 can_high_ledge,
                             ),
@@ -1485,12 +1492,12 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Mines.GawronGroove.subregion("Arena Right"),
-                            access_rule=can_high_bomb_block,
+                            access_rule=Has(ItemName.VariaSuit) & can_bomb_block,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Top"),
-                            access_rule=can_fly_vertical & can_bomb_block,
+                            access_rule=Has(ItemName.VariaSuit) & can_escape_basalt_basin,
                         ),
                     ],
                 ),

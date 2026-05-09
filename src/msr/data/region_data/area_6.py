@@ -23,6 +23,7 @@ from ...logic import (
     can_spider_boost,
     can_thorns,
     can_wall_jump,
+    door_rules,
 )
 from ...options import IBJ, DamageBoost, Movement, WallJump
 from ..room_names import Area, Area6, Area7
@@ -45,12 +46,17 @@ can_cross_swarm_square = Or(
     can_power_bomb,
     can_ibj(IBJ.option_vertical) & can_thorns,
 )
+can_traverse_poisonous_tunnel = And(can_bomb_block, Has(ItemName.LightningArmor) | can_spider)
 
 can_escape_chozo_seal_w_bottom = can_high_ledge
 can_escape_chozo_seal_e = Or(
     can_climb_wall,
     # Can also midair morph-unmorph LMAO
     Has(ItemName.HighJumpBoots) & can_wall_jump(WallJump.option_simple),
+)
+can_escape_omega_arena = Or(
+    door_rules[Door.Charge],
+    can_traverse_poisonous_tunnel & HasAll(ItemName.GrappleBeam, ItemName.MorphBall),
 )
 can_escape_crumbling_bridge_pit = can_bomb_block_near_ceiling
 can_escape_diggernaut = can_combat_diggernaut & can_power_bomb
@@ -414,10 +420,7 @@ area_6_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Pickup"),
-                            access_rule=And(
-                                can_bomb_block,
-                                Has(ItemName.LightningArmor) | can_spider,
-                            ),
+                            access_rule=can_traverse_poisonous_tunnel,
                         ),
                     ],
                 ),
@@ -427,10 +430,7 @@ area_6_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Upper"),
-                            access_rule=And(
-                                can_bomb_block,
-                                Has(ItemName.LightningArmor) | can_spider,
-                            ),
+                            access_rule=can_traverse_poisonous_tunnel,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -591,7 +591,7 @@ area_6_data = AreaData(
                         ExitData(
                             Door.Open,
                             Area6.Omega,
-                            access_rule=can_high_jump,
+                            access_rule=can_escape_omega_arena,
                         ),
                     ]
                 )
@@ -641,12 +641,11 @@ area_6_data = AreaData(
                                 can_power_bomb,
                                 HasAll(ItemName.GrappleBeam, ItemName.ScrewAttack),
                                 can_any_missile,
+                                can_high_ledge,
                                 Or(
                                     Has(ItemName.SpaceJump),
-                                    And(
-                                        can_fly_vertical,
-                                        Has(ItemName.HighJumpBoots) | can_wall_jump(WallJump.option_simple),
-                                    ),
+                                    Has(ItemName.HighJumpBoots),
+                                    can_wall_jump(WallJump.option_simple),
                                 ),
                             ),
                         ),

@@ -16,15 +16,22 @@ from ...logic import (
     can_movement,
     can_power_bomb,
     can_spider,
+    can_wall_jump,
 )
-from ...options import IBJ, Movement
+from ...options import IBJ, Movement, WallJump
 from ..room_names import Area, Area1
 from ..room_names import Area2Entryway as Area2
 from ..room_names import SurfaceEast as Surface
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
 can_escape_ice_chamber_access = Has(ItemName.IceBeam) | can_high_jump
-can_escape_inner_temple_west_hall = can_climb_wall
+can_escape_inner_temple_west_hall = Or(
+    # Either up to Inner Temple Save Station or down to Caverns Hub
+    # Both should be trivially accessible from each other
+    can_climb_wall,
+    # Right to Inner Temple Teleporter. Covers morph tunnel rule for subregion traversal
+    can_bomb_block,
+)
 
 area_1_data = AreaData(
     area=Area.Area1,
@@ -853,15 +860,19 @@ area_1_data = AreaData(
                             Door.Gigadora,
                             Area1.InnerTempleUpperHallway,
                         ),
-                        # ExitData(
-                        #     Door.Open,
-                        #     Area1.InnerTempleTeleporterAccess,
-                        #     # Best not to think about the logical implications of these pitfall blocks
-                        # ),
+                        ExitData(
+                            Door.Open,
+                            Area1.InnerTempleTeleporterAccess,
+                            access_rule=can_escape_inner_temple_west_hall,
+                        ),
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=Has(ItemName.SpaceJump) | can_spider,
+                            access_rule=Or(
+                                Has(ItemName.SpaceJump),
+                                can_spider,
+                                Has(ItemName.HighJumpBoots) & can_wall_jump(WallJump.option_intermediate),
+                            ),
                         )
                     ],
                 ),

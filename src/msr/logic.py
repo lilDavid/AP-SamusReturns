@@ -83,7 +83,8 @@ can_beam_block_through_fan_tunnel = Or(Has(ItemName.WaveBeam), can_power_bomb, c
 can_spider = HasAll(ItemName.MorphBall, ItemName.SpiderBall)
 can_spider_boost = HasAll(ItemName.MorphBall, ItemName.SpiderBall, ItemName.PowerBomb)
 can_spider_boost_underwater = And(can_spider_boost, has_knowledge(Knowledge.option_simple) | Has(ItemName.GravitySuit))
-can_cross_pitfall_bridge = Or(Has(ItemName.PhaseDrift), has_knowledge(Knowledge.option_simple) & can_spider_boost)
+can_spider_boost_through_pitfalls = has_knowledge(Knowledge.option_simple) & can_spider_boost
+can_cross_pitfall_bridge = Or(Has(ItemName.PhaseDrift), can_spider_boost_through_pitfalls)
 
 can_fly_vertical = Or(Has(ItemName.SpaceJump), can_spider_boost, can_ibj(IBJ.option_vertical))
 can_fly_vertical_underwater = Or(Has(ItemName.GravitySuit) & can_fly_vertical, can_spider_boost_underwater)
@@ -108,15 +109,8 @@ can_short_shaft = can_high_ledge | can_wall_jump(WallJump.option_simple)
 can_climb_shaft = can_wall_jump(WallJump.option_simple) | can_climb_wall
 
 can_any_missile = HasAny(ItemName.MissileLauncher, ItemName.SuperMissile)
-can_damage_tough_enemy_ranged = Or(
-    can_any_missile,
-    can_beam_burst,
-    can_power_bomb,
-)
-can_damage_tough_enemy = Or(
-    can_damage_tough_enemy_ranged,
-    Has(ItemName.ScrewAttack),
-)
+can_damage_tough_enemy_ranged = Or(can_any_missile, can_beam_burst, can_power_bomb)
+can_damage_tough_enemy = Or(can_damage_tough_enemy_ranged, Has(ItemName.ScrewAttack))
 can_damage_metroid = Or(HasAny(ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.IceBeam), can_beam_burst)
 can_blobthrower = can_beam_burst | can_power_bomb
 can_tunnel_steel_orb = Or(can_beam_burst & can_beam_block_through_tunnel, can_power_bomb)

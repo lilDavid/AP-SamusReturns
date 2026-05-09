@@ -58,8 +58,8 @@ can_escape_paraby_periphery = can_climb_wall
 can_escape_factory_intersection = can_climb_wall
 # Unless you already have access from Metroid caverns, you're locked in lower exterior if you drop down
 can_escape_ramulken_residence = can_climb_shaft
-can_escape_gamma_arena_caverns_transport = can_grapple_tunnel & can_climb_wall
-can_escape_gamma_arena_entrance = can_high_ledge
+can_escape_gamma_arena = can_grapple_tunnel
+can_escape_gamma_arena_caverns_transport = can_escape_gamma_arena & can_climb_wall
 
 area_3_exterior_data = AreaData(
     area=Area.Area3Exterior,
@@ -842,7 +842,6 @@ area_3_caverns_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Lower"),
-                            access_rule=Has(ItemName.GravitySuit) | can_spider,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1904,7 +1903,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.GammaCAccess.subregion("Upper"),
-                            access_rule=can_grapple_tunnel,
+                            access_rule=can_escape_gamma_arena,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1929,7 +1928,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.GammaCAccess.subregion("Lower"),
-                            access_rule=can_escape_gamma_arena_entrance,
+                            access_rule=can_high_ledge,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1945,14 +1944,13 @@ area_3_interior_data = AreaData(
                             Interior.GammaSAccess,
                         ),
                         ExitData(
+                            Door.MorphTunnel,
+                            Subregion("Center"),
+                        ),
+                        ExitData(
                             Door.Open,
                             Subregion("Southeast"),
                             access_rule=can_spider_boost | HasAny(ItemName.GravitySuit, ItemName.GrappleBeam),
-                        ),
-                        ExitData(
-                            Door.MorphTunnel,
-                            Interior.GammaCAccess.subregion("Lower"),
-                            access_rule=can_high_ledge,
                         ),
                     ],
                 ),
@@ -2120,7 +2118,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.GammaTransportCavernsE.subregion("Arena"),
-                            access_rule=can_escape_gamma_arena_entrance,
+                            access_rule=can_escape_gamma_arena,
                         ),
                         ExitData(
                             Door.MorphTunnel,

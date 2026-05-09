@@ -431,6 +431,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             East.CavernAlcove,
+                            access_rule=can_climb_shaft,
                         ),
                     ],
                 ),

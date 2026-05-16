@@ -112,7 +112,7 @@ def create_hints(world: SamusReturnsWorld):
 
     dna_hints, _hints = split_list(_hints, dna_statue_count)
     always_hints, _hints = split_list(_hints, len(ALWAYS_HINTS))
-    item_hints, location_hints = split_list(_hints, len(_hints) // 2)  # Bias to locations if uneven
+    item_hints, location_hints = map(iter, split_list(_hints, len(_hints) // 2))  # Bias to locations if uneven
 
     for hint, dna_group in zip(dna_hints, dna_groups, strict=False):
         hints[hint] = sorted((cast(Item, location.item) for location in dna_group), key=lambda location: location.name)
@@ -124,6 +124,14 @@ def create_hints(world: SamusReturnsWorld):
         hints[hint] = [location]
         forbidden_locations.add(location)
     for hint, location in zip(item_hints, filter_forbidden(item_locations), strict=False):
+        hints[hint] = [cast(Item, location.item)]
+        forbidden_locations.add(location)
+
+    # If we run out of either location or item hints, spill the other type into the remaining hint slots
+    for hint, location in zip(item_hints, filter_forbidden(locations), strict=False):
+        hints[hint] = [location]
+        forbidden_locations.add(location)
+    for hint, location in zip(location_hints, filter_forbidden(item_locations), strict=False):
         hints[hint] = [cast(Item, location.item)]
         forbidden_locations.add(location)
 

@@ -253,6 +253,9 @@ class SamusReturnsContext(BaseContext):
         if self.game_reader_task:
             self.game_reader_task.cancel()
 
+    def datastorage_key(self, name: str):
+        return f"msr_{name}_{self.team}_{self.slot}"
+
     def on_package(self, cmd: str, args: dict):
         super().on_package(cmd, args)
         if cmd == "Connected":
@@ -270,6 +273,20 @@ class SamusReturnsContext(BaseContext):
                 logger.exception(message)
                 self._messagebox_connection_loss = self.gui_error("Could not connect", message)
                 Utils.async_start(self.disconnect(False))
+
+            Utils.async_start(
+                self.send_msgs(
+                    [
+                        {"cmd": "SetNotify", "keys": [self.datastorage_key("hints")]},
+                        {"cmd": "Get", "keys": [self.datastorage_key("hints")]},
+                    ]
+                )
+            )
+        if cmd == "Retrieved":
+            self.hints_seen = self.hints_seen.union(args["keys"].get(self.datastorage_key("hints")) or ())
+        if cmd == "SetReply":
+            if args["key"] == self.datastorage_key("hints"):
+                self.hints_seen = self.hints_seen.union(args["value"])
 
     def on_deathlink(self, data):
         super().on_deathlink(data)
@@ -360,7 +377,7 @@ class SamusReturnsContext(BaseContext):
         if self.game_state.scenario != self.current_area:
             await self.send_msg(
                 cmd="Set",
-                key=f"msr_area_{self.team}_{self.slot}",
+                key=self.datastorage_key("area"),
                 default=None,
                 want_reply=False,
                 operations=[{"operation": "replace", "value": self.game_state.scenario}],
@@ -368,7 +385,7 @@ class SamusReturnsContext(BaseContext):
             self.current_area = self.game_state.scenario
         await self.handle_hints()
         if self.game_state.game_beaten and not self.finished_game:
-            await self.send_msgs([{"cmd": "StatusUpdate", "status": ClientStatus.CLIENT_GOAL}])
+            await self.send_msg(cmd="StatusUpdate", status=ClientStatus.CLIENT_GOAL)
         await self.handle_death_link()
 
     async def send_msg(self, **kwargs):
@@ -654,12 +671,25 @@ class SamusReturnsContext(BaseContext):
         new_hints = self.game_state.hints_seen.difference(self.hints_seen)
         await self.send_msgs(
             [
-                {"cmd": "CreateHints", "locations": [location], "player": player, "status": HintStatus.HINT_UNSPECIFIED}
-                for statue in new_hints
-                for location, player in self.hints.get(statue, [])
+                *(
+                    {
+                        "cmd": "CreateHints",
+                        "locations": [location],
+                        "player": player,
+                        "status": HintStatus.HINT_UNSPECIFIED,
+                    }
+                    for statue in new_hints
+                    for location, player in self.hints.get(statue, [])
+                ),
+                {
+                    "cmd": "Set",
+                    "key": self.datastorage_key("hints"),
+                    "default": [],
+                    "want_reply": False,
+                    "operations": [{"operation": "update", "value": new_hints}],
+                },
             ]
         )
-        self.hints_seen = self.game_state.hints_seen
 
     async def handle_death_link(self):
         if not self.death_link:

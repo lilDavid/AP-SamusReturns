@@ -110,9 +110,11 @@ def create_hints(world: SamusReturnsWorld):
     _hints = list(hint_data)
     world.random.shuffle(_hints)
 
+    # Allocate DNA and always hints first
+    # Then at least 2 location hints for every item hint because the item hints are powerful
     dna_hints, _hints = split_list(_hints, dna_statue_count)
     always_hints, _hints = split_list(_hints, len(ALWAYS_HINTS))
-    item_hints, location_hints = map(iter, split_list(_hints, len(_hints) // 2))  # Bias to locations if uneven
+    item_hints, location_hints = map(iter, split_list(_hints, len(_hints) // 3))
 
     for hint, dna_group in zip(dna_hints, dna_groups, strict=False):
         hints[hint] = sorted(dna_group, key=lambda location: location.name)

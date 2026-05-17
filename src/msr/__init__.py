@@ -262,11 +262,14 @@ def launch_client(*args):
     Launcher.launch_subprocess(client.launch, name="MetroidSamusReturnsClient", args=args)
 
 
+Launcher.icon_paths[GAME_NAME] = "ap:worlds.msr/data/client_icon.png"
+
 Launcher.components.append(
     Launcher.Component(
         "Metroid: Samus Returns Client",
         func=launch_client,
         component_type=Launcher.Type.CLIENT,
         file_identifier=Launcher.SuffixIdentifier(SamusReturnsPatch.patch_file_ending),
+        icon=GAME_NAME,
     )
 )

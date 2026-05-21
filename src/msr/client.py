@@ -766,25 +766,25 @@ def get_patch_destination(patch_file: str):
     return output_path
 
 
+def verify_patch(patch_file: str | None) -> SamusReturnsPatch | None:
+    if patch_file is None:
+        return None
+    auto_handler = AutoPatchRegister.get_handler(patch_file)
+    if auto_handler is not SamusReturnsPatch:
+        logger.error("Invalid Samus Returns patch file: %s", patch_file)
+        return None
+    return SamusReturnsPatch(patch_file)
+
+
 def launch(*launch_args: str):
     async def main():
         parser = get_base_parser()
         parser.add_argument("patch_file", default="", type=str, nargs="?", help="Path to an apmsr patch")
         args = parser.parse_args(launch_args)
 
-        if args.patch_file:
-            auto_handler = AutoPatchRegister.get_handler(args.patch_file)
-            if auto_handler is not SamusReturnsPatch:
-                logger.error("Invalid Samus Returns patch file: %s", args.patch_file)
-            else:
-                handler = SamusReturnsPatch(args.patch_file)
-                target = get_patch_destination(args.patch_file)
-                handler.patch(target)
-                logger.info(f"Wrote randomizer patch to {target}")
-
-                if handler.server:
-                    args.connect = handler.server
-                launch_game()
+        patcher = verify_patch(args.patch_file)
+        if patcher is not None:
+            args.connect = patcher.server
 
         ctx = SamusReturnsContext(args.connect, args.password)
         ctx.server_task = asyncio.create_task(server_loop(ctx), name="server loop")
@@ -794,6 +794,12 @@ def launch(*launch_args: str):
         if gui_enabled:
             ctx.run_gui()
         ctx.run_cli()
+
+        if patcher is not None:
+            target = get_patch_destination(args.patch_file)
+            await asyncio.get_event_loop().run_in_executor(None, patcher.patch, target)
+            logger.info(f"Wrote randomizer patch to {target}")
+            launch_game()
 
         ctx.game_sync_task = asyncio.create_task(ctx.game_sync_loop(), name="Samus Returns Sync")
 

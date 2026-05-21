@@ -18,6 +18,7 @@ from NetUtils import HintStatus, NetworkItem
 from worlds._bizhawk.context import AuthStatus
 from worlds.Files import AutoPatchRegister
 
+from . import lib  # Set up module importer for open-samus-returns-rando  # noqa: F401
 from .connector import (
     UUID_LENGTH,
     PacketType,

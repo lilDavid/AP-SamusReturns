@@ -9,7 +9,6 @@ from rule_builder.rules import Has
 from worlds import LauncherComponents as Launcher
 from worlds.AutoWorld import WebWorld, World
 
-from . import lib as lib  # Set up module importer for open-samus-returns-rando
 from .data import GAME_NAME
 from .hints import HintData, create_hints
 from .items import (

@@ -14,6 +14,7 @@ import Utils
 from BaseClasses import Item, Location
 from worlds.Files import APAutoPatchInterface
 
+from . import lib  # Set up module importer for open-samus-returns-rando  # noqa: F401
 from .data import GAME_NAME
 from .data.internal_names import RANDO_DNA_TEMPLATE, AreaId, ItemId, ItemModel, PickupSound
 from .data.remote_items import REMOTE_ITEM_MAPPING

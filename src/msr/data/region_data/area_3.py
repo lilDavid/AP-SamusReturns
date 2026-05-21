@@ -2179,10 +2179,6 @@ area_3_interior_data = AreaData(
                     "Hiding Spot",
                     exits=[
                         ExitData(
-                            Door.Normal,
-                            Interior.WallfireWatch.subregion("Main"),
-                        ),
-                        ExitData(
                             Door.MorphTunnel,
                             Subregion("Upper"),
                             access_rule=can_bomb_block,

@@ -502,7 +502,7 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Exterior.CavernsSaveStation,
-                            access_rule=can_bomb,
+                            access_rule=can_bomb_block,
                         ),
                     ],
                     pickups=[
@@ -524,7 +524,7 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Exterior.CavernsMaze,
-                            access_rule=can_bomb,
+                            access_rule=can_bomb_block,
                         ),
                         ExitData(
                             Door.Normal,

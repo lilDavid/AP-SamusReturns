@@ -1028,7 +1028,10 @@ area_5_exterior_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=Has(ItemName.LightningArmor),
+                            access_rule=Or(
+                                Has(ItemName.LightningArmor),
+                                Has(ItemName.Hatchling) & can_bomb_block,
+                            ),
                         )
                     ],
                 )

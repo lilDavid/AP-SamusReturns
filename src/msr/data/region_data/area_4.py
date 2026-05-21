@@ -865,7 +865,6 @@ area_4_caves_data = AreaData(
                         ExitData(
                             Door.Elevator,
                             Area5.TransportAreas4And6.subregion("Upper"),
-                            access_rule=HasAll(ItemName.MorphBall, ItemName.GrappleBeam),
                         ),
                         ExitData(
                             Door.Open,

@@ -1,4 +1,5 @@
-from rule_builder.rules import And, Has, HasAll, HasAny, Or
+from rule_builder.options import OptionFilter
+from rule_builder.rules import And, Has, HasAll, HasAny, Or, True_
 
 from ...items import ItemName
 from ...logic import (
@@ -23,9 +24,11 @@ from ...logic import (
     door_rules,
 )
 from ...logic.combat import CanDamageWithMissiles, EnemyType, can_beam_burst_and_ice_beam
-from ...options import MorphExtend, Movement, SuperJump, WallJump
+from ...options import MorphExtend, Movement, ReverseArea8, SuperJump, WallJump
 from ..room_names import Area, Area7, Area8, SurfaceWest
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
+
+can_reverse_area_8 = True_(options=[OptionFilter(ReverseArea8, ReverseArea8.option_true)])
 
 # TODO: Bombless Metroid combat trick
 can_combat_metroid_larva = Has(ItemName.IceBeam) & can_any_missile & can_bomb_block
@@ -63,11 +66,12 @@ can_escape_nest_network_bottom_to_center = CanEscape(
     ),
     f"{Area8.NestNetwork} bottom",
 )
+can_escape_queen_arena_top = HasAll(ItemName.SpaceJump, ItemName.ScrewAttack) & can_bomb_block
 can_escape_queen_arena = CanEscape(
     And(
         can_combat_queen,
         Or(
-            HasAll(ItemName.SpaceJump, ItemName.ScrewAttack) & can_bomb_block,
+            can_escape_queen_arena_top,
             Has(ItemName.Hatchling),
         ),
     ),
@@ -737,7 +741,7 @@ area_8_data = AreaData(
                         ExitData(
                             Door.Open,
                             Area8.QueenAccess,
-                            access_rule=HasAll(ItemName.SpaceJump, ItemName.ScrewAttack),
+                            access_rule=can_escape_queen_arena_top,
                         ),
                         ExitData(
                             Door.Open,
@@ -793,12 +797,14 @@ area_8_data = AreaData(
             regions=[
                 RegionData(
                     exits=[
-                        # There's a wall preventing reverse Area 8 traversal
-                        # ExitData(
-                        #     Door.Open,
-                        #     Area8.Queen,
-                        #     access_rule=can_escape_queen_arena.rule,
-                        # ),
+                        ExitData(
+                            Door.Open,
+                            Area8.Queen,
+                            access_rule=And(
+                                can_reverse_area_8,
+                                can_escape_queen_arena_top,  # Queen only activates if you drop in from the top
+                            ),
+                        ),
                         ExitData(
                             Door.Open,
                             Area8.TransportSurface.subregion("Bottom"),

@@ -176,6 +176,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 "placed_dna": world.options.dna_available.value,
             },
             "game_patches": {
+                "reverse_area8": bool(world.options.reverse_area_8.value),
                 "tanks_refill_ammo": bool(world.options.tanks_refill_ammo.value),
             },
             "constant_environment_damage": {

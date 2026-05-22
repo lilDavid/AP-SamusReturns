@@ -155,6 +155,16 @@ class Movement(LogicTrick):
     option_intermediate = 2
 
 
+# World
+class ReverseArea8(Toggle):
+    """
+    Remove the wall from the Hatchling Room going to Queen Arena, allowing you to fight the Queen
+    Metroid from behind and navigate Area 8 backwards.
+    """
+
+    display_name = "Reverse Area 8"
+
+
 # Game Patches
 class TanksRefillAmmo(Toggle):
     """
@@ -216,6 +226,12 @@ msr_option_groups = [
         ],
     ),
     OptionGroup(
+        "World",
+        [
+            ReverseArea8,
+        ],
+    ),
+    OptionGroup(
         "Logic",
         [
             Knowledge,
@@ -256,6 +272,9 @@ class SamusReturnsOptions(PerGameCommonOptions):
     local_dna: LocalDna
     shuffle_reserve_tanks: ReserveTankShuffle
     starting_scan_pulse: ScanPulseStart
+
+    # World
+    reverse_area_8: ReverseArea8
 
     # Logic
     knowledge: Knowledge

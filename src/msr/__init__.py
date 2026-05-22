@@ -229,6 +229,7 @@ class SamusReturnsWorld(World):
                 MetroidDnaRequired,
                 MetroidDnaAvailable,
                 DeathLink,
+                "World",
                 "Logic",
             ),
         }

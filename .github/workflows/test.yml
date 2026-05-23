@@ -60,7 +60,6 @@ jobs:
         uses: dariocurr/pytest-summary@v2.6
         with:
           extensions: pytest-subtests pytest-xdist
-          options: -n auto
           show: "all"
 
       - name: Fuzz AP World

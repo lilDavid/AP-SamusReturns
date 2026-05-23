@@ -44,24 +44,26 @@ jobs:
           cache: pip
 
       - name: Install AP world
-        run: |
-          mv AP-SamusReturns/src/msr worlds/msr
-          python -m pip install -r AP-SamusReturns/requirements.txt
-          rm -rf AP-SamusReturns
+        run: ln -s "$PWD/AP-SamusReturns/src/msr" worlds/msr
         shell: bash
 
-      - name: Run Fuzzer
-        uses: pyrox0/apworld-test-action@v1
-        with:
-          skip_python_setup: false
-          enable_test: false
-          enable_fuzz: true
-          world: msr
-          
+      - name: Install Python Deps
+        run: |
+          python -m pip install --upgrade pip
+          python ModuleUpdate.py --yes --force
+          python Launcher.py --update_settings
+          python -m pip install -r AP-SamusReturns/requirements.txt
+        shell: bash
+
       - name: Run AP tests
         uses: dariocurr/pytest-summary@v2.4
         with:
           extensions: pytest-subtests pytest-xdist
           options: -n auto
           show: "all"
-  
+
+      - name: Fuzz AP World
+        uses: pyrox0/apworld-fuzzer-action@v1
+        with:
+          world: msr
+          num_gens: 100

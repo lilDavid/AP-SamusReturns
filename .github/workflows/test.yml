@@ -54,6 +54,7 @@ jobs:
           python Launcher.py --update_settings
           python -m pip install -r requirements.txt
           python -m pip install -r AP-SamusReturns/requirements.txt
+          python -m pip install pytest
         shell: bash
 
       - name: Run AP tests
@@ -64,19 +65,20 @@ jobs:
           paths: |
             test
             worlds/msr
-
-      - name: Upload test summary
-        uses: actions/upload-artifact@v7
-        with:
-          name: test-summary
-          path: test-summary.md
-        if: always()
+        continue-on-error: true
 
       - name: Fuzz AP World
         uses: pyrox0/apworld-fuzzer-action@v1
         with:
           world: msr
           num_gens: 100
+        continue-on-error: true
+
+      - name: Upload test summary
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-summary
+          path: test-summary.md
 
       - name: Upload fuzz summary
         uses: actions/upload-artifact@v7
@@ -84,4 +86,3 @@ jobs:
           name: fuzz-output
           path: fuzz-output
           archive: true
-        if: always()

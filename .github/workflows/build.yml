@@ -28,7 +28,7 @@ jobs:
           cache: pip
 
       - name: Install AP world
-        run: ln -s AP-SamusReturns/src/msr worlds/msr; ls -l worlds
+        run: ln -s AP-SamusReturns/src/msr worlds/msr; ls -l worlds/msr
         shell: bash
 
       - name: Install Python Deps

@@ -36,9 +36,20 @@ jobs:
           python -m pip install --upgrade pip
           python ModuleUpdate.py --yes --force
           python Launcher.py --update_settings
-          python -m pip install -r AP-SamusReturns/requirements.txt
         shell: bash
 
       - name: Build AP world
         run: python AP-SamusReturns/build.py -p .
         shell: bash
+
+      - name: Upload AP world
+        uses: actions/upload-artifact@v4
+        with:
+          path: AP-SamusReturns/build/*.apworld
+          archive: false
+
+      - name: Upload YAML template
+        uses: actions/upload-artifact@v4
+        with:
+          path: AP-SamusReturns/build/*.yaml
+          archive: false

@@ -1,0 +1,39 @@
+name: "Build AP World"
+
+on:
+  - "push"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:          
+      - name: Checkout Archipelago
+        uses: actions/checkout@v6
+        with:
+          repository: ArchipelagoMW/Archipelago
+          fetch-depth: 0
+          path: .
+          
+      - name: Checkout AP world
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          path: AP-SamusReturns
+          
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+          cache: pip
+
+      - name: Install AP world
+        run: |
+          ln -s AP-SamusReturns/src/msr worlds/msr
+          python -m pip install -r AP-SamusReturns/requirements.txt
+        shell: bash
+
+      - name: Build AP world
+        run: python AP-SamusReturns/build.py -p .
+        shell: bash
+  

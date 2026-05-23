@@ -56,7 +56,7 @@ jobs:
         shell: bash
 
       - name: Run AP tests
-        uses: dariocurr/pytest-summary@v2.4
+        uses: dariocurr/pytest-summary@v2.6
         with:
           extensions: pytest-subtests pytest-xdist
           options: -n auto

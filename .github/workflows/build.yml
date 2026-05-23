@@ -28,12 +28,17 @@ jobs:
           cache: pip
 
       - name: Install AP world
+        run: ln -s AP-SamusReturns/src/msr worlds/msr
+        shell: bash
+
+      - name: Install Python Deps
         run: |
-          ln -s AP-SamusReturns/src/msr worlds/msr
+          python -m pip install --upgrade pip
+          python ModuleUpdate.py --yes --force
+          python Launcher.py --update_settings
           python -m pip install -r AP-SamusReturns/requirements.txt
         shell: bash
 
       - name: Build AP world
         run: python AP-SamusReturns/build.py -p .
         shell: bash
-  

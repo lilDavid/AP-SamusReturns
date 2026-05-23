@@ -43,13 +43,13 @@ jobs:
         shell: bash
 
       - name: Upload AP world
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           path: AP-SamusReturns/build/*.apworld
           archive: false
 
       - name: Upload YAML template
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           path: AP-SamusReturns/build/*.yaml
           archive: false

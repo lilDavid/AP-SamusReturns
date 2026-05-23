@@ -61,9 +61,27 @@ jobs:
         with:
           extensions: pytest-subtests pytest-xdist
           show: "all"
+          paths: |
+            test
+            worlds/msr
+
+      - name: Upload test summary
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-summary
+          path: test-summary.md
+        if: always()
 
       - name: Fuzz AP World
         uses: pyrox0/apworld-fuzzer-action@v1
         with:
           world: msr
           num_gens: 100
+
+      - name: Upload fuzz summary
+        uses: actions/upload-artifact@v3
+        with:
+          name: fuzz-output
+          path: fuzz-output
+          archive: true
+        if: always()

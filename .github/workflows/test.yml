@@ -65,20 +65,16 @@ jobs:
           paths: |
             test
             worlds/msr
-        continue-on-error: true
 
       - name: Fuzz AP World
-        uses: pyrox0/apworld-fuzzer-action@v1
-        with:
-          world: msr
-          num_gens: 100
-        continue-on-error: true
+        run: python fuzz.py -r 100 -g msr -n 1
 
       - name: Upload test summary
         uses: actions/upload-artifact@v7
         with:
           name: test-summary
           path: test-summary.md
+        if: always()
 
       - name: Upload fuzz summary
         uses: actions/upload-artifact@v7
@@ -86,3 +82,4 @@ jobs:
           name: fuzz-output
           path: fuzz-output
           archive: true
+        if: always()

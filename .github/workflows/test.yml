@@ -38,7 +38,7 @@ jobs:
           path: AP-SamusReturns
           
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.pyversion }}
           cache: pip
@@ -53,9 +53,10 @@ jobs:
       - name: Run Fuzzer
         uses: pyrox0/apworld-test-action@v1
         with:
-          enable_test: "false"
-          enable_fuzz: "true"
-          world: "msr"
+          skip_python_setup: true
+          enable_test: false
+          enable_fuzz: true
+          world: msr
           
       - name: Run AP tests
         uses: dariocurr/pytest-summary@v2.4

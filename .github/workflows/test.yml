@@ -53,7 +53,7 @@ jobs:
       - name: Run Fuzzer
         uses: pyrox0/apworld-test-action@v1
         with:
-          skip_python_setup: true
+          skip_python_setup: false
           enable_test: false
           enable_fuzz: true
           world: msr

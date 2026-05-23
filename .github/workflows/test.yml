@@ -66,7 +66,7 @@ jobs:
             worlds/msr
 
       - name: Upload test summary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         with:
           name: test-summary
           path: test-summary.md
@@ -79,7 +79,7 @@ jobs:
           num_gens: 100
 
       - name: Upload fuzz summary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         with:
           name: fuzz-output
           path: fuzz-output

@@ -5,7 +5,7 @@ on:
   - "pull_request"
 
 jobs:
-  test:
+  setup:
     strategy:
       fail-fast: false
       matrix:
@@ -21,7 +21,7 @@ jobs:
             pyversion: "3.12"
 
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.name }}
+    name: Setup ${{ matrix.name }}
 
     steps:          
       - name: Checkout Archipelago
@@ -48,6 +48,10 @@ jobs:
         run: ln -s "$PWD/AP-SamusReturns/src/msr" worlds/msr
         shell: bash
 
+      - name: Install Fuzzer
+        run: curl -L -o fuzz.py https://raw.githubusercontent.com/Eijebong/Archipelago-fuzzer/refs/heads/main/fuzz.py
+        shell: bash
+
       - name: Install Python Deps
         id: install-deps
         run: |
@@ -58,26 +62,29 @@ jobs:
           python -m pip install -r AP-SamusReturns/requirements.txt
         shell: bash
 
+  unit-test:
+    needs: setup
+    runs-on: ${{ matrix.os }}
+    name: Unit Test ${{ matrix.name }}
+    
+    steps:
       - name: Run AP tests
         uses: dariocurr/pytest-summary@v2.6
         with:
           extensions: pytest-subtests pytest-xdist
           options: -n auto
           paths: test worlds/msr
-        if: steps.install-deps.outcome == 'success'
 
+  fuzz:
+    needs: setup
+    runs-on: ${{ matrix.os }}
+    name: Fuzz ${{ matrix.name }}
+
+    steps:
       - name: Fuzz AP World
         run: python fuzz.py -r 100 -g msr -n 1
-        if: steps.install-deps.outcome == 'success'
 
-      - name: Upload test summary
-        uses: actions/upload-artifact@v7
-        with:
-          name: test-summary
-          path: test-summary.md
-        if: always()
-
-      - name: Upload fuzz summary
+      - name: Upload fuzz output
         uses: actions/upload-artifact@v7
         with:
           name: fuzz-output

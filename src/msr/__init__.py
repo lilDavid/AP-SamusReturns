@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import ClassVar
 
 import Utils
-from BaseClasses import Item, ItemClassification, Location, MultiWorld, Tutorial
+from BaseClasses import CollectionState, Item, ItemClassification, Location, MultiWorld, Tutorial
 from Options import DeathLink, Option
 from rule_builder.rules import Has
 from worlds import LauncherComponents as Launcher
@@ -236,6 +236,14 @@ class SamusReturnsWorld(World):
 
         data = item_data_table[ItemName.MetroidDna if name == ItemName.MetroidDnaLocal else ItemName(name)]
         return SamusReturnsItem(name, data.classification(), data.ap_id, self.player)
+
+    def collect_item(self, state: CollectionState, item: Item, remove: bool = False) -> str | None:
+        item_name = super().collect_item(state, item, remove)
+        if item_name is None:
+            return None
+        if item_name == ItemName.MetroidDnaLocal:
+            return ItemName.MetroidDna
+        return item_name
 
     def visualize_regions(self):
         Utils.visualize_regions(self.get_region(self.origin_region_name), Utils.output_path("msr.puml"))

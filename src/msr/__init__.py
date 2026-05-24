@@ -75,7 +75,9 @@ class SamusReturnsWorld(World):
     def is_debug(cls):
         return cls.zip_path is None
 
-    def __init__(self):
+    def __init__(self, multiworld: MultiWorld, player: int):
+        super().__init__(multiworld, player)
+
         self.topology_present = self.is_debug()
         self.displaced_filler = []
 

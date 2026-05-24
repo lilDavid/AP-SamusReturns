@@ -78,9 +78,13 @@ class SamusReturnsWorld(World):
     def is_debug(cls):
         return cls.zip_path is None
 
-    def generate_early(self):
-        self.topology_present = self.is_debug()
+    def __init__(self, multiworld: MultiWorld, player: int):
+        super().__init__(multiworld, player)
 
+        self.topology_present = self.is_debug()
+        self.displaced_filler = []
+
+    def generate_early(self):
         if self.is_universal_tracker():
             self.set_options_from_slot_data()
         else:
@@ -99,7 +103,6 @@ class SamusReturnsWorld(World):
             self.push_precollected(self.create_item(item))
 
         self.skipped_items = starting_items
-        self.displaced_filler = []
 
     def create_regions(self):
         create_regions(self)

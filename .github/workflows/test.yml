@@ -63,6 +63,20 @@ jobs:
         shell: bash
 
   unit-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: "ubuntu-latest"
+            name: "Linux"
+            pyversion: "3.12"
+          - os: "macos-latest"
+            name: "macOS"
+            pyversion: "3.11"
+          - os: "windows-latest"
+            name: "Windows"
+            pyversion: "3.12"
+  
     needs: setup
     runs-on: ${{ matrix.os }}
     name: Unit Test ${{ matrix.name }}
@@ -76,6 +90,20 @@ jobs:
           paths: test worlds/msr
 
   fuzz:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: "ubuntu-latest"
+            name: "Linux"
+            pyversion: "3.12"
+          - os: "macos-latest"
+            name: "macOS"
+            pyversion: "3.11"
+          - os: "windows-latest"
+            name: "Windows"
+            pyversion: "3.12"
+  
     needs: setup
     runs-on: ${{ matrix.os }}
     name: Fuzz ${{ matrix.name }}

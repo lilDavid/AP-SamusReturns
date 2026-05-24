@@ -63,10 +63,7 @@ jobs:
         with:
           extensions: pytest-subtests pytest-xdist
           options: -n auto
-          show: "all"
-          paths: |
-            test
-            worlds/msr
+          paths: test worlds/msr
         if: steps.install-deps.outcome == 'success'
 
       - name: Fuzz AP World

@@ -21,7 +21,7 @@ jobs:
             pyversion: "3.12"
 
     runs-on: ${{ matrix.os }}
-    name: Setup ${{ matrix.name }}
+    name: ${{ matrix.name }}
 
     steps:          
       - name: Checkout Archipelago
@@ -62,55 +62,17 @@ jobs:
           python -m pip install -r AP-SamusReturns/requirements.txt
         shell: bash
 
-  unit-test:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: "ubuntu-latest"
-            name: "Linux"
-            pyversion: "3.12"
-          - os: "macos-latest"
-            name: "macOS"
-            pyversion: "3.11"
-          - os: "windows-latest"
-            name: "Windows"
-            pyversion: "3.12"
-  
-    needs: setup
-    runs-on: ${{ matrix.os }}
-    name: Unit Test ${{ matrix.name }}
-    
-    steps:
       - name: Run AP tests
         uses: dariocurr/pytest-summary@v2.6
         with:
           extensions: pytest-subtests pytest-xdist
           options: -n auto
           paths: test worlds/msr
-
-  fuzz:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: "ubuntu-latest"
-            name: "Linux"
-            pyversion: "3.12"
-          - os: "macos-latest"
-            name: "macOS"
-            pyversion: "3.11"
-          - os: "windows-latest"
-            name: "Windows"
-            pyversion: "3.12"
-  
-    needs: setup
-    runs-on: ${{ matrix.os }}
-    name: Fuzz ${{ matrix.name }}
-
-    steps:
+        if: steps.install-deps.outcome == 'success'
+        
       - name: Fuzz AP World
         run: python fuzz.py -r 100 -g msr -n 1
+        if: steps.install-deps.outcome == 'success'
 
       - name: Upload fuzz output
         uses: actions/upload-artifact@v7

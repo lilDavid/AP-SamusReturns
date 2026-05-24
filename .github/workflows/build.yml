@@ -7,20 +7,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    steps:          
+    steps:
       - name: Checkout Archipelago
         uses: actions/checkout@v6
         with:
           repository: ArchipelagoMW/Archipelago
           fetch-depth: 0
           path: .
-          
+
       - name: Checkout AP world
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
           path: AP-SamusReturns
-          
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:

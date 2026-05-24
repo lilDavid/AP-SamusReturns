@@ -23,7 +23,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.name }}
 
-    steps:          
+    steps:
       - name: Checkout Archipelago
         uses: actions/checkout@v6
         with:
@@ -31,13 +31,13 @@ jobs:
           ref: "0.6.7"
           fetch-depth: 0
           path: .
-          
+
       - name: Checkout AP world
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
           path: AP-SamusReturns
-          
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
@@ -69,7 +69,7 @@ jobs:
           options: -n auto
           paths: test worlds/msr
         if: steps.install-deps.outcome == 'success'
-        
+
       - name: Fuzz AP World
         run: python fuzz.py -r 100 -g msr -n 1
         if: steps.install-deps.outcome == 'success'
@@ -80,4 +80,5 @@ jobs:
           name: fuzz-output
           path: fuzz-output
           archive: true
+          if-no-files-found: ignore
         if: always()

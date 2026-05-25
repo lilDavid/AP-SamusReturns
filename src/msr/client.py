@@ -700,7 +700,12 @@ class SamusReturnsContext(BaseContext):
 
         if self.last_death >= self.game_state.last_death:
             if self.killing_player:
-                await self.run_lua("Game.KillPlayer()")
+                await self.run_lua("""
+                    if Game.GetPlayer() ~= nil and not Game.GetPlayer().INPUT.bInputIgnored then
+                        Game.KillPlayer()
+                    end
+                """)
+                await asyncio.sleep(BACKOFF_SHORT)  # Reduce spam
             return
 
         self.last_death = self.game_state.last_death

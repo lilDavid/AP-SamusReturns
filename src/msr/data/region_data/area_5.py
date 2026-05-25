@@ -1174,7 +1174,7 @@ area_5_exterior_data = AreaData(
                                     Has(ItemName.HighJumpBoots),
                                     # This one's trickier than most because of the overhang but stil not terrible
                                     can_super_jump_morph_extend,
-                                    # Diagonal DBJ
+                                    can_ibj(IBJ.option_diagonal),  # Double
                                 ),
                                 can_bomb_block,
                                 can_blobthrower,
@@ -1330,7 +1330,7 @@ area_5_interior_data = AreaData(
                                             can_movement(Movement.option_simple),
                                         ),
                                     ),
-                                    # Diagonal DBJ with HJB
+                                    Has(ItemName.HighJumpBoots) & can_ibj(IBJ.option_diagonal),  # Double
                                 ),
                             ),
                         ),

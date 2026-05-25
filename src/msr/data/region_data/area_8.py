@@ -69,7 +69,10 @@ can_escape_nest_network_tunnels = Or(
 )
 can_escape_queen_arena = And(
     can_combat_queen,
-    HasAll(ItemName.SpaceJump, ItemName.ScrewAttack) | Has(ItemName.Hatchling),
+    Or(
+        HasAll(ItemName.SpaceJump, ItemName.ScrewAttack) & can_bomb_block,
+        Has(ItemName.Hatchling),
+    ),
 )
 
 area_8_data = AreaData(

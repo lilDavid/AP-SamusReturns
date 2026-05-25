@@ -329,8 +329,7 @@ area_6_data = AreaData(
                             access_rule=Or(
                                 Has(ItemName.SpaceJump),
                                 And(
-                                    # This is actually a DBJ but diagonal DBJs aren't fully considered yet
-                                    Has(ItemName.HighJumpBoots) | can_ibj(IBJ.option_diagonal),
+                                    Has(ItemName.HighJumpBoots) | can_ibj(IBJ.option_diagonal),  # Diagonal
                                     can_spider,
                                 ),
                             ),

@@ -33,7 +33,7 @@ can_escape_transport_area_8 = can_climb_shaft
 can_cross_transport_area_8 = And(
     Has(ItemName.Hatchling),
     can_escape_transport_area_8,
-    Or(Has(ItemName.SpaceJump), can_spider_boost, can_thorns),
+    Or(Has(ItemName.SpaceJump), can_spider_boost, can_thorns, can_climb_elevated_shaft),
 )
 can_combat_ridley = And(
     Has(ItemName.SpaceJump),  # Get over tail slide attack

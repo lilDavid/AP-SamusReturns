@@ -16,9 +16,8 @@ if TYPE_CHECKING:
     from . import SamusReturnsWorld
 
 # TODO: Ammo logic
-# TODO: Go through all the high-jump requirements to separate out High Jump/DBJ from super jump
-# TODO: How much height do you get out of a DBJ with HJB?
 # TODO: Separate out midair morph tricks
+# TODO: Separate vertical and diagonal IBJ tricks (so complex verticals and double diags are different)
 
 
 @dataclass

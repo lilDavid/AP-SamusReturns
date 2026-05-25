@@ -937,7 +937,7 @@ area_4_mines_data = AreaData(
                                 Has(ItemName.HighJumpBoots),
                                 can_climb_wall,
                                 can_super_jump(SuperJump.option_easy),
-                                # Diagonal DBJ
+                                can_ibj(IBJ.option_diagonal),  # Double
                             ),
                         ),
                         ExitData(

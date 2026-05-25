@@ -227,7 +227,8 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 pickup["caption"] = f"{item.name} acquired."
                 pickup["sound"] = item_data.pickup_sound()
             else:
-                pickup["caption"] = f"{world.multiworld.player_name[item.player]}'s {item.name} acquired."
+                item_name = item.name.replace('"', '\\"')
+                pickup["caption"] = f"{world.multiworld.player_name[item.player]}'s {item_name} acquired."
                 pickup["sound"] = PickupSound.TANK
             pickups.append(pickup)
         return pickups

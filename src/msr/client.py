@@ -778,7 +778,9 @@ def verify_patch(patch_file: str | None) -> SamusReturnsPatch | None:
     if auto_handler is not SamusReturnsPatch:
         logger.error("Invalid Samus Returns patch file: %s", patch_file)
         return None
-    return SamusReturnsPatch(patch_file)
+    patch = SamusReturnsPatch(patch_file)
+    patch.read()
+    return patch
 
 
 def launch(*launch_args: str):

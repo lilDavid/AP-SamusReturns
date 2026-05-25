@@ -815,7 +815,7 @@ def launch(*launch_args: str):
 
     import colorama
 
-    Utils.init_logging("Metroid: Samus Returns Client", exception_logger="Client", loglevel=logging.DEBUG)
+    Utils.init_logging("Metroid Samus Returns Client", exception_logger="Client", loglevel=logging.DEBUG)
     colorama.just_fix_windows_console()
     asyncio.run(main())
     colorama.deinit()

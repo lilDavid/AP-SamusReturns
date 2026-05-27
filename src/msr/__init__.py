@@ -235,7 +235,7 @@ class SamusReturnsWorld(World):
             return SamusReturnsItem(name, ItemClassification.progression, None, self.player)
 
         data = item_data_table[ItemName.MetroidDna if name == ItemName.MetroidDnaLocal else ItemName(name)]
-        return SamusReturnsItem(name, data.classification(), data.ap_id, self.player)
+        return SamusReturnsItem(str(name), data.classification(), data.ap_id, self.player)
 
     def collect_item(self, state: CollectionState, item: Item, remove: bool = False) -> str | None:
         item_name = super().collect_item(state, item, remove)

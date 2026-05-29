@@ -18,7 +18,16 @@ from . import lib  # Set up module importer for open-samus-returns-rando  # noqa
 from .data import GAME_NAME
 from .data.internal_names import RANDO_DNA_TEMPLATE, AreaId, ItemId, ItemModel, PickupSound
 from .data.remote_items import REMOTE_ITEM_MAPPING
-from .items import ItemName, OtherItemData, TankData, UniqueItemData, item_data_table, launcher_to_ammo
+from .items import (
+    BASE_AEION,
+    BASE_ENERGY,
+    ItemName,
+    OtherItemData,
+    TankData,
+    UniqueItemData,
+    item_data_table,
+    launcher_to_ammo,
+)
 from .locations import MetroidLocationData, location_table
 from .options import ApItemModels, PickupModels
 from .regions import all_areas_data
@@ -185,8 +194,8 @@ class SamusReturnsPatch(APAutoPatchInterface):
     def create_starting_items(self, world: SamusReturnsWorld):
         starting_items = Counter(
             {
-                ItemId.MAX_ENERGY: 99,
-                ItemId.MAX_AEION: 1000,
+                ItemId.MAX_ENERGY: BASE_ENERGY,
+                ItemId.MAX_AEION: BASE_AEION,
             }
         )
         self.required_dna = world.options.dna_required.value

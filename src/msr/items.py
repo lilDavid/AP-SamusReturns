@@ -185,6 +185,9 @@ launcher_to_ammo: dict[str, ItemId] = {
 }
 
 
+BASE_ENERGY = 99
+BASE_AEION = 1000
+
 default_ammo_amounts: dict[str, int] = {
     ItemName.EnergyTank: 100,
     ItemName.MissileLauncher: 24,

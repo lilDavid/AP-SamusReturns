@@ -25,6 +25,7 @@ from .items import (
     OtherItemData,
     TankData,
     UniqueItemData,
+    get_ammo_id,
     item_data_table,
     launcher_to_ammo,
 )
@@ -214,7 +215,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
                         starting_items[item_id] += world.ammo_amounts[item.name]
                 case UniqueItemData(_, item_id) | OtherItemData(_, item_id):
                     starting_items[item_id] += 1
-                    ammo_id = launcher_to_ammo.get(item.name)
+                    ammo_id = get_ammo_id(item.name)
                     if ammo_id is not None:
                         starting_items[ammo_id] += world.ammo_amounts[item.name]
         return starting_items

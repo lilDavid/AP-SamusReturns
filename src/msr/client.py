@@ -28,7 +28,7 @@ from .connector import (
 )
 from .data import GAME_NAME
 from .data.internal_names import AreaId, ItemId
-from .items import ItemName, default_ammo_amounts, item_data_table, launcher_to_ammo, tanks, unique_items
+from .items import ItemName, default_ammo_amounts, get_ammo_id, item_data_table, launcher_to_ammo, tanks, unique_items
 from .locations import location_table
 from .patch import SamusReturnsPatch, create_resource
 from .settings import SamusReturnsSettings, TargetSystem
@@ -518,11 +518,11 @@ class SamusReturnsContext(BaseContext):
 
         if await self.handle_metroid_dna(current_inventory):
             return
-        if await self.handle_weapon_capacity(current_inventory, ItemName.MissileTank, ItemName.MissileLauncher):
+        if await self.handle_weapon_capacity(current_inventory, ItemName.MissileLauncher):
             return
-        if await self.handle_weapon_capacity(current_inventory, ItemName.SuperMissileTank, ItemName.SuperMissile):
+        if await self.handle_weapon_capacity(current_inventory, ItemName.SuperMissile):
             return
-        if await self.handle_weapon_capacity(current_inventory, ItemName.PowerBombTank, ItemName.PowerBomb):
+        if await self.handle_weapon_capacity(current_inventory, ItemName.PowerBomb):
             return
         if await self.handle_aeion_capacity(current_inventory):
             return
@@ -548,7 +548,7 @@ class SamusReturnsContext(BaseContext):
         item_data = item_data_table[item_name]
         resources = [(item_data.item_id, 1)]
         current_inventory[item_name] = 1
-        ammo_id = launcher_to_ammo.get(item_name)
+        ammo_id = get_ammo_id(item_name)
         if ammo_id is not None:
             ammo_amount = self.ammo_amounts[item_name]
             resources.append((ammo_id, ammo_amount))
@@ -565,14 +565,15 @@ class SamusReturnsContext(BaseContext):
         await self.give_items(message, resources, received_item_index)
         return True
 
-    async def handle_weapon_capacity(self, current_inventory: Counter[str], item: ItemName, launcher: ItemName):
+    async def handle_weapon_capacity(self, current_inventory: Counter[str], launcher: ItemName):
         received_item_index = self.game_state.received_item_index
         if received_item_index is None:
             return False
 
-        item_data = tanks[item]
-        current_capacity = current_inventory[item]
-        new_capacity, last_item = self.get_received_count(item, self.ammo_amounts[item])
+        ammo = launcher_to_ammo[launcher]
+        item_data = tanks[ammo]
+        current_capacity = current_inventory[ammo]
+        new_capacity, last_item = self.get_received_count(ammo, self.ammo_amounts[ammo])
         new_capacity += self.ammo_amounts[launcher] * current_inventory[launcher]
 
         diff = new_capacity - current_capacity
@@ -580,8 +581,8 @@ class SamusReturnsContext(BaseContext):
             return False
 
         assert last_item is not None
-        message = f"{item[: -len(' Tank')]} capacity increased by {diff}"
-        if diff == self.ammo_amounts[item]:
+        message = f"{ammo[: -len(' Tank')]} capacity increased by {diff}"
+        if diff == self.ammo_amounts[ammo]:
             if self.has_collected_item(last_item):
                 message = None
             elif last_item.player != self.slot:

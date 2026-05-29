@@ -174,15 +174,22 @@ item_data_table: dict[str, ItemData] = {
 }
 
 
-launcher_to_ammo: dict[str, ItemId] = {
-    ItemName.MissileLauncher: ItemId.MISSILE_TANKS,
-    ItemName.SuperMissile: ItemId.SUPER_MISSILE_TANKS,
-    ItemName.PowerBomb: ItemId.POWER_BOMB_TANKS,
-    ItemName.ScanPulse: ItemId.MAX_AEION,
-    ItemName.LightningArmor: ItemId.MAX_AEION,
-    ItemName.BeamBurst: ItemId.MAX_AEION,
-    ItemName.PhaseDrift: ItemId.MAX_AEION,
+launcher_to_ammo: dict[str, ItemName] = {
+    ItemName.MissileLauncher: ItemName.MissileTank,
+    ItemName.SuperMissile: ItemName.SuperMissileTank,
+    ItemName.PowerBomb: ItemName.PowerBombTank,
+    ItemName.ScanPulse: ItemName.AeionTank,
+    ItemName.LightningArmor: ItemName.AeionTank,
+    ItemName.BeamBurst: ItemName.AeionTank,
+    ItemName.PhaseDrift: ItemName.AeionTank,
 }
+
+
+def get_ammo_id(launcher: str):
+    ammo_item = launcher_to_ammo.get(launcher)
+    if ammo_item is None:
+        return None
+    return item_data_table[ammo_item].item_id
 
 
 BASE_ENERGY = 99

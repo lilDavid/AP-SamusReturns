@@ -13,7 +13,6 @@ from ...logic import (
     can_climb_elevated_shaft,
     can_climb_shaft,
     can_climb_wall,
-    can_damage_metroid,
     can_high_super_jump_or_climb,
     can_higher_jump,
     can_ibj,
@@ -25,6 +24,7 @@ from ...logic import (
     can_super_jump_morph_extend,
     can_wall_jump,
 )
+from ...logic.combat import can_combat_alpha
 from ...options import IBJ, MorphExtend, Movement, SuperJump, WallJump
 from ..room_names import Area, Area1
 from ..room_names import Area2Entryway as Area2
@@ -363,7 +363,7 @@ area_1_data = AreaData(
                         ),
                     ],
                     pickups=[
-                        PickupData("Alpha Metroid", access_rule=can_damage_metroid),
+                        PickupData("Alpha Metroid", access_rule=can_combat_alpha),
                         PickupData(
                             "Above Arena",
                             access_rule=can_bomb_block & can_almost_high_ledge,
@@ -544,7 +544,7 @@ area_1_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_alpha,
                         ),
                     ],
                 )
@@ -563,7 +563,7 @@ area_1_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_alpha,
                         )
                     ],
                 )
@@ -1085,7 +1085,7 @@ area_1_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_alpha,
                         )
                     ],
                 )

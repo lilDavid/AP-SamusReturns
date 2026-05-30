@@ -9,7 +9,6 @@ from ...logic import (
     can_climb_elevated_shaft,
     can_climb_shaft,
     can_climb_wall,
-    can_damage_metroid,
     can_high_ledge,
     can_ibj,
     can_movement,
@@ -19,6 +18,7 @@ from ...logic import (
     can_thorns,
     door_rules,
 )
+from ...logic.combat import can_damage_weak_metroid
 from ...options import IBJ, Movement
 from ..room_names import Area, Area1, Area8
 from ..room_names import SurfaceEast as East
@@ -321,7 +321,7 @@ surface_east_data = AreaData(
                     pickups=[
                         PickupData(
                             "Alpha Metroid",
-                            access_rule=can_damage_metroid,
+                            access_rule=can_damage_weak_metroid(700),
                         )
                     ],
                 ),

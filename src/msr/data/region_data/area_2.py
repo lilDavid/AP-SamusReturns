@@ -15,7 +15,6 @@ from ...logic import (
     can_climb_shaft,
     can_climb_wall,
     can_damage_boost,
-    can_damage_metroid,
     can_damage_tough_enemy,
     can_fleech_swarm,
     can_fly_vertical,
@@ -33,6 +32,7 @@ from ...logic import (
     can_thorns,
     can_wall_jump,
 )
+from ...logic.combat import can_combat_alpha, can_combat_evolved_alpha, can_combat_gamma
 from ...options import IBJ, DamageBoost, Movement, WallJump
 from ..room_names import Area, Area1
 from ..room_names import Area2Entryway as Entryway
@@ -557,7 +557,7 @@ area_2_exterior_data = AreaData(
                         ),
                     ],
                     pickups=[
-                        PickupData(access_rule=can_damage_metroid),
+                        PickupData(access_rule=can_combat_alpha),
                     ],
                 )
             ],
@@ -601,7 +601,7 @@ area_2_exterior_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=Has(ItemName.VariaSuit) & can_damage_metroid,
+                            access_rule=Has(ItemName.VariaSuit) & can_combat_alpha,
                         )
                     ],
                 )
@@ -714,7 +714,7 @@ area_2_exterior_data = AreaData(
                         ),
                     ],
                     pickups=[
-                        PickupData(access_rule=can_damage_metroid),
+                        PickupData(access_rule=can_combat_evolved_alpha),
                     ],
                 )
             ],
@@ -758,7 +758,7 @@ area_2_exterior_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_evolved_alpha,
                         )
                     ],
                 )
@@ -776,7 +776,7 @@ area_2_exterior_data = AreaData(
                         )
                     ],
                     pickups=[
-                        PickupData(access_rule=can_damage_metroid),
+                        PickupData(access_rule=can_combat_alpha),
                     ],
                 )
             ],
@@ -848,7 +848,7 @@ area_2_exterior_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_alpha,
                         ),
                     ],
                 )
@@ -1435,7 +1435,7 @@ area_2_interior_data = AreaData(
                         ),
                     ],
                     pickups=[
-                        PickupData(access_rule=can_damage_metroid),
+                        PickupData(access_rule=can_combat_gamma),
                     ],
                 )
             ],
@@ -1764,7 +1764,7 @@ area_2_entryway_data = AreaData(
                         ),
                     ],
                     pickups=[
-                        PickupData(access_rule=can_damage_metroid),
+                        PickupData(access_rule=can_combat_evolved_alpha),
                     ],
                 ),
                 RegionData(

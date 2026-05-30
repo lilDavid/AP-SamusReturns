@@ -13,7 +13,6 @@ from ...logic import (
     can_climb_shaft,
     can_climb_wall,
     can_damage_boost,
-    can_damage_metroid,
     can_damage_tough_enemy,
     can_fly,
     can_fly_vertical,
@@ -34,6 +33,7 @@ from ...logic import (
     can_wall_jump,
     has_knowledge,
 )
+from ...logic.combat import can_combat_alpha, can_combat_evolved_alpha, can_combat_evolved_gamma, can_combat_gamma
 from ...options import IBJ, DamageBoost, Knowledge, Movement, SuperJump, WallJump
 from ..room_names import Area
 from ..room_names import Area2Entryway as Area2
@@ -692,7 +692,7 @@ area_3_exterior_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_gamma,
                         )
                     ],
                 ),
@@ -881,7 +881,7 @@ area_3_caverns_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_evolved_alpha,
                         )
                     ],
                 )
@@ -906,7 +906,7 @@ area_3_caverns_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_gamma,
                         )
                     ],
                 ),
@@ -1025,7 +1025,7 @@ area_3_caverns_data = AreaData(
                     pickups=[
                         PickupData(
                             "Gamma Metroid",
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_gamma,
                         )
                     ],
                 ),
@@ -1495,7 +1495,7 @@ area_3_caverns_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_evolved_gamma,
                         )
                     ],
                 ),
@@ -1556,7 +1556,7 @@ area_3_caverns_data = AreaData(
                                 Has(ItemName.VariaSuit),
                                 can_bomb_block,
                                 can_spider | Has(ItemName.GravitySuit),
-                                can_damage_metroid,
+                                can_combat_evolved_gamma,
                             )
                         )
                     ],
@@ -1600,7 +1600,7 @@ area_3_caverns_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_evolved_alpha,
                         )
                     ],
                 ),
@@ -1957,7 +1957,7 @@ area_3_interior_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=Has(Interior.GammaCAccess.location("Found Gamma Metroid")) & can_damage_metroid,
+                            access_rule=Has(Interior.GammaCAccess.location("Found Gamma Metroid")) & can_combat_gamma,
                         )
                     ],
                 ),
@@ -2102,7 +2102,7 @@ area_3_interior_data = AreaData(
                     pickups=[
                         PickupData(
                             "Alpha Metroid",
-                            access_rule=Has(ItemName.VariaSuit) & can_damage_metroid,
+                            access_rule=Has(ItemName.VariaSuit) & can_combat_alpha,
                         ),
                         PickupData(
                             "Lava",
@@ -2136,7 +2136,7 @@ area_3_interior_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_gamma,
                         )
                     ],
                 )

@@ -11,7 +11,6 @@ from ...logic import (
     can_climb_shaft,
     can_climb_wall,
     can_damage_boost,
-    can_damage_metroid,
     can_fleech_swarm,
     can_fly,
     can_fly_vertical,
@@ -30,6 +29,7 @@ from ...logic import (
     door_rules,
     has_knowledge,
 )
+from ...logic.combat import can_combat_evolved_alpha, can_combat_evolved_gamma, can_combat_gamma, can_combat_zeta
 from ...options import IBJ, DamageBoost, Knowledge, Movement, SuperJump, WallJump
 from ..room_names import Area
 from ..room_names import Area3Exterior as Area3
@@ -467,7 +467,7 @@ area_4_caves_data = AreaData(
                         ),
                         PickupData(
                             "Evolved Alpha Metroid",
-                            access_rule=can_damage_metroid & can_escape_evolved_alpha,
+                            access_rule=can_combat_evolved_alpha & can_escape_evolved_alpha,
                         ),
                     ],
                 )
@@ -586,7 +586,7 @@ area_4_caves_data = AreaData(
                     pickups=[
                         PickupData(
                             "Gamma Metroid",
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_gamma,
                         ),
                     ],
                 ),
@@ -1220,7 +1220,7 @@ area_4_mines_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_zeta,
                         )
                     ],
                 )
@@ -1469,7 +1469,7 @@ area_4_mines_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=Has(ItemName.VariaSuit) & can_damage_metroid,
+                            access_rule=Has(ItemName.VariaSuit) & can_combat_evolved_gamma,
                         )
                     ],
                 )

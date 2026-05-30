@@ -7,13 +7,13 @@ from rule_builder.options import OptionFilter
 from rule_builder.rules import And, False_, Has, HasAll, HasAny, Or, Rule, True_
 from typing_extensions import override
 
-from .data import GAME_NAME
-from .data.region_data import Door
-from .items import ItemName
-from .options import IBJ, DamageBoost, Knowledge, LogicTrick, MorphExtend, Movement, SuperJump, WallJump
+from ..data import GAME_NAME
+from ..data.region_data import Door
+from ..items import ItemName
+from ..options import IBJ, DamageBoost, Knowledge, LogicTrick, MorphExtend, Movement, SuperJump, WallJump
 
 if TYPE_CHECKING:
-    from . import SamusReturnsWorld
+    from .. import SamusReturnsWorld
 
 # TODO: Ammo logic
 # TODO: Separate out midair morph tricks
@@ -38,7 +38,7 @@ class Trick(Rule["SamusReturnsWorld"], game=GAME_NAME):
         if not world.is_universal_tracker():
             return normal_rule.resolve(world)
 
-        from .settings import TrackerTrickLogic
+        from ..settings import TrackerTrickLogic
 
         sequence_break_rule = Has(world.glitches_item_name)
         if world.settings.universal_tracker_settings.show_tricks == TrackerTrickLogic.NEXT_LEVEL:
@@ -157,7 +157,6 @@ can_climb_elevated_shaft = Or(
 can_any_missile = HasAny(ItemName.MissileLauncher, ItemName.SuperMissile)
 can_damage_tough_enemy_ranged = Or(can_any_missile, can_beam_burst, can_power_bomb)
 can_damage_tough_enemy = Or(can_damage_tough_enemy_ranged, Has(ItemName.ScrewAttack))
-can_damage_metroid = Or(HasAny(ItemName.MissileLauncher, ItemName.SuperMissile, ItemName.IceBeam), can_beam_burst)
 can_blobthrower = can_beam_burst | can_power_bomb
 can_tunnel_steel_orb = Or(can_beam_burst & can_beam_block_through_tunnel, can_power_bomb)
 
@@ -165,9 +164,6 @@ can_tunnel_steel_orb = Or(can_beam_burst & can_beam_block_through_tunnel, can_po
 can_thorns = Has(ItemName.LightningArmor) | can_damage_boost(DamageBoost.option_static)
 # Fleech swarms deactivate if you have Gravity Suit
 can_fleech_swarm = HasAny(ItemName.LightningArmor, ItemName.GravitySuit)
-
-# TODO: Proper combat logic. SJ and morph both seem required for no damage
-can_combat_omega = can_damage_metroid & HasAll(ItemName.SpaceJump, ItemName.MorphBall)
 
 door_rules = {
     Door.Open: True_(),

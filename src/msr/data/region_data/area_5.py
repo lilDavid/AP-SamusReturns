@@ -14,7 +14,6 @@ from ...logic import (
     can_climb_wall_underwater,
     can_cross_pitfall_bridge,
     can_damage_boost,
-    can_damage_metroid,
     can_damage_tough_enemy,
     can_fleech_swarm,
     can_fly,
@@ -41,6 +40,13 @@ from ...logic import (
     can_thorns,
     can_underwater_almost_high_ledge,
     can_wall_jump,
+)
+from ...logic.combat import (
+    can_combat_evolved_alpha,
+    can_combat_evolved_gamma,
+    can_combat_evolved_zeta,
+    can_combat_gamma,
+    can_combat_zeta,
 )
 from ...options import IBJ, DamageBoost, MorphExtend, Movement, SuperJump, WallJump
 from ..room_names import Area, Area6
@@ -619,7 +625,7 @@ area_5_lobby_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_evolved_alpha,
                         )
                     ],
                 )
@@ -731,7 +737,7 @@ area_5_lobby_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=Has(ItemName.VariaSuit) & can_damage_metroid,
+                            access_rule=Has(ItemName.VariaSuit) & can_combat_evolved_gamma,
                         )
                     ],
                 )
@@ -1069,7 +1075,7 @@ area_5_exterior_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_zeta,
                         ),
                     ],
                 )
@@ -1140,7 +1146,7 @@ area_5_exterior_data = AreaData(
                         PickupData(
                             access_rule=And(
                                 Has(ItemName.VariaSuit),
-                                can_damage_metroid,
+                                can_combat_evolved_gamma,
                                 Or(
                                     # One of these is needed to kill it without getting hit
                                     HasAny(ItemName.SpaceJump, ItemName.GravitySuit),
@@ -1183,7 +1189,7 @@ area_5_exterior_data = AreaData(
                         PickupData(
                             "Gamma Metroid",
                             access_rule=And(
-                                can_damage_metroid,
+                                can_combat_gamma,
                                 can_climb_wall,
                                 can_bomb_block,
                             ),
@@ -1852,7 +1858,7 @@ area_5_interior_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=HasAll(ItemName.VariaSuit, ItemName.SpaceJump) & can_damage_metroid,
+                            access_rule=HasAll(ItemName.VariaSuit, ItemName.SpaceJump) & can_combat_evolved_gamma,
                         )
                     ],
                 )
@@ -1900,7 +1906,7 @@ area_5_interior_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_evolved_zeta,
                         )
                     ],
                 )

@@ -7,7 +7,6 @@ from ...logic import (
     can_bomb,
     can_bomb_block,
     can_climb_wall,
-    can_damage_metroid,
     can_fly_vertical,
     can_high_ledge,
     can_morph_extend,
@@ -22,6 +21,7 @@ from ...logic import (
     can_wall_jump,
     door_rules,
 )
+from ...logic.combat import CanDamageWithMissiles, EnemyType, can_beam_burst_and_ice_beam
 from ...options import MorphExtend, Movement, SuperJump, WallJump
 from ..room_names import Area, Area7, Area8, SurfaceWest
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
@@ -29,9 +29,11 @@ from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomD
 # TODO: Bombless Metroid combat trick
 can_combat_metroid_larva = Has(ItemName.IceBeam) & can_any_missile & can_bomb_block
 can_combat_queen = And(
-    can_damage_metroid,
     can_spider,
     Has(ItemName.SpaceJump) | can_spider_boost,
+    # The resource logic for this fight is super weird. Expect renewable damage and at least one limited source I guess
+    can_beam_burst_and_ice_beam,
+    CanDamageWithMissiles(3500, EnemyType.QUEEN) | can_power_bomb,
 )
 
 can_climb_nest_network = Or(

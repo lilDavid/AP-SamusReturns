@@ -13,7 +13,6 @@ from ...logic import (
     can_climb_elevated_shaft,
     can_climb_shaft,
     can_climb_wall,
-    can_combat_omega,
     can_damage_tough_enemy_ranged,
     can_high_jump,
     can_high_ledge,
@@ -29,6 +28,7 @@ from ...logic import (
     can_thorns,
     can_wall_jump,
 )
+from ...logic.combat import can_combat_evolved_omega, can_combat_omega
 from ...options import IBJ, Movement, SuperJump, WallJump
 from ..room_names import Area, Area6, Area7, Area8
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
@@ -354,7 +354,7 @@ area_7_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_combat_omega,
+                            access_rule=can_combat_evolved_omega,
                         )
                     ],
                 )

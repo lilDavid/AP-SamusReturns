@@ -5,14 +5,11 @@ from ...logic import (
     can_almost_high_jump,
     can_almost_high_ledge,
     can_any_missile,
-    can_beam_burst,
     can_bomb_block,
     can_bomb_block_near_ceiling,
     can_climb_shaft,
     can_climb_wall,
-    can_combat_omega,
     can_damage_boost,
-    can_damage_metroid,
     can_fly_vertical,
     can_high_bomb_block,
     can_high_ledge,
@@ -29,6 +26,7 @@ from ...logic import (
     can_wall_jump,
     door_rules,
 )
+from ...logic.combat import CanDamageWithMissiles, EnemyType, can_combat_omega, can_combat_zeta
 from ...options import IBJ, DamageBoost, MorphExtend, Movement, SuperJump, WallJump
 from ..room_names import Area, Area6, Area7
 from ..room_names import Area5Lobby as Area5
@@ -46,7 +44,8 @@ can_navigate_hideout_sprawl_tunnels = And(
     # Screw attack is necessary to do this and sufficient to access the save station
 )
 can_combat_diggernaut = And(
-    HasAny(ItemName.MissileLauncher, ItemName.SuperMissile) | can_beam_burst,
+    # Only the first phase has a resources issue, the rest can be done with bombs as your only damage
+    Has(ItemName.PlasmaBeam) | CanDamageWithMissiles(3000, EnemyType.DIGGERNAUT),
     HasAll(ItemName.MorphBall, ItemName.Bomb, ItemName.SpiderBall, ItemName.SpaceJump),
 )
 can_cross_swarm_square = Or(
@@ -495,7 +494,7 @@ area_6_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_damage_metroid,
+                            access_rule=can_combat_zeta,
                         )
                     ],
                 )

@@ -727,6 +727,7 @@ class SamusReturnsContext(BaseContext):
     async def display_hud_message(self, text: str):
         from open_samus_returns_rando.misc_patches.lua_util import wrap_string
 
+        text = text.replace('"', '\\"')
         await self.run_lua(f"Scenario.QueueAsyncPopup({wrap_string(text)})")
 
 

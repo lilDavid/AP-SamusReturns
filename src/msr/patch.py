@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 from zipfile import ZipFile
 
 import Utils
-from BaseClasses import Item, Location
+from BaseClasses import Item, Location, MultiWorld
 from worlds.Files import APAutoPatchInterface
 
 from . import lib  # Set up module importer for open-samus-returns-rando  # noqa: F401
@@ -69,6 +69,16 @@ def sentence_case(string: str):
     if string == "":
         return ""
     return string[0].upper() + string[1:]
+
+
+def make_safe_name(string: str):
+    return string.replace('"', '\\"').replace("\n", " ")
+
+
+def format_remote_pickup(multiworld: MultiWorld, pickup: Item | Location):
+    player_name = make_safe_name(multiworld.player_name[pickup.player])
+    pickup_name = make_safe_name(pickup.name)
+    return f"{player_name}'s {pickup_name}"
 
 
 class SamusReturnsPatch(APAutoPatchInterface):
@@ -237,8 +247,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 pickup["caption"] = f"{item.name} acquired."
                 pickup["sound"] = item_data.pickup_sound()
             else:
-                item_name = item.name.replace('"', '\\"')
-                pickup["caption"] = f"{world.multiworld.player_name[item.player]}'s {item_name} acquired."
+                pickup["caption"] = f"{format_remote_pickup(world.multiworld, item)} acquired."
                 pickup["sound"] = PickupSound.TANK
             pickups.append(pickup)
         return pickups
@@ -267,7 +276,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
         if world.multiworld.players > 1:
             if item.player == world.player:
                 return f"your {item.name}"
-            return f"{world.multiworld.player_name[item.player]}'s {item.name}"
+            return format_remote_pickup(world.multiworld, item)
 
         item_data = item_data_table[ItemName(item.name)]
         if item.name in (ItemName.EnergyTank, ItemName.AeionTank):
@@ -286,7 +295,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
             return location.name
         if location.player == world.player:
             return f"your {location.name}"
-        return f"{world.multiworld.player_name[location.player]}'s {location.name}"
+        return format_remote_pickup(world.multiworld, location)
 
     @staticmethod
     def metroids_after_actors(location: Location):

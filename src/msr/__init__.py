@@ -117,6 +117,7 @@ class SamusReturnsWorld(World):
 
         major_item_pool: Counter[ItemName] = Counter()
         minor_item_pool: Counter[ItemName] = Counter()
+        prog_minor_item_pool: Counter[ItemName] = Counter()
 
         # Major items
         major_item_pool.update(major_items.keys())
@@ -127,18 +128,24 @@ class SamusReturnsWorld(World):
         major_item_pool[ItemName.MetroidDna] = self.options.dna_available.value - local_dna_count
         major_item_pool[ItemName.MetroidDnaLocal] = local_dna_count
 
-        # Tanks
+        # Tanks (total)
         major_item_pool[ItemName.EnergyTank] = 10  # E-tanks should be immune to tank displacement
         minor_item_pool[ItemName.MissileTank] = 80
         minor_item_pool[ItemName.SuperMissileTank] = 30
         minor_item_pool[ItemName.PowerBombTank] = 15
         minor_item_pool[ItemName.AeionTank] = 15
 
+        # Progression tanks
+        prog_minor_item_pool[ItemName.MissileTank] = 10
+        prog_minor_item_pool[ItemName.SuperMissileTank] = 10
+
         # Adjustments
         major_item_pool.subtract(self.skipped_items)
+        minor_item_pool.subtract(prog_minor_item_pool)
         assert all(count >= 0 for count in major_item_pool.values()), major_item_pool
+        assert all(count >= 0 for count in minor_item_pool.values()), (prog_minor_item_pool, minor_item_pool)
 
-        item_count = major_item_pool.total() + minor_item_pool.total()
+        item_count = major_item_pool.total() + prog_minor_item_pool.total() + minor_item_pool.total()
         location_count = LOCATION_COUNT - len(self.prefilled_locations)
         if item_count < location_count:
             minor_item_pool[self.get_filler_item_name()] = location_count - item_count
@@ -151,6 +158,7 @@ class SamusReturnsWorld(World):
             minor_item_pool -= Counter(self.displaced_filler)
 
         self.multiworld.itempool += [self.create_item(name) for name in major_item_pool.elements()]
+        self.multiworld.itempool += [self.create_progression_tank(name) for name in prog_minor_item_pool.elements()]
         self.multiworld.itempool += [self.create_item(name) for name in minor_item_pool.elements()]
 
     @classmethod
@@ -236,6 +244,11 @@ class SamusReturnsWorld(World):
 
         data = item_data_table[ItemName.MetroidDna if name == ItemName.MetroidDnaLocal else ItemName(name)]
         return SamusReturnsItem(str(name), data.classification(), data.ap_id, self.player)
+
+    def create_progression_tank(self, name: str):
+        item = self.create_item(name)
+        item.classification = ItemClassification.progression_deprioritized_skip_balancing
+        return item
 
     def collect_item(self, state: CollectionState, item: Item, remove: bool = False) -> str | None:
         item_name = super().collect_item(state, item, remove)

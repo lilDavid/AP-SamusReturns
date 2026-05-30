@@ -69,7 +69,6 @@ class TankData(NamedTuple):
     def classification(self):
         if self.is_useful:
             return ItemClassification.useful
-        # return ItemClassification.progression_deprioritized_skip_balancing
         return ItemClassification.filler
 
     def pickup_sound(self):

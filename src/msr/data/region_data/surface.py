@@ -229,7 +229,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.Open,
                             East.TransportCache,
-                            access_rule=Has(ItemName.Hatchling),
+                            access_rule=Has(ItemName.Hatchling) | can_power_bomb,
                         ),
                     ],
                     pickups=[

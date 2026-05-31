@@ -428,11 +428,19 @@ area_5_lobby_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Lobby.JShapeTunnel.subregion("Bottom"),
-                            access_rule=Has(ItemName.GrappleBeam),
+                            access_rule=HasAll(
+                                ItemName.GravitySuit,
+                                ItemName.SpaceJump,
+                                ItemName.ScrewAttack,
+                                ItemName.GrappleBeam,
+                            ),
                         ),
                     ],
                     pickups=[
-                        PickupData("Lower"),
+                        PickupData(
+                            "Lower",
+                            access_rule=HasAll(ItemName.GravitySuit, ItemName.SpaceJump, ItemName.ScrewAttack),
+                        ),
                     ],
                 ),
                 RegionData(
@@ -1491,7 +1499,7 @@ area_5_interior_data = AreaData(
                     pickups=[
                         PickupData(
                             access_rule=And(
-                                Has(ItemName.ScrewAttack),
+                                HasAll(ItemName.GrappleBeam, ItemName.ScrewAttack),
                                 can_spider,
                                 can_bomb_block,
                             )

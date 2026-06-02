@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from BaseClasses import CollectionState
+from NetUtils import JSONMessagePart
 from rule_builder.options import OptionFilter
 from rule_builder.rules import And, False_, Has, HasAll, HasAny, Or, Rule, True_
 from typing_extensions import override
@@ -28,6 +30,46 @@ class HasDna(Rule["SamusReturnsWorld"], game=GAME_NAME):
 
 
 @dataclass
+class CanSequenceBreak(Rule["SamusReturnsWorld"], game=GAME_NAME):
+    trick: type[LogicTrick]
+    difficulty: int
+
+    @override
+    def _instantiate(self, world: SamusReturnsWorld) -> Rule.Resolved:
+        return self.Resolved(
+            Has(world.glitches_item_name).resolve(world),
+            self.trick.display_name,  # pyright: ignore[reportAttributeAccessIssue]
+            self.trick.get_option_name(self.difficulty),
+            player=world.player,
+        )
+
+    class Resolved(Rule.Resolved):
+        rule: Has.Resolved
+        trick: str
+        difficulty: str
+
+        @override
+        def _evaluate(self, state: CollectionState) -> bool:
+            return self.rule._evaluate(state)
+
+        @override
+        def item_dependencies(self) -> dict[str, set[int]]:
+            return self.rule.item_dependencies()
+
+        @override
+        def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:
+            return [
+                {"type": "text", "text": f"{self.trick} ("},
+                {"type": "color", "color": "green" if state and self(state) else "salmon", "text": self.difficulty},
+                {"type": "text", "text": ")"},
+            ]
+
+        @override
+        def __str__(self) -> str:
+            return f"{self.trick} ({self.difficulty})"
+
+
+@dataclass
 class Trick(Rule["SamusReturnsWorld"], game=GAME_NAME):
     trick: type[LogicTrick]
     difficulty: int
@@ -40,7 +82,7 @@ class Trick(Rule["SamusReturnsWorld"], game=GAME_NAME):
 
         from ..settings import TrackerTrickLogic
 
-        sequence_break_rule = Has(world.glitches_item_name)
+        sequence_break_rule = CanSequenceBreak(self.trick, self.difficulty)
         if world.settings.universal_tracker_settings.show_tricks == TrackerTrickLogic.NEXT_LEVEL:
             sequence_break_rule.options = [OptionFilter(self.trick, self.difficulty - 1, "ge")]
         return (normal_rule | sequence_break_rule).resolve(world)

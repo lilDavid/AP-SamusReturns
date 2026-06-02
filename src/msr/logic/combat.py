@@ -80,8 +80,14 @@ class CanDamageWithMissiles(Rule["SamusReturnsWorld"], game=GAME_NAME):
             return [
                 {"type": "text", "text": "Deal "},
                 {"type": "color", "color": "green" if state and self(state) else "salmon", "text": str(self.damage)},
-                {"type": "text", "text": f"to {self.enemy_type.description} with Missiles and Super Missiles"},
+                {"type": "text", "text": " damage to "},
+                {"type": "color", "color": "cyan", "text": self.enemy_type.description},
+                {"type": "text", "text": " with Missiles and Super Missiles"},
             ]
+
+        @override
+        def __str__(self) -> str:
+            return f"Deal {self.damage} damage to {self.enemy_type.description} with Missiles and Super Missiles"
 
 
 can_damage_metroid_no_ammo = Has(ItemName.IceBeam) | can_beam_burst

@@ -45,7 +45,6 @@ class CanDamageWithMissiles(Rule["SamusReturnsWorld"], game=GAME_NAME):
             self.AmmoInfo.from_launcher(world, ItemName.MissileLauncher),
             self.AmmoInfo.from_launcher(world, ItemName.SuperMissile),
             player=world.player,
-            caching_enabled=getattr(world, "rule_caching_enabled", False),
         )
 
     class AmmoInfo(NamedTuple):
@@ -75,15 +74,6 @@ class CanDamageWithMissiles(Rule["SamusReturnsWorld"], game=GAME_NAME):
             missile_damage = self.enemy_type.missile_damage * self.get_ammo(self.missiles, state)
             super_damage = self.enemy_type.super_damage * self.get_ammo(self.supers, state)
             return missile_damage + super_damage >= self.damage
-
-        @override
-        def item_dependencies(self) -> dict[str, set[int]]:
-            return {
-                ItemName.MissileLauncher: {id(self)},
-                ItemName.MissileTank: {id(self)},
-                ItemName.SuperMissile: {id(self)},
-                ItemName.SuperMissileTank: {id(self)},
-            }
 
         @override
         def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:

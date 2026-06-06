@@ -2,6 +2,7 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    CanEscape,
     can_almost_high_jump,
     can_almost_high_ledge,
     can_any_missile,
@@ -56,31 +57,23 @@ can_cross_swarm_square = Or(
 )
 can_traverse_poisonous_tunnel = And(can_bomb_block, Has(ItemName.LightningArmor) | can_spider)
 
-can_escape_chozo_seal_w_bottom = can_high_ledge
-can_escape_chozo_seal_e = Or(
-    can_climb_wall,
-    And(
-        can_wall_jump(WallJump.option_simple),
-        Or(
-            Has(ItemName.HighJumpBoots),
-            can_super_jump(SuperJump.option_beginner),
-            can_morph_extend(MorphExtend.option_easy),
+can_escape_chozo_seal_e = CanEscape(
+    Or(
+        can_climb_wall,
+        And(
+            can_wall_jump(WallJump.option_simple),
+            Or(
+                Has(ItemName.HighJumpBoots),
+                can_super_jump(SuperJump.option_beginner),
+                can_morph_extend(MorphExtend.option_easy),
+            ),
         ),
     ),
+    Area6.ChozoSealE,
 )
-can_escape_omega_arena = Or(
-    door_rules[Door.Charge],
-    can_traverse_poisonous_tunnel & HasAll(ItemName.GrappleBeam, ItemName.MorphBall),
-)
-can_escape_crumbling_bridge_pit = can_bomb_block_near_ceiling
-can_escape_diggernaut = can_combat_diggernaut & can_power_bomb
-can_escape_swarm_square_to_transport = Has(ItemName.GrappleBeam)
-can_escape_diggernaut_loop = And(
-    can_escape_diggernaut,
-    can_fly_vertical,
-    can_cross_swarm_square,
-    can_escape_swarm_square_to_transport,
-)
+can_escape_crumbling_bridge_pit = CanEscape(can_bomb_block_near_ceiling, Area6.CrumblingBridge)
+can_escape_diggernaut = CanEscape(can_combat_diggernaut & can_power_bomb, Area6.Diggernaut)
+can_escape_swarm_square_to_transport = CanEscape(Has(ItemName.GrappleBeam), Area6.SwarmSquare)
 
 area_6_data = AreaData(
     area=Area.Area6,
@@ -99,7 +92,15 @@ area_6_data = AreaData(
                         ExitData(
                             Door.Charge,
                             Area6.Diggernaut,
-                            access_rule=can_escape_diggernaut_loop,
+                            access_rule=CanEscape(
+                                And(
+                                    can_escape_diggernaut,
+                                    can_fly_vertical,
+                                    can_cross_swarm_square,
+                                    can_escape_swarm_square_to_transport,
+                                ),
+                                "Diggernaut area",
+                            ),
                         ),
                         ExitData(
                             Door.Elevator,
@@ -320,7 +321,7 @@ area_6_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Area6.ChozoSealW.subregion("Main"),
-                            access_rule=can_escape_chozo_seal_w_bottom,
+                            access_rule=CanEscape(can_high_ledge, f"{Area6.ChozoSealW} bottom"),
                         ),
                         ExitData(
                             Door.Normal,
@@ -359,7 +360,7 @@ area_6_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Area6.ElectricEscalade,
-                            access_rule=can_escape_diggernaut,
+                            access_rule=can_escape_diggernaut.rule,
                         ),
                     ],
                     pickups=[
@@ -384,7 +385,7 @@ area_6_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Area6.TransportArea7,
-                            access_rule=can_cross_swarm_square & can_escape_swarm_square_to_transport,
+                            access_rule=can_cross_swarm_square & can_escape_swarm_square_to_transport.rule,
                         ),
                     ]
                 )
@@ -553,7 +554,7 @@ area_6_data = AreaData(
                         ExitData(
                             Door.Charge,
                             Area6.CrumblingBridge.subregion("Right"),
-                            access_rule=can_escape_chozo_seal_e,
+                            access_rule=can_escape_chozo_seal_e.rule,
                         )
                     ],
                     pickups=[
@@ -596,7 +597,13 @@ area_6_data = AreaData(
                         ExitData(
                             Door.Open,
                             Area6.Omega,
-                            access_rule=can_escape_omega_arena,
+                            access_rule=CanEscape(
+                                Or(
+                                    door_rules[Door.Charge],
+                                    can_traverse_poisonous_tunnel & HasAll(ItemName.GrappleBeam, ItemName.MorphBall),
+                                ),
+                                Area6.Omega,
+                            ),
                         ),
                     ]
                 )

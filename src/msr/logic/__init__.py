@@ -11,6 +11,7 @@ from typing_extensions import override
 
 from ..data import GAME_NAME
 from ..data.region_data import Door
+from ..data.room_names import RoomName
 from ..items import ItemName
 from ..options import IBJ, DamageBoost, Knowledge, LogicTrick, MorphExtend, Movement, SuperJump, WallJump
 
@@ -216,3 +217,49 @@ door_rules = {
     Door.Elevator: True_(),
     Door.Locked: False_(),
 }
+
+
+@dataclass
+class CanEscape(WrapperRule["SamusReturnsWorld"], game=GAME_NAME):
+    room: RoomName | str
+
+    def _instantiate(self, world: SamusReturnsWorld) -> Rule.Resolved:
+        if not world.is_universal_tracker():
+            return self.child.resolve(world)
+        return self.Resolved(
+            self.child.resolve(world),
+            explain_rule=world.settings.universal_tracker_settings.explain_ponr,
+            room=str(self.room),
+            player=world.player,
+        )
+
+    @property
+    def rule(self):
+        return self.child
+
+    class Resolved(WrapperRule.Resolved):
+        room: str
+        explain_rule: bool = True
+
+        @override
+        def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:
+            messages: list[JSONMessagePart] = [
+                {"type": "color", "color": "cyan", "text": "Cannot" if state and not self(state) else "Can"},
+                {"type": "text", "text": f" escape {self.room}"},
+            ]
+            if self.explain_rule:
+                messages.append({"type": "text", "text": " ["})
+                messages.extend(self.child.explain_json(state))
+                messages.append({"type": "text", "text": "]"})
+            return messages
+
+        @override
+        def explain_str(self, state: CollectionState | None = None) -> str:
+            message = f"{'Cannot' if state and not self(state) else 'Can'} escape {self.room}"
+            if self.explain_rule:
+                message += f" [{self.child.explain_str(state)}]"
+            return message
+
+        @override
+        def __str__(self) -> str:
+            return self.explain_str()

@@ -94,6 +94,14 @@ class TrackerTrickLogic(StrEnum):
     ALL = "all"
 
 
+class TrackerExplainPoNR(settings.Bool):
+    """
+    Set this to true to explain the rules required to cross points of no return
+    in Universal Tracker. Set it to false to only display that you need to
+    escape the area.
+    """
+
+
 class ConsoleSettings(settings.Group):
     sd_path: ConsoleSdPath | None = None
     ip_address: ConsoleIp | None = None
@@ -106,6 +114,7 @@ class EmulatorSettings(settings.Group):
 
 class TrackerSettings(settings.Group):
     show_tricks: TrackerTrickLogic = TrackerTrickLogic.NEXT_LEVEL
+    explain_ponr: TrackerExplainPoNR | bool = True
 
 
 class SamusReturnsSettings(settings.Group):

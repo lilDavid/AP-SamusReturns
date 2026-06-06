@@ -2,6 +2,7 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import VICTORY, ItemName
 from ...logic import (
+    CanEscape,
     HasDna,
     can_almost_high_ledge,
     can_any_missile,
@@ -16,7 +17,6 @@ from ...logic import (
     can_spider,
     can_spider_boost,
     can_thorns,
-    door_rules,
 )
 from ...logic.combat import can_damage_weak_metroid
 from ...options import IBJ, Movement
@@ -25,14 +25,12 @@ from ..room_names import SurfaceEast as East
 from ..room_names import SurfaceWest as West
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
 
-can_escape_cavern_cavity = can_climb_shaft | can_almost_high_ledge
-can_escape_energy_recharge_shaft = can_almost_high_ledge
-can_escape_charge_chamber = Or(can_almost_high_ledge & door_rules[Door.Missile], door_rules[Door.Charge])
+can_escape_cavern_cavity = CanEscape(can_climb_shaft | can_almost_high_ledge, room=East.CavernCavity)
+can_escape_energy_recharge_shaft = CanEscape(can_almost_high_ledge, room=East.EnergyRechargeShaft)
 
-can_escape_transport_area_8 = can_climb_shaft
+can_escape_transport_area_8 = CanEscape(can_climb_shaft, room=West.TransportArea8)
 can_cross_transport_area_8 = And(
     Has(ItemName.Hatchling),
-    can_escape_transport_area_8,
     Or(Has(ItemName.SpaceJump), can_spider_boost, can_thorns, can_climb_elevated_shaft),
 )
 can_combat_ridley = And(
@@ -422,7 +420,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.Open,
                             East.ScanPulse.subregion("Left"),
-                            access_rule=can_escape_cavern_cavity,
+                            access_rule=can_escape_cavern_cavity.rule,
                         ),
                         ExitData(
                             Door.Normal,
@@ -454,12 +452,12 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.Missile,
                             East.ChargeBeam,
-                            access_rule=can_escape_charge_chamber,
+                            access_rule=CanEscape(can_almost_high_ledge, room=East.ChargeBeam),
                         ),
                         ExitData(
                             Door.Charge,
                             East.ChargeBeam,
-                            access_rule=can_escape_charge_chamber,
+                            # Escaping is trivial since the door will already be open
                         ),
                         ExitData(
                             Door.Normal,
@@ -588,7 +586,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             East.CavernCavity,
-                            access_rule=can_escape_cavern_cavity,
+                            access_rule=can_climb_shaft | can_almost_high_ledge,
                         )
                     ],
                     pickups=[
@@ -628,7 +626,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Upper"),
-                            access_rule=can_escape_energy_recharge_shaft,
+                            access_rule=can_escape_energy_recharge_shaft.rule,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -681,7 +679,7 @@ surface_west_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Left Shaft"),
-                            access_rule=Has(ItemName.Hatchling) & can_escape_transport_area_8,
+                            access_rule=Has(ItemName.Hatchling) & can_climb_shaft,
                         ),
                     ],
                 ),
@@ -696,7 +694,7 @@ surface_west_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Hallway"),
-                            access_rule=can_cross_transport_area_8,
+                            access_rule=can_cross_transport_area_8 & can_escape_transport_area_8,
                         ),
                     ],
                     pickups=[
@@ -715,12 +713,12 @@ surface_west_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Left Shaft"),
-                            access_rule=can_cross_transport_area_8,
+                            access_rule=can_cross_transport_area_8 & can_escape_transport_area_8.rule,
                         ),
                         ExitData(
                             Door.Open,
                             Subregion("Exit"),
-                            access_rule=HasAny(ItemName.Hatchling, ItemName.MorphBall) & can_escape_transport_area_8,
+                            access_rule=HasAny(ItemName.Hatchling, ItemName.MorphBall),
                         ),
                     ],
                     pickups=[
@@ -751,7 +749,10 @@ surface_west_data = AreaData(
                         ExitData(
                             Door.Open,
                             East.LandingSite.subregion("West"),
-                            access_rule=HasAny(ItemName.Hatchling, ItemName.MorphBall) & can_escape_transport_area_8,
+                            access_rule=And(
+                                HasAny(ItemName.Hatchling, ItemName.MorphBall),
+                                can_escape_transport_area_8.rule,
+                            ),
                         ),
                     ],
                     events=[

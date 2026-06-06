@@ -2,6 +2,7 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    CanEscape,
     can_almost_high_jump,
     can_almost_high_ledge,
     can_almost_higher_jump,
@@ -43,30 +44,30 @@ from ..room_names import Area3Interior as Interior
 from ..room_names import Area4Caves as Area4
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
 
-can_escape_factory_exterior_access = Or(
-    # Through the grapple blocks
-    Has(ItemName.GrappleBeam),
-    # Using the teleport station
-    can_blobthrower,
-    can_spider,
-    can_fly,
-)
-can_escape_factory_exterior_crevice = can_climb_wall
+can_escape_factory_exterior_crevice = CanEscape(can_climb_wall, f"{Exterior.FactoryExt} crevice")
 
-can_escape_evolved_alpha_north_to_gamma = can_climb_wall & can_bomb_block
-can_escape_interior_gamma_arena_south = Or(
-    Has(ItemName.GrappleBeam),
-    Has(ItemName.HighJumpBoots) & can_super_jump_morph_extend,
-    Has(ItemName.HighJumpBoots) & can_ibj(IBJ.option_double),
-    can_fly_vertical,
-)
+can_escape_evolved_alpha_north_to_gamma = CanEscape(can_climb_wall & can_bomb_block, Caverns.Gamma2N)
 
-can_escape_paraby_periphery = can_climb_wall
-can_escape_factory_intersection = can_climb_wall
+can_escape_paraby_periphery = CanEscape(can_climb_wall, Interior.ParabyPeriphery)
+can_escape_factory_intersection = CanEscape(can_climb_wall, Interior.FactoryIntersection)
 # Unless you already have access from Metroid caverns, you're locked in lower exterior if you drop down
-can_escape_ramulken_residence = can_climb_shaft
-can_escape_gamma_arena = Or(Has(ItemName.GrappleBeam), can_almost_high_jump, can_fly_vertical)
-can_escape_gamma_arena_caverns_transport = can_escape_gamma_arena & can_climb_wall
+can_escape_ramulken_residence = CanEscape(can_climb_shaft, Interior.RamulkenResidence)
+can_escape_gamma_arena = CanEscape(
+    Or(Has(ItemName.GrappleBeam), can_almost_high_jump, can_fly_vertical),
+    "Gamma Arena Center",
+)
+can_escape_gamma_arena_caverns_transport = CanEscape(can_climb_wall, "Gamma Arena Center right shaft")
+can_escape_interior_gamma_arena_south = CanEscape(
+    Or(
+        Has(ItemName.GrappleBeam),
+        And(
+            Has(ItemName.HighJumpBoots),
+            can_super_jump_morph_extend | can_ibj(IBJ.option_double),
+        ),
+        can_fly_vertical,
+    ),
+    Interior.GammaS,
+)
 
 area_3_exterior_data = AreaData(
     area=Area.Area3Exterior,
@@ -739,7 +740,17 @@ area_3_exterior_data = AreaData(
                                         can_damage_tough_enemy,
                                     ),
                                 ),
-                                can_escape_factory_exterior_access,
+                                CanEscape(
+                                    Or(
+                                        # Through the grapple blocks
+                                        Has(ItemName.GrappleBeam),
+                                        # Using the teleport station
+                                        can_blobthrower,
+                                        can_spider,
+                                        can_fly,
+                                    ),
+                                    Exterior.FactoryExtAccess,
+                                ),
                             ),
                         ),
                     ],
@@ -1614,7 +1625,7 @@ area_3_caverns_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Arena"),
-                            access_rule=can_escape_evolved_alpha_north_to_gamma,
+                            access_rule=can_escape_evolved_alpha_north_to_gamma.rule,
                         ),
                     ],
                 ),
@@ -1736,7 +1747,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Left"),
-                            access_rule=can_escape_paraby_periphery,
+                            access_rule=can_escape_paraby_periphery.rule,
                         ),
                     ],
                     pickups=[
@@ -1850,7 +1861,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
-                            access_rule=can_escape_factory_intersection,
+                            access_rule=can_escape_factory_intersection.rule,
                         ),
                     ],
                 ),
@@ -1947,12 +1958,12 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.GammaCAccess.subregion("Upper"),
-                            access_rule=can_escape_gamma_arena,
+                            access_rule=can_escape_gamma_arena.rule,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Center"),
-                            access_rule=can_escape_gamma_arena_caverns_transport,
+                            access_rule=can_escape_gamma_arena.rule & can_escape_gamma_arena_caverns_transport,
                         ),
                     ],
                     pickups=[
@@ -1967,7 +1978,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Arena"),
-                            access_rule=can_escape_gamma_arena_caverns_transport,
+                            access_rule=can_escape_gamma_arena_caverns_transport.rule,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -2040,7 +2051,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Interior.FactoryIntersection.subregion("Bottom"),
-                            access_rule=can_escape_ramulken_residence,
+                            access_rule=can_escape_ramulken_residence.rule,
                         ),
                         ExitData(
                             Door.Normal,
@@ -2126,7 +2137,7 @@ area_3_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.GammaSAccess,
-                            access_rule=can_escape_interior_gamma_arena_south,
+                            access_rule=can_escape_interior_gamma_arena_south.rule,
                         ),
                         ExitData(
                             Door.PowerBomb,

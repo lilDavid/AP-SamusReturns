@@ -2,6 +2,7 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    CanEscape,
     can_almost_high_jump,
     can_almost_high_ledge,
     can_almost_higher_jump,
@@ -41,29 +42,32 @@ from ..room_names import Area2Interior as Interior
 from ..room_names import Area3Exterior as Area3
 from . import AreaData, Door, EventData, ExitData, PickupData, RegionData, RoomData, Subregion
 
-can_escape_arachnus_drop = can_climb_wall
-can_escape_arachnus_loop = And(
-    # Arachnus Arena to Fan Funnel
-    can_bomb_block,
-    # Fan Funnel to Maintenance Tunnel
-    HasAll(ItemName.SpringBall, ItemName.Bomb) | Has(ItemName.PowerBomb),
-    # Maintenance Tunnel to Dam Exterior
+can_escape_arachnus_drop = CanEscape(can_climb_wall, "Drop to Arachnus")
+can_escape_caverns_alpha_east = CanEscape(
+    Or(And(can_high_jump_no_grip | can_spider, can_bomb), can_power_bomb),
+    Exterior.CavernsAlphaE,
 )
-can_escape_caverns_alpha_east = Or(And(can_high_jump_no_grip | can_spider, can_bomb), can_power_bomb)
 
-can_escape_transport_dam_exterior_west = can_almost_high_jump | can_spider_boost
+can_escape_transport_dam_exterior_west = CanEscape(
+    can_almost_high_jump | can_spider_boost,
+    "Transport to Dam Exterior West",
+)
 # Only via the tunnel. The path through Generator Access works both ways
-can_escape_wave_to_varia = can_beam_block_through_tunnel
-can_escape_interior_teleporter = can_short_shaft
-can_escape_hi_jump_access = can_almost_higher_ledge
-can_escape_fleech_fire_containment = can_fleech_swarm & can_climb_shaft
-can_escape_interior_gamma_arena_to_intersection_terminal = And(can_any_missile, can_bomb_block, can_spider)
-can_escape_whimsical_waterwheels = can_almost_high_ledge  # Either to transport or the teleporter
-
-can_escape_transport_access = Or(
-    can_spider,
-    can_shorter_shaft & can_thorns,
+can_escape_wave_to_varia = CanEscape(can_beam_block_through_tunnel, Interior.WallfireCorridor)
+can_escape_interior_teleporter = CanEscape(can_short_shaft, Interior.InteriorTeleporter)
+can_escape_hi_jump_access = CanEscape(can_almost_higher_ledge, Interior.HighJumpBootsAccess)
+can_escape_fleech_fire_containment = CanEscape(can_fleech_swarm & can_climb_shaft, Interior.FleechFireContainment)
+can_escape_interior_gamma_arena_to_intersection_terminal = CanEscape(
+    And(can_any_missile, can_bomb_block, can_spider),
+    f"{Interior.InteriorIntersection} bottom",
 )
+can_escape_whimsical_waterwheels = CanEscape(
+    # Either to transport or the teleporter
+    can_almost_high_ledge,
+    Interior.WhimsicalWaterwheels,
+)
+
+can_escape_transport_access = CanEscape(Or(can_spider, can_shorter_shaft & can_thorns), Entryway.TransportAccess)
 
 area_2_exterior_data = AreaData(
     area=Area.Area2Exterior,
@@ -136,12 +140,21 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
-                            access_rule=can_escape_arachnus_drop,
+                            access_rule=can_escape_arachnus_drop.rule,
                         ),
                         ExitData(
                             Door.Missile,
                             Exterior.Arachnus,
-                            access_rule=can_escape_arachnus_loop,
+                            access_rule=CanEscape(
+                                And(
+                                    # Arachnus Arena to Fan Funnel
+                                    can_bomb_block,
+                                    # Fan Funnel to Maintenance Tunnel
+                                    HasAll(ItemName.SpringBall, ItemName.Bomb) | Has(ItemName.PowerBomb),
+                                    # Maintenance Tunnel to Dam Exterior
+                                ),
+                                "Arachnus area",
+                            ),
                         ),
                         ExitData(
                             Door.Locked,
@@ -249,7 +262,7 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Exterior.FanFunnel,
-                            access_rule=can_escape_arachnus_loop,
+                            access_rule=can_bomb_block,
                         ),
                     ],
                     pickups=[
@@ -272,7 +285,7 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Exterior.MaintenanceTunnel,
-                            access_rule=can_escape_arachnus_loop,
+                            access_rule=HasAll(ItemName.SpringBall, ItemName.Bomb) | Has(ItemName.PowerBomb),
                         ),
                     ],
                 )
@@ -813,7 +826,6 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Exterior.DamExterior.subregion("Inner"),
-                            access_rule=can_escape_arachnus_loop,
                         ),
                     ],
                 )
@@ -843,7 +855,7 @@ area_2_exterior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Exterior.CavernsAlphaEAccess.subregion("Right"),
-                            access_rule=can_escape_caverns_alpha_east,
+                            access_rule=can_escape_caverns_alpha_east.rule,
                         )
                     ],
                     pickups=[
@@ -884,7 +896,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Northwest"),
-                            access_rule=can_escape_transport_dam_exterior_west,
+                            access_rule=can_escape_transport_dam_exterior_west.rule,
                         ),
                         ExitData(
                             Door.Charge,
@@ -919,7 +931,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("South"),
-                            access_rule=can_escape_wave_to_varia,
+                            access_rule=can_escape_wave_to_varia.rule,
                         ),
                         ExitData(
                             Door.Normal,
@@ -996,7 +1008,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Side tunnel"),
-                            access_rule=can_escape_whimsical_waterwheels,
+                            access_rule=can_escape_whimsical_waterwheels.rule,
                         ),
                         ExitData(
                             Door.Normal,
@@ -1073,7 +1085,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("South tunnel"),
-                            access_rule=can_escape_interior_gamma_arena_to_intersection_terminal,
+                            access_rule=can_escape_interior_gamma_arena_to_intersection_terminal.rule,
                         ),
                         ExitData(
                             Door.Normal,
@@ -1222,7 +1234,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Upper"),
-                            access_rule=can_escape_interior_teleporter,
+                            access_rule=can_escape_interior_teleporter.rule,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1265,7 +1277,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Upper"),
-                            access_rule=can_escape_fleech_fire_containment,
+                            access_rule=can_escape_fleech_fire_containment.rule,
                         ),
                         ExitData(
                             Door.Normal,
@@ -1372,7 +1384,7 @@ area_2_interior_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Interior.InteriorTeleporter.subregion("Lower"),
-                            access_rule=can_escape_hi_jump_access,
+                            access_rule=can_escape_hi_jump_access.rule,
                         ),
                         ExitData(
                             Door.Missile,
@@ -1709,13 +1721,13 @@ area_2_entryway_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Upper"),
-                            access_rule=can_escape_transport_access,
+                            access_rule=can_escape_transport_access.rule,
                         ),
                         ExitData(
                             Door.Open,
                             Entryway.FleechSwarmFloodway,
                             access_rule=Or(
-                                can_escape_transport_access,
+                                can_escape_transport_access.rule,
                                 can_high_ledge,
                             ),
                         ),

@@ -2,6 +2,7 @@ from rule_builder.rules import And, False_, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    CanEscape,
     can_almost_high_jump,
     can_almost_high_jump_gap,
     can_almost_high_ledge,
@@ -95,15 +96,15 @@ can_escape_lobby_teleporter_east_pickup_left = And(
 )
 # To Lobby Passageway
 can_escape_lobby_teleporter_east_pickup_right = HasAll(ItemName.MorphBall, ItemName.GrappleBeam)
-can_escape_phase_drift_chamber = can_bomb_block
+can_escape_phase_drift_chamber = CanEscape(can_bomb_block, Lobby.PhaseDrift)
 
-can_escape_exterior_zeta_arena = can_almost_high_jump
-can_escape_gravity_chamber_access = can_jump_underwater | can_spider
-can_escape_gravity_chamber = can_jump_underwater | can_spider_boost_underwater
-can_escape_screw_attack_chamber = Has(ItemName.ScrewAttack) & can_climb_shaft
+can_escape_exterior_zeta_arena = CanEscape(can_almost_high_jump, Exterior.Zeta)
+can_escape_screw_attack_chamber = CanEscape(Has(ItemName.ScrewAttack) & can_climb_shaft, Exterior.ScrewAttack)
 
-can_escape_interior_save_station_water = can_high_underwater_ledge
-can_escape_evolved_zeta_arena = can_almost_high_jump
+can_escape_interior_save_station_water = CanEscape(can_high_underwater_ledge, f"{Interior.InteriorSaveStation} water")
+can_escape_gravity_chamber_access = CanEscape(can_jump_underwater | can_spider, Interior.GravitySuitAccess)
+can_escape_gravity_chamber = CanEscape(can_jump_underwater | can_spider_boost_underwater, Interior.GravitySuit)
+can_escape_evolved_zeta_arena = CanEscape(can_almost_high_jump, Interior.Zeta2)
 
 area_5_lobby_data = AreaData(
     area=Area.Area5Lobby,
@@ -583,9 +584,12 @@ area_5_lobby_data = AreaData(
                             Subregion("Pickup"),
                             access_rule=And(
                                 can_high_bomb_block,
-                                Or(
-                                    can_escape_lobby_teleporter_east_pickup_left,
-                                    can_escape_lobby_teleporter_east_pickup_right,
+                                CanEscape(
+                                    Or(
+                                        can_escape_lobby_teleporter_east_pickup_left,
+                                        can_escape_lobby_teleporter_east_pickup_right,
+                                    ),
+                                    f"{Lobby.LobbyTeleporterE} pickup",
                                 ),
                             ),
                         ),
@@ -667,12 +671,12 @@ area_5_lobby_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Lobby.MeboidMillpond.subregion("Exit"),
-                            access_rule=can_escape_phase_drift_chamber,
+                            access_rule=can_escape_phase_drift_chamber.rule,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Lobby.MeboidMillpond.subregion("Lake"),
-                            access_rule=can_escape_phase_drift_chamber,
+                            access_rule=can_escape_phase_drift_chamber.rule,
                         ),
                     ],
                     pickups=[
@@ -977,7 +981,7 @@ area_5_exterior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Exterior.ScrewAttackAccess,
-                            access_rule=can_escape_screw_attack_chamber,
+                            access_rule=can_escape_screw_attack_chamber.rule,
                         ),
                     ],
                     pickups=[
@@ -1078,7 +1082,7 @@ area_5_exterior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Exterior.ZetaAccess.subregion("Left"),
-                            access_rule=can_escape_exterior_zeta_arena,
+                            access_rule=can_escape_exterior_zeta_arena.rule,
                         )
                     ],
                     pickups=[
@@ -1390,7 +1394,7 @@ area_5_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Exit"),
-                            access_rule=can_escape_interior_save_station_water,
+                            access_rule=can_escape_interior_save_station_water.rule,
                         )
                     ],
                     pickups=[
@@ -1565,7 +1569,7 @@ area_5_interior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Interior.GravitySuitAccess.subregion("Lake"),
-                            access_rule=can_escape_gravity_chamber,
+                            access_rule=can_escape_gravity_chamber.rule,
                         ),
                         ExitData(
                             Door.Normal,
@@ -1800,7 +1804,7 @@ area_5_interior_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
-                            access_rule=can_escape_gravity_chamber_access,
+                            access_rule=can_escape_gravity_chamber_access.rule,
                         ),
                         ExitData(
                             Door.Normal,
@@ -1909,7 +1913,7 @@ area_5_interior_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Interior.Zeta2Access.subregion("Right"),
-                            access_rule=can_escape_evolved_zeta_arena,
+                            access_rule=can_escape_evolved_zeta_arena.rule,
                         )
                     ],
                     pickups=[

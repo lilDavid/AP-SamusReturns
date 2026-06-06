@@ -2,6 +2,7 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    CanEscape,
     can_almost_high_jump,
     can_almost_high_ledge,
     can_almost_higher_jump,
@@ -31,13 +32,16 @@ from ..room_names import Area2Entryway as Area2
 from ..room_names import SurfaceEast as Surface
 from . import AreaData, Door, ExitData, PickupData, RegionData, RoomData, Subregion
 
-can_escape_ice_chamber_access = Has(ItemName.IceBeam) | can_almost_high_jump
-can_escape_inner_temple_west_hall = Or(
-    # Either up to Inner Temple Save Station or down to Caverns Hub
-    # Both should be trivially accessible from each other
-    can_almost_higher_ledge,
-    # Right to Inner Temple Teleporter. Covers morph tunnel rule for subregion traversal
-    can_bomb_block,
+can_escape_ice_chamber_access = CanEscape(Has(ItemName.IceBeam) | can_almost_high_jump, Area1.IceBeamAccess)
+can_escape_inner_temple_west_hall = CanEscape(
+    Or(
+        # Either up to Inner Temple Save Station or down to Caverns Hub
+        # Both should be trivially accessible from each other
+        can_almost_higher_ledge,
+        # Right to Inner Temple Teleporter. Covers morph tunnel rule for subregion traversal
+        can_bomb_block,
+    ),
+    Area1.InnerTempleWHall,
 )
 
 area_1_data = AreaData(
@@ -739,7 +743,7 @@ area_1_data = AreaData(
                         ExitData(
                             Door.Open,
                             Area1.InnerTempleSaveStation,
-                            access_rule=can_escape_inner_temple_west_hall,
+                            access_rule=can_almost_higher_ledge,
                         ),
                         ExitData(
                             Door.Normal,
@@ -765,7 +769,7 @@ area_1_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Area1.CavernsHub,
-                            access_rule=can_escape_inner_temple_west_hall,
+                            access_rule=can_almost_higher_ledge,
                         ),
                     ],
                 ),
@@ -1024,7 +1028,7 @@ area_1_data = AreaData(
                         ExitData(
                             Door.Open,
                             Area1.InnerTempleEHall.subregion("Lower"),
-                            access_rule=can_escape_ice_chamber_access,
+                            access_rule=can_escape_ice_chamber_access.rule,
                         ),
                         ExitData(
                             Door.Missile,

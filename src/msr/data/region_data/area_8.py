@@ -2,6 +2,7 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    CanEscape,
     can_almost_high_ledge,
     can_any_missile,
     can_bomb,
@@ -55,26 +56,22 @@ can_climb_nest_network_tunnels = And(
 can_climb_nest_nodule = can_shorter_shaft
 can_navigate_metroid_nest_shaft_west = And(can_combat_metroid_larva, can_high_ledge, Has(ItemName.MorphBall))
 
-can_escape_nest_network_bottom_to_center = Or(
-    can_climb_nest_nodule,  # Necessary to get to center from earlier in the game
-    Has(ItemName.ScrewAttack),  # Warp to start in Transport to Area 7, if start was later in A8
-)
-can_escape_nest_network_tunnels = Or(
-    can_climb_nest_network_tunnels,
-    And(
-        Or(
-            door_rules[Door.MorphTunnel] & Has(ItemName.GrappleBeam),
-            can_thorns,
-        ),
-        can_escape_nest_network_bottom_to_center,
-    ),
-)
-can_escape_queen_arena = And(
-    can_combat_queen,
+can_escape_nest_network_bottom_to_center = CanEscape(
     Or(
-        HasAll(ItemName.SpaceJump, ItemName.ScrewAttack) & can_bomb_block,
-        Has(ItemName.Hatchling),
+        can_climb_nest_nodule,  # Necessary to get to center from earlier in the game
+        Has(ItemName.ScrewAttack),  # Warp to start in Transport to Area 7, if start was later in A8
     ),
+    f"{Area8.NestNetwork} bottom",
+)
+can_escape_queen_arena = CanEscape(
+    And(
+        can_combat_queen,
+        Or(
+            HasAll(ItemName.SpaceJump, ItemName.ScrewAttack) & can_bomb_block,
+            Has(ItemName.Hatchling),
+        ),
+    ),
+    Area8.Queen,
 )
 
 area_8_data = AreaData(
@@ -387,7 +384,22 @@ area_8_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Tunnels"),
-                            access_rule=Has(ItemName.ScrewAttack) & can_escape_nest_network_tunnels,
+                            access_rule=And(
+                                Has(ItemName.ScrewAttack),
+                                CanEscape(
+                                    Or(
+                                        can_climb_nest_network_tunnels,
+                                        And(
+                                            Or(
+                                                door_rules[Door.MorphTunnel] & Has(ItemName.GrappleBeam),
+                                                can_thorns,
+                                            ),
+                                            can_escape_nest_network_bottom_to_center,
+                                        ),
+                                    ),
+                                    f"{Area8.NestNetwork} tunnels",
+                                ),
+                            ),
                         ),
                         ExitData(
                             Door.Open,
@@ -785,7 +797,7 @@ area_8_data = AreaData(
                         # ExitData(
                         #     Door.Open,
                         #     Area8.Queen,
-                        #     access_rule=can_escape_queen_arena,
+                        #     access_rule=can_escape_queen_arena.rule,
                         # ),
                         ExitData(
                             Door.Open,

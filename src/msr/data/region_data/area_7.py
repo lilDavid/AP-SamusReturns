@@ -2,6 +2,7 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    CanEscape,
     can_almost_high_jump_gap,
     can_almost_high_ledge,
     can_almost_higher_ledge,
@@ -40,21 +41,25 @@ can_jump_up_wallfire_workstation = And(
     HasAny(ItemName.HighJumpBoots, ItemName.SpaceJump) | can_super_jump(SuperJump.option_easy),
 )
 
-can_escape_transport_to_area_6_bottom = can_climb_wall
-can_escape_transport_to_area_6_tunnels = Or(can_power_bomb, can_bomb_block & can_climb_shaft)
-can_escape_robot_regime_bottom = Or(
-    can_high_jump,
-    And(
-        can_thorns,
-        can_wall_jump(WallJump.option_intermediate) | can_spider,
+can_escape_transport_to_area_6_bottom = CanEscape(can_climb_wall, f"{Area7.TransportArea6} bottom")
+can_escape_robot_regime_bottom = CanEscape(
+    Or(
+        can_high_jump,
+        And(
+            can_thorns,
+            can_wall_jump(WallJump.option_intermediate) | can_spider,
+        ),
     ),
+    Area7.RobotRegime,
 )
-can_escape_spider_boost_tunnel_s_water = can_jump_underwater | can_spider
-can_escape_evolved_omega_arena = Or(
-    can_climb_shaft & can_cross_wallfire_workstation_top,
-    HasAll(ItemName.ScrewAttack, ItemName.MorphBall),
+can_escape_spider_boost_tunnel_s_water = CanEscape(
+    can_jump_underwater | can_spider,
+    f"{Area7.SpiderBoostTunnelS} water",
 )
-can_escape_grapple_puzzle_madness = HasAll(ItemName.MorphBall, ItemName.ScrewAttack) & can_climb_shaft
+can_escape_grapple_puzzle_madness = CanEscape(
+    HasAll(ItemName.MorphBall, ItemName.ScrewAttack) & can_climb_shaft,
+    Area7.GrapplePuzzleMadness,
+)
 
 area_7_data = AreaData(
     area=Area.Area7,
@@ -190,7 +195,7 @@ area_7_data = AreaData(
                         ExitData(
                             Door.Charge,
                             Area7.RobotRegime.subregion("Lower"),
-                            access_rule=can_escape_spider_boost_tunnel_s_water,
+                            access_rule=can_escape_spider_boost_tunnel_s_water.rule,
                         ),
                         ExitData(
                             Door.Open,
@@ -384,7 +389,7 @@ area_7_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Upper"),
-                            access_rule=can_escape_robot_regime_bottom,
+                            access_rule=can_escape_robot_regime_bottom.rule,
                         ),
                     ],
                 ),
@@ -486,19 +491,22 @@ area_7_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Left"),
-                            access_rule=can_escape_transport_to_area_6_tunnels,
+                            access_rule=can_bomb_block & can_climb_shaft,
                         ),
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Transport"),
-                            access_rule=can_escape_transport_to_area_6_tunnels,
+                            access_rule=can_power_bomb,
                         ),
                     ],
                     pickups=[
                         PickupData(
                             "Tunnel",
                             access_rule=And(
-                                can_escape_transport_to_area_6_tunnels,
+                                CanEscape(
+                                    Or(can_power_bomb, can_bomb_block & can_climb_shaft),
+                                    f"{Area7.TransportArea6} tunnels",
+                                ),
                                 Has(ItemName.SuperMissile),
                                 can_bomb_block,
                                 Or(
@@ -553,7 +561,7 @@ area_7_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Left"),
-                            access_rule=can_escape_transport_to_area_6_bottom,
+                            access_rule=can_escape_transport_to_area_6_bottom.rule,
                         ),
                         ExitData(
                             Door.Normal,
@@ -779,7 +787,16 @@ area_7_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Arena"),
-                            access_rule=can_cross_wallfire_workstation_top & can_escape_evolved_omega_arena,
+                            access_rule=And(
+                                can_cross_wallfire_workstation_top,
+                                CanEscape(
+                                    Or(
+                                        can_climb_shaft & can_cross_wallfire_workstation_top,
+                                        HasAll(ItemName.ScrewAttack, ItemName.MorphBall),
+                                    ),
+                                    Area7.Omega2,
+                                ),
+                            ),
                         ),
                     ],
                 ),
@@ -827,7 +844,7 @@ area_7_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Top"),
-                            access_rule=can_escape_grapple_puzzle_madness,
+                            access_rule=can_escape_grapple_puzzle_madness.rule,
                         )
                     ],
                     pickups=[

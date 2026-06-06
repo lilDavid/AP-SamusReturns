@@ -2,6 +2,7 @@ from rule_builder.rules import And, Has, HasAll, HasAny, Or
 
 from ...items import ItemName
 from ...logic import (
+    CanEscape,
     can_almost_high_jump,
     can_almost_high_ledge,
     can_almost_higher_jump,
@@ -45,30 +46,36 @@ can_cross_purple_puddle = Or(
     can_damage_boost(DamageBoost.option_static),
 )
 can_traverse_transit_tunnel = can_spider | can_thorns
-can_escape_evolved_alpha = can_almost_high_jump | Has(ItemName.GravitySuit)
 can_cross_caves_gamma_hazards = Or(
     Has(ItemName.GrappleBeam),
     can_spider_boost,
     can_thorns,
 )
+can_escape_evolved_alpha = CanEscape(can_almost_high_jump | Has(ItemName.GravitySuit), Caves.Alpha2)
+can_escape_spazer_chamber = CanEscape(door_rules[Door.Gigadora] & can_almost_high_ledge, Caves.SpazerBeam)
 
-can_escape_spazer_chamber = door_rules[Door.Gigadora] & can_almost_high_ledge
-can_escape_pink_crystals = Or(
-    Has(ItemName.SpaceJump),
-    can_ibj(IBJ.option_vertical),
-    # There are spikes at the top of the room but there's a gap so
-    # you can either do the damage boost or squeeze in
-    And(
-        can_spider_boost,
-        Or(
-            can_damage_boost(DamageBoost.option_static),
-            has_knowledge(Knowledge.option_simple),
+can_escape_pink_crystals = CanEscape(
+    Or(
+        Has(ItemName.SpaceJump),
+        can_ibj(IBJ.option_vertical),
+        # There are spikes at the top of the room but there's a gap so
+        # you can either do the damage boost or squeeze in
+        And(
+            can_spider_boost,
+            Or(
+                can_damage_boost(DamageBoost.option_static),
+                has_knowledge(Knowledge.option_simple),
+            ),
         ),
     ),
+    Mines.PinkCrystalPreserve,
 )
-can_escape_evolved_gamma = can_almost_high_ledge
-can_escape_sj_chamber_top = can_fly_vertical
-can_escape_diggernaut_tunnels_top = HasAll(ItemName.SpaceJump, ItemName.MorphBall) | can_ibj(IBJ.option_vertical)
+can_escape_evolved_gamma = CanEscape(can_almost_high_ledge, Mines.Gamma2)
+can_escape_sj_chamber_top = CanEscape(can_fly_vertical, Mines.SpaceJump)
+can_escape_diggernaut_tunnels_top = CanEscape(
+    HasAll(ItemName.SpaceJump, ItemName.MorphBall) | can_ibj(IBJ.option_vertical),
+    Mines.DiggernautExcavationTunnels,
+)
 can_sj_chamber_to_diggernaut_tunnels_maze = And(
     # Has you fall through a pitfall block and navigate some obstacles in DET
     Has(ItemName.SuperMissile),
@@ -76,21 +83,29 @@ can_sj_chamber_to_diggernaut_tunnels_maze = And(
     can_spider,
     can_escape_diggernaut_tunnels_top,
 )
-can_escape_sj_chamber_bottom = can_fly_vertical | can_sj_chamber_to_diggernaut_tunnels_maze
 
-can_escape_diggernaut_tunnels_side = Has(ItemName.GrappleBeam) & can_escape_sj_chamber_top
-can_escape_diggernaut_tunnels_bottom = Or(
-    can_escape_diggernaut_tunnels_top,
-    can_escape_diggernaut_tunnels_side,
+can_escape_diggernaut_tunnels_side = CanEscape(
+    Has(ItemName.GrappleBeam) & can_escape_sj_chamber_top,
+    Mines.DiggernautExcavationTunnels,
+)
+can_escape_diggernaut_tunnels_bottom = CanEscape(
+    Or(
+        can_escape_diggernaut_tunnels_top.rule,
+        can_escape_diggernaut_tunnels_side.rule,
+    ),
+    f"{Mines.DiggernautExcavationTunnels} bottom",
 )
 
-can_escape_basalt_basin = And(
-    Or(
-        Has(ItemName.SpaceJump),
-        can_ibj(IBJ.option_vertical),
-        can_spider_boost & can_movement(Movement.option_simple),  # Timed unmorph to grip
+can_escape_basalt_basin = CanEscape(
+    And(
+        Or(
+            Has(ItemName.SpaceJump),
+            can_ibj(IBJ.option_vertical),
+            can_spider_boost & can_movement(Movement.option_simple),  # Timed unmorph to grip
+        ),
+        can_bomb_block,
     ),
-    can_bomb_block,
+    Mines.BasaltBasin,
 )
 
 area_4_caves_data = AreaData(
@@ -457,7 +472,7 @@ area_4_caves_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Caves.Alpha2Access.subregion("Upper"),
-                            access_rule=can_escape_evolved_alpha,
+                            access_rule=can_escape_evolved_alpha.rule,
                         )
                     ],
                     pickups=[
@@ -1072,7 +1087,7 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.Open,
                             Subregion("Top"),
-                            access_rule=can_escape_pink_crystals,
+                            access_rule=can_escape_pink_crystals.rule,
                         ),
                         ExitData(
                             Door.Normal,
@@ -1305,7 +1320,10 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Left"),
-                            access_rule=can_escape_basalt_basin & HasAll(ItemName.SuperMissile, ItemName.VariaSuit),
+                            access_rule=And(
+                                can_escape_basalt_basin.rule,
+                                HasAll(ItemName.SuperMissile, ItemName.VariaSuit),
+                            ),
                         ),
                         ExitData(
                             Door.Open,
@@ -1464,7 +1482,7 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Mines.GawronGroove.subregion("Right"),
-                            access_rule=Has(ItemName.VariaSuit) & can_escape_evolved_gamma,
+                            access_rule=Has(ItemName.VariaSuit) & can_escape_evolved_gamma.rule,
                         )
                     ],
                     pickups=[
@@ -1514,7 +1532,7 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Top"),
-                            access_rule=Has(ItemName.VariaSuit) & can_escape_basalt_basin,
+                            access_rule=Has(ItemName.VariaSuit) & can_escape_basalt_basin.rule,
                         ),
                     ],
                 ),
@@ -1531,7 +1549,7 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.Normal,
                             Mines.MinesIntersectionTerminal.subregion("Bottom"),
-                            access_rule=can_escape_sj_chamber_top,
+                            access_rule=can_escape_sj_chamber_top.rule,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1547,7 +1565,10 @@ area_4_mines_data = AreaData(
                     ],
                     pickups=[
                         PickupData(
-                            access_rule=can_escape_sj_chamber_bottom,
+                            access_rule=CanEscape(
+                                can_fly_vertical | can_sj_chamber_to_diggernaut_tunnels_maze,
+                                Mines.SpaceJump,
+                            )
                         ),
                     ],
                 )
@@ -1608,7 +1629,7 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Sublevel 1"),
-                            access_rule=can_escape_diggernaut_tunnels_top,
+                            access_rule=can_escape_diggernaut_tunnels_bottom.rule,
                         ),
                         ExitData(
                             Door.MorphTunnel,
@@ -1639,7 +1660,7 @@ area_4_mines_data = AreaData(
                         ExitData(
                             Door.MorphTunnel,
                             Subregion("Sublevel 2"),
-                            access_rule=can_escape_diggernaut_tunnels_bottom,
+                            access_rule=can_escape_diggernaut_tunnels_bottom.rule,
                         ),
                         # There's an entrance from SJ chamber that goes through this little backdoor area
                     ],

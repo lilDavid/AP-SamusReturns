@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from BaseClasses import CollectionState
 from NetUtils import JSONMessagePart
 from rule_builder.options import OptionFilter
-from rule_builder.rules import And, False_, Has, HasAll, HasAny, Or, Rule, True_
+from rule_builder.rules import And, False_, Has, HasAll, HasAny, Or, Rule, True_, WrapperRule
 from typing_extensions import override
 
 from ..data import GAME_NAME
@@ -30,31 +30,22 @@ class HasDna(Rule["SamusReturnsWorld"], game=GAME_NAME):
 
 
 @dataclass
-class CanSequenceBreak(Rule["SamusReturnsWorld"], game=GAME_NAME):
+class TrickWrapper(WrapperRule["SamusReturnsWorld"], game=GAME_NAME):
     trick: type[LogicTrick]
     difficulty: int
 
     @override
     def _instantiate(self, world: SamusReturnsWorld) -> Rule.Resolved:
         return self.Resolved(
-            Has(world.glitches_item_name).resolve(world),
+            self.child.resolve(world),
             self.trick.display_name,  # pyright: ignore[reportAttributeAccessIssue]
             self.trick.get_option_name(self.difficulty),
             player=world.player,
         )
 
-    class Resolved(Rule.Resolved):
-        rule: Has.Resolved
+    class Resolved(WrapperRule.Resolved):
         trick: str
         difficulty: str
-
-        @override
-        def _evaluate(self, state: CollectionState) -> bool:
-            return self.rule._evaluate(state)
-
-        @override
-        def item_dependencies(self) -> dict[str, set[int]]:
-            return self.rule.item_dependencies()
 
         @override
         def explain_json(self, state: CollectionState | None = None) -> list[JSONMessagePart]:
@@ -63,6 +54,10 @@ class CanSequenceBreak(Rule["SamusReturnsWorld"], game=GAME_NAME):
                 {"type": "color", "color": "green" if state and self(state) else "salmon", "text": self.difficulty},
                 {"type": "text", "text": ")"},
             ]
+
+        @override
+        def explain_str(self, state: CollectionState | None = None) -> str:
+            return str(self)
 
         @override
         def __str__(self) -> str:
@@ -82,10 +77,10 @@ class Trick(Rule["SamusReturnsWorld"], game=GAME_NAME):
 
         from ..settings import TrackerTrickLogic
 
-        sequence_break_rule = CanSequenceBreak(self.trick, self.difficulty)
+        ut_rule = TrickWrapper(normal_rule | Has(world.glitches_item_name), self.trick, self.difficulty)
         if world.settings.universal_tracker_settings.show_tricks == TrackerTrickLogic.NEXT_LEVEL:
-            sequence_break_rule.options = [OptionFilter(self.trick, self.difficulty - 1, "ge")]
-        return (normal_rule | sequence_break_rule).resolve(world)
+            ut_rule.options = [OptionFilter(self.trick, self.difficulty - 1, "ge")]
+        return ut_rule.resolve(world)
 
 
 def can_damage_boost(damage_boost: int):
@@ -147,9 +142,9 @@ can_high_ledge = can_spider | can_high_jump
 can_high_underwater_ledge = Or(Has(ItemName.GravitySuit) & can_high_jump, can_spider)
 
 # Super jumps alone fall just short of other methods
-can_almost_high_jump = can_high_jump | can_super_jump(SuperJump.option_beginner)
+can_almost_high_jump = can_high_jump_no_grip | can_super_jump(SuperJump.option_beginner)
 can_almost_high_ledge = can_almost_high_jump | can_spider
-can_almost_high_jump_gap = can_high_jump | can_super_jump(SuperJump.option_easy)
+can_almost_high_jump_gap = can_high_jump_no_grip | can_super_jump(SuperJump.option_easy)
 can_underwater_almost_high_jump = Or(Has(ItemName.GravitySuit) & can_almost_high_jump, can_spider_boost_underwater)
 can_underwater_almost_high_ledge = Or(Has(ItemName.GravitySuit) & can_almost_high_jump, can_spider)
 

@@ -87,11 +87,20 @@ class TrackerTrickLogic(StrEnum):
     Controls what tricks will show as Glitched accessible in Universal Tracker.
     Set this to "next_level" to show locations reachable with tricks set one
     level above the selected difficulty. Set it to "all" to show locations
-    reachable with any tricks that aren't already in logic.
+    reachable with any tricks that aren't already in logic. Set it to "none" to
+    not show sequence break logic for any tricks.
     """
 
+    NONE = "none"
     NEXT_LEVEL = "next_level"
     ALL = "all"
+
+
+class TrackerPoNRLogic(settings.Bool):
+    """
+    Set this to true to show points of no return as Glitched accessible in
+    Universal Tracker. Set it to false to only show areas you can escape from.
+    """
 
 
 class TrackerExplainPoNR(settings.Bool):
@@ -113,7 +122,8 @@ class EmulatorSettings(settings.Group):
 
 
 class TrackerSettings(settings.Group):
-    show_tricks: TrackerTrickLogic = TrackerTrickLogic.NEXT_LEVEL
+    sequence_break_tricks: TrackerTrickLogic = TrackerTrickLogic.NEXT_LEVEL
+    sequence_break_ponr: TrackerPoNRLogic | bool = False
     explain_ponr: TrackerExplainPoNR | bool = True
 
 

@@ -78,8 +78,11 @@ class Trick(Rule["SamusReturnsWorld"], game=GAME_NAME):
 
         from ..settings import TrackerTrickLogic
 
+        if world.settings.universal_tracker_settings.sequence_break_tricks == TrackerTrickLogic.NONE:
+            return TrickWrapper(True_(), self.trick, self.difficulty, options=normal_rule.options).resolve(world)
+
         ut_rule = TrickWrapper(normal_rule | Has(world.glitches_item_name), self.trick, self.difficulty)
-        if world.settings.universal_tracker_settings.show_tricks == TrackerTrickLogic.NEXT_LEVEL:
+        if world.settings.universal_tracker_settings.sequence_break_tricks == TrackerTrickLogic.NEXT_LEVEL:
             ut_rule.options = [OptionFilter(self.trick, self.difficulty - 1, "ge")]
         return ut_rule.resolve(world)
 
@@ -226,8 +229,14 @@ class CanEscape(WrapperRule["SamusReturnsWorld"], game=GAME_NAME):
     def _instantiate(self, world: SamusReturnsWorld) -> Rule.Resolved:
         if not world.is_universal_tracker():
             return self.child.resolve(world)
+
+        if world.settings.universal_tracker_settings.sequence_break_ponr:
+            rule = self.child | Has(world.glitches_item_name)
+        else:
+            rule = self.child
+
         return self.Resolved(
-            self.child.resolve(world),
+            rule.resolve(world),
             explain_rule=world.settings.universal_tracker_settings.explain_ponr,
             room=str(self.room),
             player=world.player,

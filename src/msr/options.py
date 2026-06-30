@@ -184,6 +184,14 @@ class RoomNames(DefaultOnToggle):
     display_name = "Display Room Names"
 
 
+class FusionSuit(Toggle):
+    """
+    Change Samus's suit to the Fusion suit
+    """
+
+    display_name = "Fusion Suit"
+
+
 class PickupModels(Choice):
     """
     How to display pickups.
@@ -253,6 +261,7 @@ msr_option_groups = [
         "Cosmetic",
         [
             RoomNames,
+            FusionSuit,
             PickupModels,
             ApItemModels,
         ],
@@ -290,6 +299,7 @@ class SamusReturnsOptions(PerGameCommonOptions):
 
     # Cosmetic
     display_room_names: RoomNames
+    fusion_suit: FusionSuit
     pickup_models: PickupModels
     ap_item_models: ApItemModels
 

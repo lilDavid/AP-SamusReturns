@@ -187,6 +187,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
             "cosmetic_patches": {
                 "enable_room_name_display": "ALWAYS" if world.options.display_room_names.value else "NEVER",
                 "camera_names_dict": self.get_room_names(),
+                "use_fusion_models": bool(world.options.fusion_suit.value),
             },
             "enable_remote_lua": True,
             "layout_uuid": "00000000-0000-1111-0000-000000000000",

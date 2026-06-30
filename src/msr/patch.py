@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import functools
 import hashlib
+import importlib.metadata
 import json
 import shutil
 from collections import Counter
@@ -44,7 +45,14 @@ TITLE_ID_JP = "00040000001BFC00"
 
 MOD_FILES = {"romfs", "code.bin", "code.bps", "exheader.bin", "archipelago.json", "patcher.json"}
 
-PATCH_SCHEMA = "https://raw.githubusercontent.com/randovania/open-samus-returns-rando/refs/heads/main/src/open_samus_returns_rando/files/schema.json"
+
+@functools.cache
+def get_osrr_version():
+    return importlib.metadata.version("open-samus-returns-rando")
+
+
+def patch_schema():
+    return f"https://raw.githubusercontent.com/randovania/open-samus-returns-rando/refs/tags/v{get_osrr_version()}/src/open_samus_returns_rando/files/schema.json"
 
 
 def get_title_id(rom_path: str | Path):
@@ -163,7 +171,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
 
     def create_config(self, world: SamusReturnsWorld):
         self.config = {
-            "$schema": PATCH_SCHEMA,
+            "$schema": patch_schema(),
             "configuration_identifier": self.get_config_identifier(world),
             "starting_location": landing_site_data.to_config(),
             "starting_items": self.create_starting_items(world),

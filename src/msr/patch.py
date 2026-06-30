@@ -178,6 +178,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
             "game_patches": {
                 "reverse_area8": bool(world.options.reverse_area_8.value),
                 "tanks_refill_ammo": bool(world.options.tanks_refill_ammo.value),
+                "skip_opening": True,
             },
             "constant_environment_damage": {
                 "heat": 20,

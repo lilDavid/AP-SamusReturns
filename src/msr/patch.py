@@ -130,12 +130,18 @@ class SamusReturnsPatch(APAutoPatchInterface):
 
         for file in output_path.iterdir():
             shutil.rmtree(file, ignore_errors=True)
-        samus_returns_patcher.patch_extracted(rom_path, output_path, self.config)
+
+        config = {
+            **self.config,
+            "text_patches": {
+                **self.config.get("text_patches", {}),
+                "GUI_SAMUS_DATA_TITLE": f"OSSR v{get_osrr_version()}",
+            },
+        }
+        samus_returns_patcher.patch_extracted(rom_path, output_path, config)
+
         with open(config_cache, "w") as stream:
-            json.dump(
-                {"world_version": world_version, "config_md5": self.config_md5},
-                stream,
-            )
+            json.dump({"world_version": world_version, "config_md5": self.config_md5}, stream)
 
     @staticmethod
     def get_path(path: str):
@@ -170,6 +176,14 @@ class SamusReturnsPatch(APAutoPatchInterface):
         opened_zipfile.writestr("config.json", json.dumps(self.config, indent=4))
 
     def create_config(self, world: SamusReturnsWorld):
+        generator_info = "\n".join(
+            [
+                f"AP {Utils.version_tuple.as_simple_string()} - MSR AP {world.world_version.as_simple_string()}",
+                f"{world.multiworld.seed_name}",
+                f"P{world.player} - {world.player_name}",
+            ]
+        )
+
         self.config = {
             "$schema": patch_schema(),
             "configuration_identifier": self.get_config_identifier(world),
@@ -196,6 +210,10 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 "enable_room_name_display": "ALWAYS" if world.options.display_room_names.value else "NEVER",
                 "camera_names_dict": self.get_room_names(),
                 "use_fusion_models": bool(world.options.fusion_suit.value),
+            },
+            "text_patches": {
+                "GUI_MSG_NEW_FILE_CREATION": generator_info,
+                "GUI_MSG_NEW_GAME": generator_info,
             },
             "enable_remote_lua": True,
             "layout_uuid": "00000000-0000-1111-0000-000000000000",

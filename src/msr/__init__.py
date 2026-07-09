@@ -1,6 +1,6 @@
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, cast
 
 import Utils
 from BaseClasses import CollectionState, Item, ItemClassification, Location, MultiWorld, Tutorial
@@ -73,6 +73,7 @@ class SamusReturnsWorld(World):
     displaced_filler: list[ItemName]
 
     hints: dict[HintData, list[Location | Item]]
+    spoiler: dict[str, list[Location]]
 
     @classmethod
     def is_debug(cls):
@@ -177,6 +178,26 @@ class SamusReturnsWorld(World):
             self.hints = create_hints(self)
         else:
             self.hints = {}
+
+    @classmethod
+    def stage_pre_output(cls, multiworld: MultiWorld):
+        # Generate "mini-playthroughs" listing the items and their locations in their rough logical order
+        # Although grouping by item takes precedence (relevant for when progressive items are added)
+        world_lookup = {
+            player: cast(SamusReturnsWorld, world)
+            for player, world in multiworld.worlds.items()
+            if world.game == cls.game
+        }
+        spoiler_items = {*major_items.keys(), *reserve_tanks.keys(), ItemName.MetroidDna}
+
+        for world in world_lookup.values():
+            world.spoiler = defaultdict(list)
+        for sphere in multiworld.get_sendable_spheres():
+            for location in sphere:
+                assert location.item is not None
+                world = world_lookup.get(location.item.player)
+                if world is not None and location.item.name in spoiler_items:
+                    world.spoiler[location.item.name].append(location)
 
     def generate_output(self, output_directory: str):
         patch = SamusReturnsPatch(player=self.player, player_name=self.player_name)

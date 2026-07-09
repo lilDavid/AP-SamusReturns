@@ -5,7 +5,7 @@ import hashlib
 import importlib.metadata
 import json
 import shutil
-from collections import Counter
+from collections import Counter, defaultdict
 from collections.abc import Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -29,6 +29,7 @@ from .items import (
     get_ammo_id,
     item_data_table,
     launcher_to_ammo,
+    reserve_tanks,
 )
 from .locations import location_table
 from .options import ApItemModels, PickupModels
@@ -191,6 +192,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
             "starting_items": self.create_starting_items(world),
             "pickups": self.create_pickups(world),
             "hints": self.create_hints(world),
+            "spoiler_log": self.create_spoiler(world),
             "objective": {
                 "final_boss": "Ridley",
                 "total_dna": world.options.dna_available.value,
@@ -299,6 +301,36 @@ class SamusReturnsPatch(APAutoPatchInterface):
             if lines:
                 hints.append(hint.get_config(lines))
         return hints
+
+    def create_spoiler(self, world: SamusReturnsWorld):
+        spoiler: defaultdict[str, list[str]] = defaultdict(list)
+
+        spoiler_items = set(world.spoiler.keys())
+        if not world.options.shuffle_reserve_tanks.value:
+            spoiler_items.difference_update(reserve_tanks)
+        spoiler_items.discard(ItemName.MissileLauncher)
+
+        for item in sorted(
+            (item.name for item in world.multiworld.precollected_items[world.player] if item in spoiler_items),
+            key=lambda item: item_data_table[item].ap_id,
+        ):
+            spoiler[item].append("Starting equipment")
+            # Assumes majors are unique, need to change when progressive items added
+            spoiler_items.discard(item)
+
+        for item, locations in world.spoiler.items():
+            if item not in spoiler_items:
+                continue
+            # For individual items, prioritize grouping by player over logcal order
+            # Other games may not have a semantic meaning to location IDs like this one does
+            # So maintain the logical order within that player's group since that always means *something*
+            locations.sort(key=lambda loc: (loc.player, loc.address if loc.game == world.game else 0))
+            for location in locations:
+                spoiler[item].append(sentence_case(self.get_location_name(world, location)))
+
+        # Always write Metroid DNA at the end
+        entries = sorted(spoiler.items(), key=lambda kvp: kvp[0] == ItemName.MetroidDna)
+        return {item: "\n".join(locations) for item, locations in entries}
 
     @staticmethod
     def get_item_name(world: SamusReturnsWorld, item: Item):

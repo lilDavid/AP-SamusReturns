@@ -201,6 +201,7 @@ class SamusReturnsPatch(APAutoPatchInterface):
             "starting_items": self.create_starting_items(world),
             "pickups": self.create_pickups(world),
             "hints": self.create_hints(world),
+            "final_boss_hint": "Locate the hatchling Metroid to open the|path to Ridley.",
             "spoiler_log": self.create_spoiler(world),
             "objective": {
                 "final_boss": "Ridley",

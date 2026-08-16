@@ -49,6 +49,9 @@ MOD_FILES = {"romfs", "code.bin", "code.bps", "exheader.bin", "archipelago.json"
 
 @functools.cache
 def get_osrr_version():
+    # Force the module to install/load
+    import open_samus_returns_rando  # noqa: F401
+
     return importlib.metadata.version("open-samus-returns-rando")
 
 

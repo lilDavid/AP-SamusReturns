@@ -1,1 +1,1 @@
-open-samus-returns-rando==3.6.0
+open-samus-returns-rando==3.6.1

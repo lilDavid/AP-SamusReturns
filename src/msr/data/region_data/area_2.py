@@ -1075,7 +1075,7 @@ area_2_interior_data = AreaData(
                         PickupData("Statue"),
                         PickupData(
                             "Tunnel",
-                            access_rule=Has(ItemName.ScrewAttack),
+                            access_rule=can_bomb_block & Has(ItemName.ScrewAttack),
                         ),
                     ],
                 ),

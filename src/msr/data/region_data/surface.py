@@ -371,6 +371,7 @@ surface_east_data = AreaData(
                         ExitData(
                             Door.Open,
                             East.CavernCavity,
+                            access_rule=can_escape_cavern_cavity,
                         ),
                     ],
                 ),

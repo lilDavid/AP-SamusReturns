@@ -233,9 +233,66 @@ class SamusReturnsContext(BaseContext):
         return settings.console_settings.ip_address or ""
 
     def make_gui(self):
-        ui = super().make_gui()
-        ui.base_title = "Metroid: Samus Returns Client"
-        return ui
+        import kvui  # noqa: F401
+        from kivy.clock import mainthread
+        from kivy.metrics import dp
+        from kivymd.uix.boxlayout import MDBoxLayout
+        from kivymd.uix.label import MDLabel
+        from kivymd.uix.progressindicator import MDLinearProgressIndicator
+
+        class PatchProgress(MDBoxLayout):
+            def __init__(self, *args, **kwargs):
+                super().__init__(
+                    *args,
+                    orientation="vertical",
+                    size_hint_y=None,
+                    spacing=5,
+                    padding=(5, 10),
+                    height=dp(0),
+                    opacity=0.0,
+                    **kwargs,
+                )
+
+                self._progress_bar = MDLinearProgressIndicator(size_hint_y=None, height=dp(12))
+                self.add_widget(self._progress_bar)
+
+                self._label = MDLabel(size_hint_y=None, height=dp(16), shorten=True, shorten_from="right")
+                self.add_widget(self._label)
+
+            @mainthread
+            def hide(self):
+                self.height = dp(0)
+                self.opacity = 0.0
+
+            @mainthread
+            def show(self):
+                self.height = dp(50)
+                self.opacity = 1.0
+
+            @mainthread
+            def update_status(self, progress: float, message: str):
+                self._progress_bar.value = int(progress * 100)
+                self._label.text = f"Patching game: {message}"
+
+        base_class = super().make_gui()
+
+        class SamusReturnsManager(base_class):
+            base_title = "Metroid: Samus Returns Client"
+
+            def build(self):
+                super().build()
+
+                bottom_layout: MDBoxLayout = self.textinput.parent
+                self.grid.remove_widget(bottom_layout)
+
+                self.patch_progress = PatchProgress()
+                self.grid.add_widget(self.patch_progress)
+
+                self.grid.add_widget(bottom_layout)
+
+                return self.container
+
+        return SamusReturnsManager
 
     async def server_auth(self, password_requested: bool = False):
         self.password_requested = password_requested
@@ -784,6 +841,24 @@ def verify_patch(patch_file: str | None) -> SamusReturnsPatch | None:
     patch.read()
     return patch
 
+def patch_game(ctx: SamusReturnsContext, patcher: SamusReturnsPatch, target: Path):
+    def update_status(progress: float, message: str):
+        if ctx.ui:
+            try:
+                ctx.ui.patch_progress.show()
+                ctx.ui.patch_progress.update_status(progress, message)
+            except AttributeError:
+                pass
+
+    try:
+        patcher.patch_with_status_update(target, update_status)
+    finally:
+        if ctx.ui:
+            try:
+                ctx.ui.patch_progress.hide()
+            except AttributeError:
+                pass
+
 
 def launch(*launch_args: str):
     async def main():
@@ -806,7 +881,7 @@ def launch(*launch_args: str):
 
         if patcher is not None:
             target = get_patch_destination(args.patch_file)
-            await asyncio.get_event_loop().run_in_executor(None, patcher.patch, target)
+            await asyncio.get_event_loop().run_in_executor(None, patch_game, ctx, patcher, target)
             logger.info(f"Wrote randomizer patch to {target}")
             launch_game()
 

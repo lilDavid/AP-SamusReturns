@@ -6,7 +6,7 @@ import importlib.metadata
 import json
 import shutil
 from collections import Counter, defaultdict
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import TYPE_CHECKING
 from zipfile import ZipFile
@@ -103,8 +103,8 @@ class SamusReturnsPatch(APAutoPatchInterface):
     def __init__(self, path: str | None = None, player: int | None = None, player_name: str = "", server: str = ""):
         super().__init__(path, player, player_name, server)
 
-    def patch(self, target: str | Path):
-        from open_samus_returns_rando import samus_returns_patcher
+    def _patch(self, target: str | Path, status_update: Callable[[float, str], None] | None):
+        import open_samus_returns_rando
 
         from . import SamusReturnsWorld
 
@@ -139,10 +139,19 @@ class SamusReturnsPatch(APAutoPatchInterface):
                 "GUI_SAMUS_DATA_TITLE": f"OSSR v{get_osrr_version()}",
             },
         }
-        samus_returns_patcher.patch_extracted(rom_path, output_path, config)
+        if status_update is None:
+            open_samus_returns_rando.patch(rom_path, output_path, config)
+        else:
+            open_samus_returns_rando.patch_with_status_update(rom_path, output_path, config, status_update)
 
         with open(config_cache, "w") as stream:
             json.dump({"world_version": world_version, "config_md5": self.config_md5}, stream)
+
+    def patch(self, target: str | Path):
+        self._patch(target, None)
+
+    def patch_with_status_update(self, target: str | Path, status_update: Callable[[float, str], None] | None = None):
+        self._patch(target, status_update)
 
     @staticmethod
     def get_path(path: str):
